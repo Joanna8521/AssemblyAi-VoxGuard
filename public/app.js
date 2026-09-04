@@ -841,10 +841,18 @@ const EXAMPLES = {
 
   renderBands({ rules: [] });
 
-  // Said out loud on the page, not left to be inferred from behaviour.
+  // Both halves, and a warning when they disagree. The server build alone
+  // answers "what was deployed", never "what am I running", and those coming
+  // apart is what a stale bundle looks like from the inside.
   try {
     const h = await api('/api/health');
-    $('c-build').textContent = h.version ?? '—';
+    const mine = document.querySelector('meta[name="build"]')?.content ?? '?';
+    const chip = $('c-build');
+    chip.textContent = h.version === mine ? mine : `${mine} \u2260 ${h.version}`;
+    chip.title = h.version === mine
+      ? 'this page and the server are the same build'
+      : `this page was built from ${mine}; the server is running ${h.version}. Reload.`;
+    chip.classList.toggle('stale', h.version !== mine);
   } catch { $('c-build').textContent = 'offline'; }
 
   await refresh();

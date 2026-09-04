@@ -816,7 +816,29 @@ export async function handler(req, res) {
 
   try {
     const file = await readFile(path);
-    send(res, 200, file, { 'content-type': MIME[extname(path)] ?? 'application/octet-stream' });
+    const type = MIME[extname(path)] ?? 'application/octet-stream';
+
+    // Every local script reference carries the build.
+    //
+    // A stamp that reports the server build answers a different question from
+    // the one being asked. Twice now a fix was live on the server while the
+    // browser ran the previous bundle, and the page said the new number both
+    // times, so the evidence pointed at the code rather than at the cache.
+    // Stamping the URLs means a new build cannot be served old scripts, and
+    // the page can say which bundle it is actually running.
+    if (type.startsWith('text/html') || type.includes('javascript')) {
+      const v = buildVersion();
+      const stamped = file.toString('utf8')
+        .replace(/(src|href)="(\.\/[^"?]+\.(?:js|css))"/g, `$1="$2?v=${v}"`)
+        .replace(/from '(\.\/[^']+\.js)'/g, `from '$1?v=${v}'`)
+        .replace('<title>', `<meta name="build" content="${v}"><title>`);
+      return send(res, 200, Buffer.from(stamped, 'utf8'), {
+        'content-type': type,
+        'cache-control': 'no-cache, must-revalidate',
+      });
+    }
+
+    send(res, 200, file, { 'content-type': type });
   } catch {
     send(res, 404, { error: 'not found' });
   }
