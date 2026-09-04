@@ -223,9 +223,11 @@ function renderAudit(entries) {
     d.innerHTML =
       `<span class="ts">${e.at.slice(11, 19)}</span>` +
       `<span class="ac">${e.action}</span>` +
-      `<span><span class="tag ${e.real ? 'real' : ''}">${e.real ? 'real' : 'sandbox'}</span> ` +
+      `<span><span class="tag ${e.real ? 'real' : ''}">${
+        e.verdict !== 'ALLOW' ? 'not run' : e.performed ? 'sent' : 'simulated'
+      }</span> ` +
       `<span class="v ${e.verdict}">${e.verdict}</span></span>` +
-      `<span class="why">${e.reason} · ${e.risk ?? 'unregistered'}${e.policyVersion ? ` · policy v${e.policyVersion}` : ''}</span>`;
+      `<span class="why">${e.reason}${e.outcome ? ` &middot; ${e.outcome}` : ''}</span>`;
     box.appendChild(d);
   }
   box.scrollTop = box.scrollHeight;

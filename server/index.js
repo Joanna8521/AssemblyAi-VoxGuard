@@ -24,6 +24,8 @@ import { evaluate } from '../governance/evaluator.js';
 import { compile, amend, fingerprint } from '../governance/policy.js';
 import { load } from '../governance/registry.js';
 import { validateRules } from '../governance/validate.js';
+import { MemoryStore, KVStore, sessionIdFrom } from '../governance/store.js';
+import { perform, adapterStatus } from '../adapters/index.js';
 import { toolsFor, systemPrompt, greeting, inputConfig } from '../voice/tools.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -75,12 +77,33 @@ const workforce = (() => {
 })();
 
 
-/** In-memory for now. A hackathon does not need Postgres to prove a point. */
-const state = {
-  policy: null,
-  audit: [],
-  missionId: 'M-100',
-};
+/**
+ * One store, many sessions.
+ *
+ * Memory is right when this is a single long-lived process. It is wrong the
+ * moment there are two, and a serverless deployment is always two, so the choice
+ * is made here from configuration rather than inherited by accident. Announced
+ * at startup, because deploying with the wrong one looks fine until a second
+ * person opens the page.
+ */
+const store = process.env.KV_REST_API_URL
+  ? new KVStore(await makeKV())
+  : new MemoryStore();
+
+async function makeKV() {
+  const url = process.env.KV_REST_API_URL.replace(/\/+$/, '');
+  const token = process.env.KV_REST_API_TOKEN;
+  const call = async (cmd) => {
+    const res = await fetch(`${url}/${cmd.map(encodeURIComponent).join('/')}`,
+      { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error(`kv ${res.status}`);
+    return (await res.json()).result;
+  };
+  return {
+    get: (k) => call(['get', k]),
+    set: (k, v, o) => call(o?.ex ? ['set', k, v, 'EX', String(o.ex)] : ['set', k, v]),
+  };
+}
 
 // ── AssemblyAI token minting ────────────────────────────────────────────────
 
@@ -112,7 +135,7 @@ async function mintToken() {
 
 // ── audit ───────────────────────────────────────────────────────────────────
 
-function record(request, result) {
+function record(session, request, result, outcome) {
   const entry = {
     at: new Date().toISOString(),
     actionId: request.actionId,
@@ -124,14 +147,19 @@ function record(request, result) {
     reason: result.reason,
     risk: result.risk,
     adapter: registry.adapterOf(request.action),
-    real: registry.isReal(request.action),
+    // `real` used to mean "a credential for this class of action exists
+    // somewhere in the corpus", which said nothing about whether this
+    // deployment would do it. It now means it ran.
+    real: outcome?.mode === 'real' && outcome.performed === true,
+    performed: outcome?.performed ?? false,
+    outcome: outcome?.detail ?? 'not authorised, so nothing was attempted',
     // Whether the emitting skill is even capable of this. Not used to decide,
     // since a forged call is refused on the policy alone, but worth recording.
     knownEmitter: request.skill ? registry.canPerform(request.skill, request.action) : null,
-    policyId: state.policy?.policyId ?? null,
-    policyVersion: state.policy?.version ?? null,
+    policyId: session.policy?.policyId ?? null,
+    policyVersion: session.policy?.version ?? null,
   };
-  state.audit.push(entry);
+  session.audit.push(entry);
   return entry;
 }
 
@@ -142,6 +170,7 @@ const routes = {
     ok: true,
     keyConfigured: Boolean(API_KEY),
     corpus: registry.corpus,
+    adapters: adapterStatus(),
   }),
 
   'GET /api/token': async () => mintToken(),
@@ -176,10 +205,10 @@ const routes = {
     agents: workforce.agents,
   }),
 
-  'GET /api/state': async () => ({
-    policy: state.policy,
-    fingerprint: state.policy ? fingerprint(state.policy) : null,
-    audit: state.audit,
+  'GET /api/state': async (_body, { session }) => ({
+    policy: session.policy,
+    fingerprint: session.policy ? fingerprint(session.policy) : null,
+    audit: session.audit,
   }),
 
   /**
@@ -195,17 +224,18 @@ const routes = {
    * so the audit trail shows a rule was restated rather than hiding that it
    * changed.
    */
-  'POST /api/policy/compile': async (body) => {
+  'POST /api/policy/compile': async (body, { session, save }) => {
     const at = new Date().toISOString();
     const { accepted: rules, rejected } = validateRules(body.rules, registry);
 
-    if (state.policy) {
-      const before = new Map(state.policy.rules.map((r) => [r.action, r.effect]));
-      state.policy = amend(state.policy, rules, { at });
+    if (session.policy) {
+      const before = new Map(session.policy.rules.map((r) => [r.action, r.effect]));
+      session.policy = amend(session.policy, rules, { at });
       const restated = rules.filter((r) => before.has(r.action) && before.get(r.action) === r.effect);
+      await save();
       return {
-        policy: state.policy,
-        fingerprint: fingerprint(state.policy),
+        policy: session.policy,
+        fingerprint: fingerprint(session.policy),
         merged: true,
         kept: [...before.keys()].filter((a) => !rules.some((r) => r.action === a)),
         restated: restated.map((r) => r.action),
@@ -213,25 +243,27 @@ const routes = {
       };
     }
 
-    state.policy = compile({
-      missionId: body.missionId ?? state.missionId,
+    session.policy = compile({
+      missionId: body.missionId ?? session.missionId,
       scope: body.scope ?? 'mission',
       rules,
       spokenIn: body.spokenIn ?? null,
       at,
     });
-    return { policy: state.policy, fingerprint: fingerprint(state.policy), merged: false, rejected };
+    await save();
+    return { policy: session.policy, fingerprint: fingerprint(session.policy), merged: false, rejected };
   },
 
-  'POST /api/policy/amend': async (body) => {
-    if (!state.policy) {
+  'POST /api/policy/amend': async (body, { session, save }) => {
+    if (!session.policy) {
       const e = new Error('no policy to amend');
       e.status = 409;
       throw e;
     }
     const { accepted, rejected } = validateRules(body.changes, registry);
-    state.policy = amend(state.policy, accepted, { at: new Date().toISOString() });
-    return { policy: state.policy, fingerprint: fingerprint(state.policy), rejected };
+    session.policy = amend(session.policy, accepted, { at: new Date().toISOString() });
+    await save();
+    return { policy: session.policy, fingerprint: fingerprint(session.policy), rejected };
   },
 
   /**
@@ -239,9 +271,9 @@ const routes = {
    * it: a workforce skill, an MCP client, or a request forged by hand from the
    * console. The evaluator does not care which, and that is the point.
    */
-  'POST /api/evaluate': async (body) => {
+  'POST /api/evaluate': async (body, { session, save }) => {
     const request = {
-      actionId: body.actionId ?? `A-${1000 + state.audit.length}`,
+      actionId: body.actionId ?? `A-${1000 + session.audit.length}`,
       action: body.action,
       skill: body.skill ?? null,
       parameters: body.parameters ?? {},
@@ -251,8 +283,19 @@ const routes = {
       e.status = 400;
       throw e;
     }
-    const result = evaluate(request, state.policy, registry);
-    return { request, ...result, audit: record(request, result) };
+    const result = evaluate(request, session.policy, registry);
+
+    // The one place an adapter is ever called, and only past this line. The
+    // invariant the whole project rests on is that nothing consequential
+    // reaches the outside world except through the evaluator, and it is this
+    // ordering that makes it true rather than intended.
+    const outcome = result.verdict === 'ALLOW'
+      ? await perform(request.action, request.parameters, { registry })
+      : null;
+
+    const entry = record(session, request, result, outcome);
+    await save();
+    return { request, ...result, outcome, audit: entry };
   },
 
   /**
@@ -263,7 +306,7 @@ const routes = {
    * under dozens of hypotheticals and make the audit trail useless for the one
    * thing it is for. So this runs the evaluator and writes nothing.
    */
-  'POST /api/preview': async (body) => {
+  'POST /api/preview': async (body, { session }) => {
     const results = (body.actions ?? []).map((a) => {
       const request = {
         actionId: 'preview',
@@ -271,7 +314,7 @@ const routes = {
         skill: body.skill ?? null,
         parameters: (typeof a === 'string' ? {} : a.parameters) ?? {},
       };
-      const { verdict, reason, reasonCode, risk } = evaluate(request, state.policy, registry);
+      const { verdict, reason, reasonCode, risk } = evaluate(request, session.policy, registry);
       return {
         action: request.action,
         verdict, reason, reasonCode, risk,
@@ -280,12 +323,11 @@ const routes = {
         label: registry.label(request.action, 'en'),
       };
     });
-    return { policyVersion: state.policy?.version ?? null, results };
+    return { policyVersion: session.policy?.version ?? null, results };
   },
 
-  'POST /api/reset': async () => {
-    state.policy = null;
-    state.audit = [];
+  'POST /api/reset': async (_body, { id }) => {
+    await store.clear(id);
     return { ok: true };
   },
 };
@@ -336,7 +378,10 @@ const server = createServer(async (req, res) => {
     let body = {};
     try {
       if (req.method !== 'GET') body = await readBody(req);
-      send(res, 200, await routes[key](body));
+      const id = sessionIdFrom(req, res);
+      const session = await store.get(id);
+      const ctx = { id, session, save: () => store.put(id, session) };
+      send(res, 200, await routes[key](body, ctx));
     } catch (err) {
       send(res, err.status ?? 500, { error: err.message, code: err.code ?? null });
     }
@@ -359,6 +404,7 @@ const server = createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`Signal Box  →  http://localhost:${PORT}`);
+  console.log(`  state: ${store instanceof KVStore ? 'shared KV' : 'in this process only'}`);
   if (!API_KEY) {
     console.log('\n  ASSEMBLYAI_API_KEY is not set. Everything except the voice');
     console.log('  connection still works. Policy, evaluator and audit run offline.');

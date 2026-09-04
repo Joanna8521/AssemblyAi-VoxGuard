@@ -531,9 +531,11 @@ function renderAudit(entries) {
     d.innerHTML =
       `<span class="ts">${e.at.slice(11, 19)}</span>` +
       `<span class="ac">${e.action}</span>` +
-      `<span><span class="tag ${e.real ? 'real' : ''}">${e.real ? 'real' : 'sandbox'}</span> ` +
+      `<span><span class="tag ${e.real ? 'real' : ''}">${
+        e.verdict !== 'ALLOW' ? 'not run' : e.performed ? 'sent' : 'simulated'
+      }</span> ` +
       `<span class="v ${e.verdict}">${e.verdict}</span></span>` +
-      `<span class="why">${e.reason}</span>`;
+      `<span class="why">${e.reason}${e.outcome ? ` &middot; ${e.outcome}` : ''}</span>`;
     box.appendChild(d);
   }
   box.scrollTop = box.scrollHeight;
@@ -711,8 +713,10 @@ async function talk() {
     `Every node here comes from <code>agents/workforce.json</code>, and every verdict from the ` +
     `evaluator on the server. Nothing on this page is staged: with no policy compiled, a run of ` +
     `the stock-out stops almost immediately, which is the correct answer and not a very ` +
-    `dramatic one. Actions marked <code>sandbox</code> have no credential anywhere and are ` +
-    `simulated; <code>real</code> ones are not. The evaluator is real either way.` +
+    `dramatic one. ` +
+    `An action shows <code>sent</code> only when an adapter really carried it out, ` +
+    `<code>simulated</code> when it was authorised but no adapter is configured for it here, ` +
+    `and <code>not run</code> when the policy refused. The evaluator is the same in all three.` +
     `<br><br>` + (webmcp
       ? `This page is registered with the browser through <code>navigator.modelContext</code>: ` +
         `an agent in this tab can read the policy and attempt actions, and meets the same ` +
