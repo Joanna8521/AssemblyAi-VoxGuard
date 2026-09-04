@@ -264,6 +264,7 @@ async function runMission() {
       await new Promise((res) => setTimeout(res, 900));
     }
     renderAttention(r.decisions);
+    wantVoice(r.decisions.some((d) => d.verdict !== 'ALLOW'));
 
     if (!r.decisions.length) {
       renderAttention([]);
@@ -284,11 +285,23 @@ async function runMission() {
 function setConn(text, live) {
   $('c-conn').textContent = text;
   $('c-conn').className = `chip${live ? ' live' : ''}`;
-  const talking = live;
-  $('talk').textContent = talking ? 'Stop' : 'Talk';
-  $('talk').className = talking ? 'stop' : '';
-  $('hero-lbl').textContent = talking ? 'Listening…' : 'Start talking';
-  $('hero-mic').className = `mic${talking ? ' on' : ''}`;
+  $('c-conn2').textContent = live ? 'listening' : text;
+  $('c-conn2').className = `chip${live ? ' live' : ''}`;
+
+  $('mic').className = `mic-btn${live ? ' live' : ''}`;
+  $('mic-lbl').textContent = live ? 'Listening. Tap to stop.' : 'Hold a conversation';
+  $('mic-hint').textContent = live
+    ? 'it is listening; say what you want changed'
+    : 'say what changed, or what they may do now';
+
+  $('hero-lbl').textContent = live ? 'Listening…' : 'Start talking';
+  $('hero-mic').className = `mic${live ? ' on' : ''}`;
+}
+
+/** When something is held, the microphone is the answer to it. Say so. */
+function wantVoice(on) {
+  $('mic').classList.toggle('wanted', on);
+  if (on) $('mic-hint').textContent = 'something is waiting on you. tell it what to do.';
 }
 
 async function talk() {
@@ -358,8 +371,10 @@ const EXAMPLES = {
   $('c-corpus').innerHTML = `<b>${health.corpus?.skills ?? '?'}</b> governed`;
   if (!health.keyConfigured) {
     setConn('no API key', false);
-    $('talk').disabled = true;
+    $('mic').disabled = true;
     $('hero-mic').disabled = true;
+    $('mic-lbl').textContent = 'No API key configured';
+    $('mic-hint').textContent = 'everything else still works without it';
   }
 
   registerWebMCP(catalog.actions
@@ -380,7 +395,7 @@ const EXAMPLES = {
     };
   }
 
-  $('talk').onclick = talk;
+  $('mic').onclick = talk;
   $('hero-mic').onclick = talk;
   $('run-mission').onclick = runMission;
 
