@@ -313,7 +313,7 @@ const server = createServer(async (req, res) => {
 
   if (req.method !== 'GET') return send(res, 405, { error: 'method not allowed' });
 
-  const rel = url.pathname === '/' ? '/console.html' : url.pathname;
+  const rel = url.pathname === '/' ? '/index.html' : url.pathname;
   const path = join(WEB, normalize(rel).replace(/^(\.\.[/\\])+/, ''));
   if (!path.startsWith(WEB)) return send(res, 403, { error: 'forbidden' });
 
