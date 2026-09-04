@@ -1,0 +1,11 @@
+{
+  "name": "signal-box",
+  "version": "0.1.0",
+  "description": "Voice-compiled policy for an AI commerce workforce",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test \"governance/*.test.js\"",
+    "registry": "python3 tools/build_registry.py"
+  }
+}
