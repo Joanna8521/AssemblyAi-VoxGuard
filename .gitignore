@@ -1,0 +1,22 @@
+# ── Never commit: proprietary course material ───────────────────────────────
+# The OpenClaw v7 skill corpus is paid course content ("課程專用，請勿外傳").
+# This repository is MIT-licensed and public. Only *derived metadata* about the
+# corpus belongs here — see registry/README.md. The corpus itself never does.
+電商Skills+Subagents/
+**/SKILL.md
+*.zip
+
+# ── Never commit: credentials ───────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*-key.json
+*_credentials.json
+
+# ── Local noise ─────────────────────────────────────────────────────────────
+.DS_Store
+node_modules/
+dist/
+.claude/
