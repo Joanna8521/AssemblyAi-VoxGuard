@@ -23,6 +23,36 @@ const api = (path, body) => fetch(path, body
 let MISSION = null, BLUEPRINT = null, VOICE = null;
 
 const fail = (where, msg) => { $(where).textContent = msg; $(where).classList.add('show'); };
+
+/**
+ * Whichever error line is actually on screen.
+ *
+ * This used to pick by whether a mission existed, which was the same thing
+ * until the board started opening on the press. After that, an error raised
+ * before the first mission went to the opening screen's error line, and the
+ * opening screen was hidden: a session that failed said so into a box nobody
+ * could see, and the symptom was a page that simply did nothing.
+ */
+const visibleError = () => ($('hero-panel').hidden ? 'err' : 'hero-err');
+
+/**
+ * A short record of what the voice connection did.
+ *
+ * "It didn't do anything" is a true report that fits a session that failed to
+ * start, a config the server rejected, a connection that closed, and a model
+ * that heard perfectly well and only chatted back. Those need different fixes,
+ * and telling them apart took a round of guessing each time. The page now says
+ * which one happened.
+ */
+const WIRE = [];
+function note(text) {
+  WIRE.push(`${new Date().toTimeString().slice(0, 8)}  ${text}`);
+  const box = $('wire');
+  if (!box) return;
+  box.hidden = false;
+  box.innerHTML = '<b>connection</b>' +
+    WIRE.slice(-6).map((l) => `<div>${esc(l)}</div>`).join('');
+}
 const clearFail = () => { for (const id of ['err', 'hero-err']) $(id)?.classList.remove('show'); };
 
 // ── the flow ────────────────────────────────────────────────────────────────
@@ -557,28 +587,51 @@ async function talk() {
   if (VOICE) { VOICE.stop(); return; }
   clearFail();
   showBoard();
+  note('starting');
   try {
     VOICE = await connect({
-      onStatus: (s) => { setConn(s, s === 'live'); if (s === 'offline') VOICE = null; },
+      onStatus: (s) => { setConn(s, s === 'live'); note(s); if (s === 'offline') VOICE = null; },
+      // Where the turn is, said in the hint line under the button. Somebody who
+      // has stopped speaking needs to know whether they were heard before they
+      // decide the thing is broken and press stop.
+      onTurn: (state) => {
+        note(state);
+        const hint = $('mic-hint');
+        if (hint) {
+          hint.textContent = {
+            thinking: 'heard you. working out what that means',
+            answering: 'answering',
+            listening: 'say what changed, or what they may do now',
+          }[state] ?? '';
+        }
+      },
       onUser: (text, final) => {
         $('said').innerHTML = final ? '' : '<span class="partial"></span>';
         (final ? $('said') : $('said').firstChild).textContent = text;
       },
       onAgent: (text) => { $('agent').hidden = false; $('agent-text').textContent = text; },
-      onMission: (mission, bp) => renderMission(mission, bp),
-      onTool: refresh,
-      onError: (m) => fail(MISSION ? 'err' : 'hero-err', m),
+      onMission: (mission, bp) => { note(`mission ${mission.id} opened`); renderMission(mission, bp); },
+      // Every tool call, named. A turn where the model answered without calling
+      // anything is the commonest way for nothing to happen, and it is
+      // invisible unless the calls that did happen are listed.
+      onTool: (name, result) => {
+        note(`called ${name}${result?.total_rules != null ? ` (${result.total_rules} rules)` : ''}`);
+        refresh();
+      },
+      onError: (m) => { fail(visibleError(), m); note(`error: ${m}`); },
       // An ending nobody asked for gets said out loud, in the panel somebody is
       // already looking at, rather than being left to be inferred from a status
       // chip going quiet.
       onEnded: (why) => {
         VOICE = null;
+        note(why);
         $('agent').hidden = false;
         $('agent-text').textContent = why;
       },
     });
   } catch (e) {
-    fail(MISSION ? 'err' : 'hero-err', e.message);
+    fail(visibleError(), e.message);
+    note(`could not start: ${e.message}`);
     VOICE = null;
   }
 }

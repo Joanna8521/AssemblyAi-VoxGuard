@@ -363,6 +363,14 @@ h1{font-size:16px;letter-spacing:-.02em}
 .hero-src .watch-add{margin-bottom:0}
 .hero-src .note{margin-top:6px}
 .hero-src .note{text-align:left}
+/* What the connection actually did. "It didn't do anything" was the only
+   report available, and it fits a failed session, a rejected config and a
+   model that simply chatted back. Making the page hand over the evidence beats
+   asking somebody to open a developer console. */
+.wire{margin-top:auto;padding-top:9px;border-top:1px dashed var(--line);
+  font:10.5px/1.6 var(--mono);color:var(--faint)}
+.wire b{color:var(--muted);font-weight:600}
+.wire div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .note{font-size:11px;line-height:1.5;color:var(--muted);margin-top:8px}
 .note:empty{display:none}
 .w.sheet{border-left:3px solid var(--accent)}
@@ -563,6 +571,7 @@ h1{font-size:16px;letter-spacing:-.02em}
         <p class="said" id="said"></p>
         <div class="agent" id="agent" hidden><b>STANDING ORDER</b><span id="agent-text"></span></div>
         <div class="err" id="err"></div>
+        <div class="wire" id="wire" hidden></div>
       </div>
     </section>
 

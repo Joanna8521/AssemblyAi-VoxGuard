@@ -83,8 +83,16 @@ export async function connect(h = {}) {
         break;
 
       case 'transcript.user.delta': say('onUser', msg.text ?? '', false); break;
-      case 'transcript.user':       say('onUser', msg.text ?? '', true); break;
+      case 'transcript.user':
+        say('onUser', msg.text ?? '', true);
+        // The turn is closed and it is now the agent's move. Without this,
+        // "heard you, working on it" and "did not hear you at all" look
+        // identical from the outside, and they need opposite responses.
+        say('onTurn', 'thinking');
+        break;
       case 'transcript.agent':      say('onAgent', msg.text ?? ''); break;
+      case 'reply.started':         say('onTurn', 'answering'); break;
+      case 'reply.done':            say('onTurn', 'listening'); break;
       case 'reply.audio':           play(msg.data ?? msg.audio); break;
 
       case 'tool.call': {
