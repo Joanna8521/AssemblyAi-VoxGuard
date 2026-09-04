@@ -30,11 +30,11 @@ let sequence = 0;
  *   rules   the boundaries they stated
  * @param {object[]} agents   the workforce to draw from
  */
-export function open(spec, agents, { at = null } = {}) {
+export function open(spec, agents, { at = null, live = null } = {}) {
   const id = `M-${String(++sequence).padStart(3, '0')}`;
   const needs = [...new Set(spec.needs ?? [])];
 
-  const composition = compose(needs, agents);
+  const composition = compose(needs, agents, { live });
   const policy = compile({
     missionId: id,
     scope: spec.scope ?? 'mission',
@@ -58,6 +58,7 @@ export function open(spec, agents, { at = null } = {}) {
       reason: m.reason,
       covers: m.covers,
       support: m.covers.length === 0,
+      runs: m.runs === true,
     })),
     passedOver: composition.considered,
     uncovered: composition.uncovered,

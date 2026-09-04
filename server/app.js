@@ -499,7 +499,7 @@ const routes = {
     const mission = openMission(
       { brief: body.brief, needs, rules: accepted, scope: body.scope, spokenIn: body.spokenIn },
       workforce.agents,
-      { at: new Date().toISOString() },
+      { at: new Date().toISOString(), live: implementedAgents() },
     );
 
     session.missions ??= [];

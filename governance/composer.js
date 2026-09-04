@@ -23,7 +23,11 @@
  * @param {object[]} agents    the workforce to draw from
  * @param {object}   options   { limit, includeUpstream }
  */
-export function compose(actions, agents, { limit = 8, includeUpstream = true } = {}) {
+export function compose(actions, agents, { limit = 8, includeUpstream = true, live = null } = {}) {
+  // Who can actually go and do it, where that is known. Claiming an action and
+  // being able to perform it are different, and a team picked purely on claims
+  // will hand the work to somebody who will only describe it.
+  const canRun = live ? new Set(live) : null;
   const needed = [...new Set(actions)].filter(Boolean);
   if (!needed.length) {
     return { team: [], uncovered: [], considered: [], why: 'The mission names no action to do.' };
@@ -43,10 +47,14 @@ export function compose(actions, agents, { limit = 8, includeUpstream = true } =
       const score = covers.reduce((sum, a) => sum + weightOf(a), 0);
       // What it brings that nobody else on the shortlist could.
       const rare = covers.filter((a) => (holders.get(a)?.length ?? 0) <= 2);
-      return { agent, covers, rare, score };
+      const runs = canRun ? canRun.has(agent.id) : null;
+      return { agent, covers, rare, score, runs };
     })
     .filter((c) => c.covers.length > 0)
     .sort((a, b) =>
+      // A built agent outranks a described one that offers the same, because
+      // the point of assembling a team is that the work happens.
+      (Number(b.runs === true) - Number(a.runs === true)) ||
       b.score - a.score ||
       b.rare.length - a.rare.length ||
       a.agent.actions.length - b.agent.actions.length ||   // narrower beats broader

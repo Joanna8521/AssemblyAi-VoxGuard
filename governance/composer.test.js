@@ -129,6 +129,27 @@ describe('the team holds together', () => {
 });
 
 
+describe('a built agent beats a described one', () => {
+  test('the one that will actually run is preferred when both would cover it', () => {
+    // Content Gap claimed all three actions a rival-launch mission needs and had
+    // no implementation, so it took the work from the agent built to do it.
+    const needs = ['scrape_public_page', 'analyze_data', 'draft_plan'];
+    const blind = compose(needs, agents);
+    const sighted = compose(needs, agents, { live: ['A07'] });
+
+    assert.ok(sighted.team.some((m) => m.agent.id === 'A07'),
+      'the built agent should be picked once the composer is told which are built');
+    assert.ok(!blind.team.some((m) => m.agent.id === 'A07') ||
+              sighted.team[0].agent.id === 'A07',
+      'and it should rank ahead of an equal claim that cannot run');
+  });
+
+  test('being built does not buy a place on work it cannot cover', () => {
+    const r = compose(['issue_refund'], agents, { live: ['A07'] });
+    assert.ok(!r.team.some((m) => m.agent.id === 'A07'));
+  });
+});
+
 // ── what the agent is told it can do ────────────────────────────────────────
 describe('the voice agent is told the truth about its reach', () => {
   test('the prompt names what is actually connected, and what is not', async () => {
