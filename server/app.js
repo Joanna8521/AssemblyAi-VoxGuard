@@ -162,7 +162,9 @@ async function mintToken() {
 
   const url = new URL('https://agents.assemblyai.com/v1/token');
   url.searchParams.set('expires_in_seconds', '120');
-  url.searchParams.set('max_session_duration_seconds', '600');
+  // Ten minutes ended a conversation mid-sentence and, worse, would end a
+  // recording mid-take. This is still a bound rather than no bound.
+  url.searchParams.set('max_session_duration_seconds', '1800');
 
   const res = await fetch(url, { headers: { Authorization: `Bearer ${API_KEY}` } });
   if (!res.ok) {
@@ -720,9 +722,32 @@ const routes = {
     return { mission: digest(mission), observed, decisions };
   },
 
-  'POST /api/reset': async (_body, { id }) => {
+  /**
+   * Start again, without throwing away the setup.
+   *
+   * This used to clear the whole session, which took the connected spreadsheet
+   * and the watched storefronts with it. Those are not state: somebody pasted
+   * them once and expects them to still be there. Reset means the work and the
+   * permissions, not the sources.
+   */
+  'POST /api/reset': async (_body, { id, session, save }) => {
+    const pools = session.pools ?? {};
+    const settings = session.settings ?? {};
+
     await store.clear(id);
-    return { ok: true };
+
+    const fresh = await store.get(id);
+    fresh.pools = pools;
+    fresh.settings = settings;
+    await store.put(id, fresh);
+
+    return {
+      ok: true,
+      kept: {
+        sheets: (pools.sheets ?? []).length,
+        watching: (pools.listings ?? []).length,
+      },
+    };
   },
 };
 

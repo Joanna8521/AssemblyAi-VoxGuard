@@ -42,6 +42,9 @@ export async function connect(h = {}) {
 
   const ws = new WebSocket(`${WS_URL}?token=${encodeURIComponent(token)}`);
   let audioCtx = null, node = null, playAt = 0, closed = false;
+  // Whether this ending was asked for. Without it a clean close and a dropped
+  // connection are the same event.
+  let stopping = false;
 
   const teardown = () => {
     if (closed) return;
@@ -57,7 +60,19 @@ export async function connect(h = {}) {
     ws.send(JSON.stringify({ type: 'session.update', session: config }));
   };
   ws.onerror = () => say('onError', 'The voice connection failed. Check the browser console.');
-  ws.onclose = teardown;
+
+  // Why it ended, not just that it did. A session runs for at most ten minutes
+  // and then closes cleanly, which looked identical to a crash: the status went
+  // to offline, the button reverted, and somebody mid-sentence was left
+  // guessing whether it had heard them.
+  ws.onclose = (ev) => {
+    const wanted = stopping;
+    teardown();
+    if (wanted) return;
+    say('onEnded', ev.code === 1000 || ev.code === 1005
+      ? 'The voice session reached its time limit and closed. Press to carry on; nothing was lost.'
+      : `The voice connection dropped (${ev.code}). Press to reconnect.`);
+  };
 
   ws.onmessage = async (ev) => {
     const msg = JSON.parse(ev.data);
@@ -231,6 +246,7 @@ export async function connect(h = {}) {
 
   return {
     stop() {
+      stopping = true;
       // session.end first, then let the server close. A bare close leaves the
       // session inside a 30-second resume window, and that window is billable.
       if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'session.end' }));

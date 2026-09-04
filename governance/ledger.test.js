@@ -111,3 +111,33 @@ test('nobody runs before the agent that writes what it reads', () => {
   assert.ok(order.indexOf('A03') < order.indexOf('A23'),
     'Customer Desk reads the notice Emergency Response writes');
 });
+
+test('starting again does not throw away what was connected', async () => {
+  // Reset cleared the whole session, which took the spreadsheet somebody had
+  // pasted and the storefronts they were watching with it. Those are setup,
+  // not state: the point of reset is to drop the work and the permissions.
+  const { MemoryStore } = await import('./store.js');
+  const store = new MemoryStore();
+
+  const session = await store.get('t');
+  session.pools = { sheets: [{ url: 'x' }], listings: [{ url: 'y' }] };
+  session.settings = { revenueDropPercent: 35 };
+  session.policy = { rules: [{ action: 'issue_refund', effect: 'DENY' }] };
+  session.audit = [{ action: 'issue_refund' }];
+  await store.put('t', session);
+
+  // What the route does: keep the sources, clear everything else.
+  const pools = session.pools, settings = session.settings;
+  await store.clear('t');
+  const fresh = await store.get('t');
+  fresh.pools = pools;
+  fresh.settings = settings;
+  await store.put('t', fresh);
+
+  const after = await store.get('t');
+  assert.equal(after.pools.sheets.length, 1, 'the sheet survives');
+  assert.equal(after.pools.listings.length, 1, 'the watched pages survive');
+  assert.equal(after.settings.revenueDropPercent, 35, 'and the threshold');
+  assert.equal(after.policy, null, 'but the permissions do not');
+  assert.deepEqual(after.audit, [], 'nor the decisions');
+});

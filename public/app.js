@@ -568,6 +568,14 @@ async function talk() {
       onMission: (mission, bp) => renderMission(mission, bp),
       onTool: refresh,
       onError: (m) => fail(MISSION ? 'err' : 'hero-err', m),
+      // An ending nobody asked for gets said out loud, in the panel somebody is
+      // already looking at, rather than being left to be inferred from a status
+      // chip going quiet.
+      onEnded: (why) => {
+        VOICE = null;
+        $('agent').hidden = false;
+        $('agent-text').textContent = why;
+      },
     });
   } catch (e) {
     fail(MISSION ? 'err' : 'hero-err', e.message);
