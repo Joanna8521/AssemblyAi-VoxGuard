@@ -108,6 +108,25 @@ export async function connect(h = {}) {
    * `not_recorded` carries rules the server refused: the agent has to say so.
    */
   async function runTool(name, args) {
+    if (name === 'start_mission') {
+      const r = await api('/api/missions', {
+        brief: args.brief ?? '',
+        needs: args.needs ?? [],
+        rules: args.rules ?? [],
+        scope: args.scope ?? 'mission',
+      });
+      say('onMission', r.mission, r.blueprint);
+      return {
+        mission_id: r.mission.id,
+        team: r.mission.team.map((m) => `${m.name}: ${m.reason}`),
+        why_this_team: r.mission.composition,
+        orders_in_force: r.mission.policy.rules.map((x) => `${x.action}: ${x.effect}`),
+        nobody_can_do: r.unknownNeeds ?? [],
+        not_recorded: (r.rejected ?? []).map((x) => `${x.rule.action ?? '?'}: ${x.reason}`),
+        note: 'Assembled and bounded. Nothing has run yet.',
+      };
+    }
+
     if (name === 'compile_policy') {
       const r = await api('/api/policy/compile', {
         rules: args.rules ?? [], scope: args.scope ?? 'mission',

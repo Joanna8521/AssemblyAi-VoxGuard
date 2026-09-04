@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
+
 :root{
   --bg:#EAE4DC; --surface:#F5F1EA; --surface-2:#E3DCD2; --surface-3:#D8CFC3;
   --ink:#302C26; --muted:#6B645A; --faint:#8B8276;
@@ -43,8 +44,6 @@ select{font:12.5px var(--sans);padding:7px 9px;border-radius:3px;border:1px soli
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
-.wrap{max-width:1280px;margin:0 auto;padding:16px 14px 60px}
-@media(min-width:900px){.wrap{padding:24px 24px 80px}}
 
 /* masthead */
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
@@ -73,9 +72,7 @@ select{font:12.5px var(--sans);padding:7px 9px;border-radius:3px;border:1px soli
 .spacer{flex:1}
 
 /* two columns on desktop, stacked on phones */
-.grid{display:grid;gap:16px;grid-template-columns:1fr}
-@media(min-width:1000px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,400px);align-items:start}
-  .side{position:sticky;top:16px;display:flex;flex-direction:column;gap:14px}}
+@media(min-width:1000px){  .side{position:sticky;top:16px;display:flex;flex-direction:column;gap:14px}}
 
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:4px;overflow:hidden}
 .panel-hd{display:flex;align-items:center;gap:9px;padding:10px 13px;border-bottom:1px solid var(--line);background:var(--surface-2)}
@@ -211,67 +208,6 @@ dialog::backdrop{background:rgba(16,26,23,.42)}
 .node.agent{cursor:pointer}
 .node.agent:hover{border-color:var(--accent)}
 
-/* ── the phone ──────────────────────────────────────────────────────────────
-   Not the desktop layout squeezed. On a phone somebody is out of the office and
-   wants to say something and see what happened; the whole floor plan is what
-   they look at when they get back. So voice and policy come first, the flow
-   goes underneath, and the things you touch are big enough to hit while
-   walking. */
-@media (max-width:719px){
-  .wrap{padding:12px 12px 44px}
-  .top{gap:8px;margin-bottom:10px}
-  h1{font-size:16px}
-  .sub{display:none}                    /* the tagline is for the desk */
-  .chips{width:100%;justify-content:flex-start}
-
-  .bar{position:sticky;top:0;z-index:5;margin:0 -12px 14px;border-radius:0;
-       border-left:0;border-right:0;padding:10px 12px;
-       backdrop-filter:blur(8px);background:color-mix(in srgb,var(--surface-2) 92%,transparent)}
-  .bar #talk{flex:1 1 auto;justify-content:center;padding:13px 16px;font-size:15px}
-  .bar #run,.bar #reset{padding:13px 14px}
-  .bar select,.bar #c-corpus{display:none}   /* settings, not controls */
-
-  /* Voice and policy first; the floor plan after. */
-  .grid{display:flex;flex-direction:column}
-  .side{order:1;display:flex;flex-direction:column;gap:12px}
-  .grid>div:first-child{order:2}
-
-  .said{font-size:16px}
-  .panel-hd{padding:11px 12px}
-  .panel-bd{padding:12px}
-
-  /* One department at a time is already the idea; make the strip feel swipeable
-     rather than looking like a row that got cut off. */
-  .deps{margin:0 -12px 10px;padding:0 12px 6px;scroll-snap-type:x proximity}
-  .deps button{scroll-snap-align:start;padding:9px 13px}
-
-  .flow{padding:12px 8px 16px}
-  .node{padding:11px 12px}
-  .node .nm{font-size:14px}
-  /* The edge is a two-pixel line, so its label cannot live inside it in normal
-     flow; it stays absolute and is centred on the line instead of sitting to
-     the right of it, where it ran off a narrow screen. The line grows to make
-     room underneath.
-
-     (The first attempt at this set the label to position:static, which put a
-     block of text inside a two-pixel-wide box. Worth remembering that a rule
-     which reads sensibly can still be nonsense against the element it lands
-     on.) */
-  .edge{height:46px}
-  .edge .lbl{left:50%;top:auto;bottom:2px;transform:translateX(-50%);
-             text-align:center;max-width:88vw;background:var(--surface);padding:0 6px}
-
-  /* Three pools abreast leaves about forty pixels for a word. */
-  .split{flex-wrap:wrap}
-  .split>*{flex:1 1 calc(50% - 5px);min-width:0}
-
-  .log{max-height:none}
-  .verdict-note{margin-left:0;margin-right:0}
-}
-
-@media (max-width:400px){
-  .split>*{flex:1 1 100%}
-  .deps button{font-size:12px}
 }
 
 /* watching */
@@ -297,610 +233,290 @@ dialog::backdrop{background:rgba(16,26,23,.42)}
 
 .foot{margin-top:18px;padding:12px 14px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);font-size:12.5px;line-height:1.6;color:var(--muted)}
 .foot code{font:11px var(--mono);background:var(--surface);padding:1px 4px;border-radius:2px;border:1px solid var(--line)}
+
+/* ── one screen ─────────────────────────────────────────────────────────────
+   The desktop layout fits a viewport and does not scroll. That is a filming
+   requirement before it is a design one: the whole argument, from what somebody
+   said to what was refused, has to be visible in a single unbroken take, and a
+   demo that scrolls is a demo that cuts.
+
+   So the page is a grid of fixed rows, and anything that grows scrolls inside
+   its own panel rather than pushing the rest off the bottom. */
+html,body{height:100%;overflow:hidden}
+/* A later display rule outranks the one [hidden] sets, so anything given a
+   display value needs telling explicitly. This cost a confusing screenshot. */
+[hidden]{display:none!important}
+.app{
+  height:100vh;display:grid;gap:10px;padding:10px 12px;
+  grid-template-rows:auto minmax(0,1fr);
+}
+@media(min-width:1100px){.app{padding:12px 16px;gap:12px}}
+
+.board{
+  display:grid;gap:10px;min-height:0;
+  grid-template-columns:1fr;grid-auto-rows:minmax(0,auto);
+  overflow-y:auto;
+}
+@media(min-width:1100px){
+  .board{
+    grid-template-columns:minmax(270px,1fr) minmax(0,1.55fr) minmax(280px,1fr);
+    grid-template-rows:minmax(0,1fr) minmax(0,1fr);
+    overflow:hidden;
+  }
+  .cell-voice   {grid-column:1;grid-row:1}
+  .cell-watch   {grid-column:1;grid-row:2}
+  .cell-work    {grid-column:2;grid-row:1}
+  .cell-flow    {grid-column:2;grid-row:2}
+  .cell-orders  {grid-column:3;grid-row:1}
+  .cell-audit   {grid-column:3;grid-row:2}
+}
+
+.panel{display:flex;flex-direction:column;min-height:0}
+.panel-bd{flex:1;min-height:0;overflow-y:auto}
+.panel-hd{flex-shrink:0}
+
+/* ── header ── */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  flex-wrap:wrap;padding:0 2px}
+.brand{display:flex;align-items:center;gap:10px}
+h1{font-size:16px;letter-spacing:-.02em}
+.sub{font-size:11.5px;color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* ── the opening screen ── */
+.hero{display:grid;place-content:center;text-align:center;height:100%;padding:20px}
+.hero h2{font-size:26px;letter-spacing:-.03em;margin-bottom:10px}
+.hero p{font-size:14.5px;color:var(--muted);max-width:44ch;margin:0 auto 24px;line-height:1.6}
+.hero .mic{display:inline-flex;align-items:center;gap:10px;padding:15px 28px;font-size:15px;
+  background:var(--accent);border-color:var(--accent);color:var(--on-accent);border-radius:30px}
+.examples{margin-top:26px;display:flex;flex-direction:column;gap:7px;align-items:center}
+.examples span{font:10.5px var(--mono);color:var(--faint);letter-spacing:.1em;text-transform:uppercase}
+.examples button{font-size:13px;padding:9px 15px;border-radius:16px;color:var(--muted);
+  background:var(--surface);max-width:52ch;text-align:left;line-height:1.45}
+.examples button:hover{color:var(--ink);border-color:var(--accent)}
+
+/* ── the work ── */
+.brief{font-size:14px;line-height:1.55;padding:10px 12px;background:var(--surface-2);
+  border-left:3px solid var(--accent);border-radius:0 3px 3px 0;margin-bottom:11px}
+.brief small{display:block;font:9.5px var(--mono);letter-spacing:.13em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:4px}
+.team{display:flex;flex-direction:column;gap:1px}
+.member{display:grid;grid-template-columns:auto 1fr;gap:9px;padding:7px 9px;
+  background:var(--surface-2);border-radius:3px;align-items:start}
+.member.support{background:none;border:1px dashed var(--line)}
+.member .e{font-size:15px;line-height:1.25}
+.member .n{display:block;font-size:13px;font-weight:600;line-height:1.35}
+.member .r{display:block;font-size:11px;color:var(--faint);line-height:1.4;margin-top:2px}
+
+/* Three separate spans in this file have now run into the one above them
+   because a span is inline and a stacked pair is not. Anything that is a line
+   of its own says so here, once, rather than being remembered each time. */
+.member .n,.member .r,.node .nm,.node .meta,.w .t small,.brief small,.cap .a small{display:block}
+.composition{font-size:11.5px;color:var(--muted);line-height:1.5;padding-top:8px;
+  border-top:1px dashed var(--line);margin-top:8px}
+
+/* ── orders, in three bands ── */
+.bands{display:flex;flex-direction:column;gap:8px}
+.band{border-radius:4px;padding:9px 11px;border:1px solid var(--line)}
+.band h4{margin:0 0 5px;font:600 9.5px var(--mono);letter-spacing:.13em;text-transform:uppercase}
+.band ul{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.band li{font:11px var(--mono);padding:3px 7px;border-radius:3px;background:var(--surface)}
+.band.allow{border-color:var(--clear);background:var(--clear-soft)}
+.band.allow h4{color:var(--clear)}
+.band.ask{border-color:var(--caution);background:var(--caution-soft)}
+.band.ask h4{color:var(--caution)}
+.band.deny{border-color:var(--deny);background:var(--deny-soft)}
+.band.deny h4{color:var(--deny)}
+.band .none{font-size:11px;color:var(--faint)}
+
+/* ── the flow, sideways on a desk ──
+   Vertical reads better on a phone and horizontal films better on a desk: the
+   work moves left to right, the evaluator sits in the middle of the frame, and
+   an action that stops there stops in the centre of the shot. */
+.flow{flex:1;min-height:0;overflow:auto;padding:12px;
+  background:radial-gradient(circle at 1px 1px,var(--rail) 1px,transparent 0) 0 0/16px 16px;
+  background-color:var(--surface);display:flex;align-items:center;justify-content:center}
+.rail{display:flex;align-items:stretch;gap:0;min-width:min-content}
+.col{display:flex;flex-direction:column;justify-content:center;gap:7px;min-width:0}
+.col.agents{max-width:220px}
+.link{display:flex;align-items:center;padding:0 8px;flex-shrink:0}
+.link i{display:block;width:26px;height:2px;background:var(--rail);position:relative}
+.link i::after{content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);
+  border:4px solid transparent;border-left-color:var(--rail)}
+.link .lbl{font:9.5px var(--mono);color:var(--faint);white-space:nowrap;
+  position:absolute;transform:translateY(-15px)}
+
+.stage{border:1px solid var(--line-strong);border-radius:4px;background:var(--surface);
+  padding:7px 9px;display:flex;align-items:center;gap:8px;transition:border-color .25s,box-shadow .25s}
+.stage .e{font-size:14px}
+.stage .n{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stage.support{border-style:dashed;opacity:.75}
+.stage.busy{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.stage.cleared{border-color:var(--clear)}
+.stage.held{border-color:var(--deny);background:var(--deny-soft)}
+.endcap{border:1px dashed var(--line-strong);border-radius:4px;background:var(--surface-3);
+  padding:8px 10px;font:10.5px var(--mono);color:var(--muted);text-align:center;
+  writing-mode:vertical-rl;text-orientation:mixed;max-height:200px}
+
+.gate{border:1px solid var(--line-strong);border-radius:5px;background:var(--surface-2);
+  padding:12px 14px;text-align:center;min-width:118px}
+.gate .ttl{font:600 9px var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);line-height:1.5}
+.gate .sig{display:flex;gap:6px;justify-content:center;margin:9px 0 7px}
+.gate .sig i{width:12px;height:12px;border-radius:50%;opacity:.18;transition:opacity .15s,box-shadow .15s}
+.gate .sig i:nth-child(1){background:var(--clear)}
+.gate .sig i:nth-child(2){background:var(--caution)}
+.gate .sig i:nth-child(3){background:var(--deny)}
+.gate.s-ALLOW .sig i:nth-child(1){opacity:1;box-shadow:0 0 12px var(--clear)}
+.gate.s-ASK   .sig i:nth-child(2){opacity:1;box-shadow:0 0 12px var(--caution)}
+.gate.s-DENY  .sig i:nth-child(3){opacity:1;box-shadow:0 0 12px var(--deny)}
+.gate .cnt{font:10.5px var(--mono);color:var(--muted)}
+.gate .cnt b{color:var(--ink)}
+
+.pkt{position:absolute;padding:2px 7px;border-radius:9px;font:600 9px var(--mono);
+  white-space:nowrap;border:1px solid var(--accent);background:var(--accent-soft);
+  color:var(--accent);animation:travel 1.15s ease-in-out forwards;z-index:3}
+@keyframes travel{from{transform:translate(-40px,-50%);opacity:0}
+  20%{opacity:1}80%{opacity:1}to{transform:translate(40px,-50%);opacity:0}}
+
+/* ── attention ── */
+.attention{border:1px solid var(--caution);background:var(--caution-soft);border-radius:4px;
+  padding:10px 12px;margin-bottom:11px}
+.attention h4{margin:0 0 6px;font:600 9.5px var(--mono);letter-spacing:.13em;
+  text-transform:uppercase;color:var(--caution)}
+.attention .item{font-size:12.5px;line-height:1.5;padding:5px 0;border-bottom:1px solid var(--line)}
+.attention .item:last-child{border-bottom:0}
+.attention .item b{font-family:var(--mono);font-size:11.5px}
+
+/* ── watching ── */
+.watch-add{display:flex;gap:6px;margin-bottom:9px}
+.watch-add input{flex:1;min-width:0;font:11px var(--mono);padding:8px 9px;border-radius:3px;
+  border:1px solid var(--line-strong);background:var(--surface);color:inherit}
+.watch-add button{padding:8px 12px;font-size:12px}
+.watches{display:flex;flex-direction:column;gap:5px}
+.w{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;
+  padding:7px 9px;background:var(--surface-2);border-radius:3px}
+.w .t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:500}
+.w .t small{display:block;font:9.5px var(--mono);color:var(--faint);font-weight:400}
+.w .p{font:600 12px var(--mono);white-space:nowrap}
+.w .x{border:0;background:none;color:var(--faint);padding:1px 4px;cursor:pointer;font-size:14px}
+.w.out{border-left:3px solid var(--deny)}
+.w.ok{border-left:3px solid var(--clear)}
+
+/* ── the phone: back to a scroll, voice first ── */
+@media(max-width:1099px){
+  html,body{overflow:auto}
+  .app{height:auto;min-height:100vh}
+  .board{overflow:visible}
+  .cell-voice{order:1}.cell-work{order:2}.cell-orders{order:3}
+  .cell-flow{order:4}.cell-watch{order:5}.cell-audit{order:6}
+  .panel-bd{max-height:none}
+  .flow{min-height:220px}
+  .rail{flex-direction:column;align-items:center}
+  .link{padding:8px 0}
+  .link i{width:2px;height:22px}
+  .link i::after{right:50%;top:auto;bottom:-1px;transform:translateX(50%);
+    border-left-color:transparent;border-top-color:var(--rail)}
+  .endcap{writing-mode:horizontal-tb;max-height:none}
+  .col.agents{max-width:none;width:100%}
+  .hero h2{font-size:21px}
+  .examples button{max-width:none}
+}
+
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="app">
 
   <header class="top">
     <div class="brand">
       <div class="lamps" id="lamps"><i></i><i></i><i></i></div>
       <div>
         <h1>Standing Order</h1>
-        <p class="sub">Your workforce, running. And where it stops.</p>
+        <p class="sub">Say what needs doing, and how far they may go.</p>
       </div>
     </div>
     <div class="chips">
       <span class="chip" id="c-conn">offline</span>
-      <span class="chip pol" id="c-pol">no policy</span>
-      <span class="chip" id="c-fp">none</span>
+      <span class="chip pol" id="c-mission">no mission</span>
+      <span class="chip" id="c-fp">&mdash;</span>
+      <span class="chip" id="c-corpus">&hellip;</span>
+      <button id="talk" style="padding:6px 13px;font-size:12.5px">Talk</button>
+      <button id="reset" style="padding:6px 11px;font-size:12.5px">Reset</button>
     </div>
   </header>
 
-  <div class="bar">
-    <button class="primary mic" id="talk"><span class="dot"></span><span id="talk-lbl">Talk to it</span></button>
-    <button id="run">Run the stock-out</button>
-    <button id="reset">Reset</button>
-    <span class="spacer"></span>
-    <select id="market" title="Platform names are configuration, not behaviour"></select>
-    <span class="chip" id="c-corpus">loading</span>
-  </div>
-
-  <div class="grid">
-
-    <div>
-      <section class="panel">
-        <div class="panel-hd">
-          <span class="eyebrow">01</span><h2 id="flow-title">The floor</h2>
-          <span class="chip" style="margin-left:auto" id="c-dept"></span>
-        </div>
-        <div class="panel-bd" style="padding-bottom:0">
-          <div class="deps" id="deps"></div>
-        </div>
-        <div class="flow" id="flow"></div>
-      </section>
-    </div>
-
-    <div class="side">
-
-      <section class="panel">
-        <div class="panel-hd"><span class="eyebrow">02</span><h2>Voice</h2>
-          <span class="chip" style="margin-left:auto">Voice Agent API</span></div>
-        <div class="panel-bd">
-          <p class="said" id="said"><span class="empty" style="padding:0">Press talk, then say what this workforce may and may not do.</span></p>
-          <div class="agent" id="agent" hidden><b>AGENT</b><span id="agent-text"></span></div>
-          <div class="err" id="err"></div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-hd"><span class="eyebrow">03</span><h2>Price Watch</h2>
-          <button id="run-watch" style="margin-left:auto;padding:5px 11px;font-size:12px">Check now</button></div>
-        <div class="panel-bd">
-          <div class="watch-add">
-            <input id="watch-url" placeholder="https://a-competitor.com/products/..." spellcheck="false">
-            <button id="watch-add">Watch</button>
-          </div>
-          <div class="watches" id="watches"></div>
-          <div class="ran" id="ran"></div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-hd"><span class="eyebrow">04</span><h2>Policy in force</h2></div>
-        <div class="panel-bd">
-          <div class="rules" id="rules"></div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-hd"><span class="eyebrow">05</span><h2>Audit</h2>
-          <span class="chip" style="margin-left:auto" id="c-audit">0</span></div>
-        <div class="panel-bd"><div class="log" id="log"></div></div>
-      </section>
-
-    </div>
-  </div>
-
-  <div class="foot" id="foot"></div>
-
-  <dialog id="detail">
-    <div class="d-hd">
-      <span class="ico" id="d-ico"></span>
-      <div>
-        <h3 id="d-name"></h3>
-        <p class="dep" id="d-dep"></p>
+  <!-- Nothing open yet, and only one thing to do about that. -->
+  <section class="panel" id="hero-panel">
+    <div class="hero">
+      <h2>What needs handling?</h2>
+      <p>Describe the situation and its limits in one breath. It works out who should be
+         involved, and exactly how far they may go.</p>
+      <button class="mic" id="hero-mic"><span class="dot"></span><span id="hero-lbl">Start talking</span></button>
+      <div class="examples">
+        <span>or try one</span>
+        <button data-eg="stock">A product just went out of stock. Handle it, but don&rsquo;t refund
+          or cancel anything, and ask me before you tell customers.</button>
+        <button data-eg="revenue">Revenue is down this week and I don&rsquo;t know why. Find out,
+          and don&rsquo;t change any prices while you look.</button>
+        <button data-eg="rivals">Watch what my competitors are charging and tell me when
+          anything moves.</button>
       </div>
-      <button class="d-x" id="d-close" aria-label="Close">&times;</button>
+      <div class="err" id="hero-err"></div>
     </div>
-    <div class="d-bd">
-      <p class="d-purpose" id="d-purpose"></p>
-      <div class="d-facts" id="d-facts"></div>
-      <p class="d-sec">What it may do, right now</p>
-      <div class="caps" id="d-caps"></div>
-    </div>
-    <p class="d-ft" id="d-ft"></p>
-  </dialog>
+  </section>
+
+  <div class="board" id="board" hidden>
+
+    <section class="panel cell-voice">
+      <div class="panel-hd"><span class="eyebrow">Voice</span><h2>What you said</h2></div>
+      <div class="panel-bd">
+        <p class="said" id="said"></p>
+        <div class="agent" id="agent" hidden><b>STANDING ORDER</b><span id="agent-text"></span></div>
+        <div class="err" id="err"></div>
+      </div>
+    </section>
+
+    <section class="panel cell-watch">
+      <div class="panel-hd"><span class="eyebrow">Watching</span><h2>Price &amp; stock</h2>
+        <button id="run-watch" style="margin-left:auto;padding:5px 10px;font-size:11.5px">Check</button></div>
+      <div class="panel-bd">
+        <div class="watch-add">
+          <input id="watch-url" placeholder="https://a-rival.com/products/&hellip;" spellcheck="false">
+          <button id="watch-add">Watch</button>
+        </div>
+        <div class="watches" id="watches"></div>
+      </div>
+    </section>
+
+    <section class="panel cell-work">
+      <div class="panel-hd"><span class="eyebrow" id="m-id">M</span><h2>The work, and who is on it</h2>
+        <button id="run-mission" style="margin-left:auto;padding:6px 12px;font-size:12.5px">Run it</button></div>
+      <div class="panel-bd">
+        <p class="brief" id="m-brief"><small>You said</small><span></span></p>
+        <div class="attention" id="m-attention" hidden></div>
+        <div class="team" id="m-team"></div>
+        <p class="composition" id="m-composition"></p>
+      </div>
+    </section>
+
+    <section class="panel cell-flow">
+      <div class="panel-hd"><span class="eyebrow">Flow</span><h2>How it runs, and where it stops</h2></div>
+      <div class="flow" id="flow"></div>
+    </section>
+
+    <section class="panel cell-orders">
+      <div class="panel-hd"><span class="eyebrow">Orders</span><h2>Standing orders in force</h2></div>
+      <div class="panel-bd"><div class="bands" id="m-bands"></div></div>
+    </section>
+
+    <section class="panel cell-audit">
+      <div class="panel-hd"><span class="eyebrow">Audit</span><h2>Every decision</h2>
+        <span class="chip" style="margin-left:auto" id="c-audit">0</span></div>
+      <div class="panel-bd"><div class="log" id="log"></div></div>
+    </section>
+
+  </div>
 </div>
-
-<script type="module">
-import { connect } from './voice.js';
-import { registerWebMCP } from './webmcp.js';
-
-const $ = (id) => document.getElementById(id);
-const api = (p, body) => fetch(p, body
-  ? { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(body) }
-  : undefined).then(async (r) => {
-    const d = await r.json().catch(() => ({ error:`${r.status}` }));
-    if (!r.ok) throw new Error(d.error ?? r.status);
-    return d;
-  });
-
-let WF = null, DEPT = null, VOICE = null;
-
-// ── the flow ────────────────────────────────────────────────────────────────
-// A vertical run of nodes with labelled edges, the same shape on a phone and on
-// a desktop. Everything consequential passes through one node in the middle,
-// which is the only claim this picture is really making.
-
-function nodeEl(kind, ico, name, meta, risk) {
-  const d = document.createElement('div');
-  d.className = `node ${kind}`;
-  if (kind === 'source' || kind === 'sink') { d.textContent = name; return d; }
-  d.innerHTML =
-    `<span class="ico">${ico}</span>` +
-    `<span class="body"><span class="nm">${name}</span>` +
-    (meta ? `<span class="meta">${meta}</span>` : '') + `</span>` +
-    (risk ? `<span class="risk${risk.startsWith('L4') ? ' hi' : ''}">${risk}</span>` : '');
-  return d;
-}
-
-function edgeEl(label) {
-  const d = document.createElement('div');
-  d.className = 'edge';
-  if (label) d.innerHTML = `<span class="lbl">${label}</span>`;
-  return d;
-}
-
-function gateEl() {
-  const d = document.createElement('div');
-  d.className = 'gate';
-  d.id = 'gate';
-  d.innerHTML =
-    `<p class="ttl">Policy evaluator</p>` +
-    `<div class="sig"><i></i><i></i><i></i></div>` +
-    `<p class="cnt"><b id="g-pass">0</b> cleared &middot; <b id="g-hold">0</b> held</p>` +
-    `<p class="why" id="g-why"></p>`;
-  return d;
-}
-
-function renderDept(id) {
-  DEPT = id;
-  const dept = WF.departments.find((d) => d.id === id);
-  const agents = WF.agents.filter((a) => a.department === id);
-  const pools = new Set(agents.flatMap((a) => a.writes));
-
-  $('flow-title').textContent = `${dept.emoji} \u00a0${dept.name}`;
-  $('c-dept').textContent = `${agents.length} agents`;
-  for (const b of $('deps').children) b.setAttribute('aria-pressed', b.dataset.id === id);
-
-  const flow = $('flow');
-  flow.innerHTML = '';
-  flow.appendChild(nodeEl('source', '', 'Schedules, signals, and you', ''));
-  flow.appendChild(edgeEl('wake the agent'));
-
-  for (const a of agents) {
-    const when = a.schedule ?? (a.triggered_by ? `on ${a.triggered_by.join(' / ')}` : 'on demand');
-    const el = nodeEl('agent', a.emoji, a.name, `${when}  &middot;  ${a.actions.length} actions`, a.highestRisk);
-    el.id = `n-${a.id}`;
-    el.title = a.purpose;
-    el.onclick = () => openAgent(a.id);
-    flow.appendChild(el);
-    flow.appendChild(edgeEl(''));
-  }
-
-  if (pools.size) {
-    const wrap = document.createElement('div');
-    wrap.className = 'split';
-    for (const p of [...pools].slice(0, 3)) {
-      const pool = WF.pools.find((x) => x.id === p);
-      const el = nodeEl('pool', pool.emoji, pool.name, '');
-      el.style.maxWidth = 'none';
-      wrap.appendChild(el);
-    }
-    flow.appendChild(wrap);
-    flow.appendChild(edgeEl('anything consequential'));
-  }
-
-  flow.appendChild(gateEl());
-  flow.appendChild(edgeEl('cleared only'));
-  flow.appendChild(nodeEl('sink', '', 'The outside world', ''));
-
-  const note = document.createElement('div');
-  note.className = 'verdict-note';
-  note.id = 'run-note';
-  flow.appendChild(note);
-}
-
-/**
- * An agent, opened.
- *
- * The list of what it *can* do is static and not very interesting. What it may
- * do right now, under the policy currently in force, is the question only a
- * governance layer can answer, so that is what this leads with. The verdicts
- * come from the same evaluator that decides for real; the difference is that
- * asking does not count as doing, so nothing lands in the audit.
- */
-let OPEN_AGENT = null;
-
-async function openAgent(id) {
-  const a = WF.agents.find((x) => x.id === id);
-  if (!a) return;
-  OPEN_AGENT = id;
-
-  const dept = WF.departments.find((d) => d.id === a.department);
-  const poolName = (p) => {
-    const pool = WF.pools.find((x) => x.id === p);
-    return pool ? `${pool.emoji} ${pool.name}` : p;
-  };
-
-  $('d-ico').textContent = a.emoji;
-  $('d-name').textContent = a.name;
-  $('d-dep').textContent = `${a.id} \u00b7 ${dept.emoji} ${dept.name}`;
-  $('d-purpose').textContent = a.purpose;
-
-  const facts = [
-    ['Runs', a.schedule ?? (a.triggered_by ? `when ${a.triggered_by.join(' or ')} raises a signal` : 'on demand')],
-    ['Reads', a.reads.length ? a.reads.map(poolName).join(', ') : 'nothing'],
-    ['Writes', a.writes.length ? a.writes.map(poolName).join(', ') : 'nothing'],
-  ];
-  $('d-facts').innerHTML = facts
-    .map(([k, v]) => `<span class="pill">${k} <b>${v}</b></span>`).join('');
-
-  $('d-caps').innerHTML = '<p class="empty">Asking the evaluator...</p>';
-  $('detail').showModal();
-
-  const { policyVersion, results } = await api('/api/preview', { skill: id, actions: a.actions });
-  if (OPEN_AGENT !== id) return;
-
-  $('d-caps').innerHTML = '';
-  for (const r of results) {
-    const d = document.createElement('div');
-    d.className = 'cap';
-    d.innerHTML =
-      `<span class="a">${r.action}<small>${r.label}</small></span>` +
-      `<span class="tag ${r.real ? 'real' : ''}">${r.real ? 'real' : 'sandbox'}</span>` +
-      `<span class="v ${r.verdict}">${r.verdict}</span>` +
-      `<span class="why">${r.risk} &middot; ${r.reason}</span>`;
-    $('d-caps').appendChild(d);
-  }
-
-  const held = results.filter((r) => r.verdict !== 'ALLOW').length;
-  $('d-ft').textContent = policyVersion
-    ? `Judged against policy version ${policyVersion}. ${held} of ${results.length} would not go through as things stand. Change the policy by voice and reopen this to see it move.`
-    : `No policy has been compiled, so nothing consequential is assumed. ${held} of ${results.length} would stop here. Speak a policy and reopen this.`;
-}
-
-// ── live state ──────────────────────────────────────────────────────────────
-let passed = 0, held = 0;
-
-function signal(verdict, why) {
-  const g = $('gate');
-  if (!g) return;
-  g.className = `gate s-${verdict}`;
-  $('g-why').textContent = why ?? '';
-  const lamps = $('lamps').children;
-  for (const l of lamps) l.className = '';
-  lamps[verdict === 'DENY' ? 0 : verdict === 'ASK' ? 1 : 2].className = 'on';
-  setTimeout(() => { g.className = 'gate'; }, 2600);
-}
-
-function packet(agentId, text, verdict) {
-  const node = $(`n-${agentId}`);
-  if (node) {
-    node.classList.add('busy');
-    setTimeout(() => {
-      node.classList.remove('busy');
-      node.classList.add(verdict === 'ALLOW' ? 'cleared' : 'held');
-      setTimeout(() => node.classList.remove('cleared', 'held'), 2200);
-    }, 700);
-  }
-  const edges = [...document.querySelectorAll('.edge')];
-  const edge = edges.at(-2);
-  if (!edge) return;
-  const p = document.createElement('span');
-  p.className = 'pkt';
-  p.textContent = text;
-  edge.appendChild(p);
-  setTimeout(() => p.remove(), 1200);
-}
-
-function renderPolicy(policy, fp) {
-  const box = $('rules');
-  if (!policy) {
-    box.innerHTML = '<p class="empty">Nothing authorised yet<br>Nothing consequential is assumed</p>';
-    $('c-pol').textContent = 'no policy';
-    $('c-fp').textContent = 'none';
-    return;
-  }
-  box.innerHTML = '';
-  for (const r of policy.rules) {
-    const d = document.createElement('div');
-    d.className = 'rule';
-    d.innerHTML = `<span class="nm">${r.action}</span>` +
-      (r.conditions ? `<span class="cond">${Object.entries(r.conditions)
-        .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : v}`).join(' ')}</span>` : '') +
-      `<span class="v ${r.effect}">${r.effect}</span>`;
-    box.appendChild(d);
-  }
-  $('c-pol').textContent = `${policy.policyId} v${policy.version}`;
-  $('c-fp').textContent = fp ?? 'none';
-}
-
-function renderAudit(entries) {
-  const box = $('log');
-  $('c-audit').textContent = entries.length;
-  if (!entries.length) { box.innerHTML = '<p class="empty">No decisions yet</p>'; return; }
-  box.innerHTML = '';
-  for (const e of entries.slice(-40)) {
-    const d = document.createElement('div');
-    d.className = 'lrow';
-    d.innerHTML =
-      `<span class="ts">${e.at.slice(11, 19)}</span>` +
-      `<span class="ac">${e.action}</span>` +
-      `<span><span class="tag ${e.real ? 'real' : ''}">${
-        e.verdict !== 'ALLOW' ? 'not run' : e.performed ? 'sent' : 'simulated'
-      }</span> ` +
-      `<span class="v ${e.verdict}">${e.verdict}</span></span>` +
-      `<span class="why">${e.reason}${e.outcome ? ` &middot; ${e.outcome}` : ''}</span>`;
-    box.appendChild(d);
-  }
-  box.scrollTop = box.scrollHeight;
-}
-
-// ── watching ────────────────────────────────────────────────────────────────
-function renderWatches(listings) {
-  const box = $('watches');
-  if (!listings?.length) {
-    box.innerHTML = '<p class="empty">Nothing watched yet.<br>' +
-      'Paste a competitor product page above. Shopify stores read cleanest, ' +
-      'because they publish the data rather than hiding it in the page.</p>';
-    return;
-  }
-  box.innerHTML = '';
-  for (const w of listings) {
-    const d = document.createElement('div');
-    d.className = `w ${w.inStock === false ? 'out' : w.inStock ? 'ok' : ''}`;
-    const host = new URL(w.url).hostname.replace(/^www\./, '');
-    const stock = w.inStock === false ? 'sold out'
-      : w.inStock ? `${w.variantsInStock}/${w.variants ?? '?'} in stock` : '';
-    const seen = w.checkedAt
-      ? `read ${new Date(w.checkedAt).toLocaleTimeString()} via ${w.via ?? '?'}`
-      : 'not read yet';
-    d.innerHTML =
-      `<span class="t">${w.title ?? host}<small>${host}</small></span>` +
-      `<span class="p">${w.price ?? '—'}</span>` +
-      `<button class="x" data-url="${w.url}" title="Stop watching">&times;</button>` +
-      `<span class="s">${w.lastError ? `could not be read: ${w.lastError}` : `${seen}${stock ? ` &middot; ${stock}` : ''}`}</span>`;
-    box.appendChild(d);
-  }
-  for (const b of box.querySelectorAll('.x')) {
-    b.onclick = async () => {
-      const { watching } = await api('/api/watch/remove', { url: b.dataset.url });
-      renderWatches(watching);
-    };
-  }
-}
-
-async function refresh() {
-  const [s, p] = await Promise.all([api('/api/state'), api('/api/pools')]);
-  renderPolicy(s.policy, s.fingerprint);
-  renderAudit(s.audit);
-  renderWatches(p.pools?.listings);
-  passed = s.audit.filter((e) => e.verdict === 'ALLOW').length;
-  held = s.audit.length - passed;
-  if ($('g-pass')) { $('g-pass').textContent = passed; $('g-hold').textContent = held; }
-}
-
-// ── firing actions at the evaluator ─────────────────────────────────────────
-async function fire(agentId, action, parameters = {}) {
-  const r = await api('/api/evaluate', { skill: agentId, action, parameters });
-  packet(agentId, action, r.verdict);
-  signal(r.verdict, `${action}: ${r.reason}`);
-  await refresh();
-  return r;
-}
-
-/**
- * The stock-out. A signal wakes Emergency Response, which fans out; the
- * Scheduler then tries to arrange the one thing that was refused. Every verdict
- * comes from the server, so nothing here is staged: with no policy compiled the
- * whole run stops, which is the correct and rather undramatic answer.
- */
-async function runMission() {
-  $('run').disabled = true;
-  const script = [
-    ['A03', 'pause_ad', { platform: 'meta' }],
-    ['A03', 'delist_product', { platform: 'shopee' }],
-    ['A03', 'mark_out_of_stock', {}],
-    ['A04', 'read_orders', { }],
-    ['A23', 'notify_customer', { customer_group: 'all' }],
-    ['A04', 'issue_refund', { count: 14 }],
-    ['A36', 'create_schedule', { action: 'notify_customer' }],
-  ];
-  const outcomes = [];
-  for (const [agent, action, params] of script) {
-    const dept = WF.agents.find((a) => a.id === agent)?.department;
-    if (dept && dept !== DEPT) renderDept(dept);
-    outcomes.push(await fire(agent, action, params));
-    await new Promise((r) => setTimeout(r, 1150));
-  }
-  $('run').disabled = false;
-
-  // A bare counter reading "1 cleared, 6 held" looks like the run broke. It did
-  // not: holding is the whole product. Say which it is, and what to do next.
-  const cleared = outcomes.filter((o) => o.verdict === 'ALLOW');
-  const stopped = outcomes.filter((o) => o.verdict !== 'ALLOW');
-  const s = await api('/api/state');
-  const note = $('run-note');
-  if (!note) return;
-
-  if (!s.policy) {
-    note.className = 'verdict-note hold show';
-    note.innerHTML =
-      `<b>The run finished.</b> ${cleared.length} of ${outcomes.length} actions went through; ` +
-      `the other ${stopped.length} stopped at the evaluator because <b>nothing has been ` +
-      `authorised yet</b>. That is the system working, not failing: a workforce nobody has ` +
-      `spoken to does not get to touch the outside world.<br><br>` +
-      `Press <b>Talk to it</b>, say what it may and may not do, then run this again.`;
-  } else {
-    const named = stopped.map((o) => o.request.action);
-    note.className = `verdict-note ${stopped.length ? 'hold' : 'good'} show`;
-    note.innerHTML = stopped.length
-      ? `<b>The run finished under ${s.policy.policyId} v${s.policy.version}.</b> ` +
-        `${cleared.length} cleared. ${stopped.length} held: <b>${named.join(', ')}</b>. ` +
-        `Every one of those was refused because of something you said, and the audit below ` +
-        `records which rule and which version.`
-      : `<b>The run finished under ${s.policy.policyId} v${s.policy.version}.</b> ` +
-        `All ${cleared.length} actions cleared, because the policy covers all of them.`;
-  }
-}
-
-// ── voice ───────────────────────────────────────────────────────────────────
-function setConn(text, live) {
-  $('c-conn').textContent = text;
-  $('c-conn').className = `chip${live ? ' live' : ''}`;
-}
-
-async function talk() {
-  if (VOICE) { VOICE.stop(); return; }
-  $('err').classList.remove('show');
-  $('talk').disabled = true;
-
-  try {
-    VOICE = await connect({
-      onStatus: (s) => {
-        setConn(s, s === 'live');
-        $('talk').disabled = false;
-        $('talk').className = s === 'live' ? 'stop mic on' : 'primary mic';
-        $('talk-lbl').textContent = s === 'live' ? 'Stop' : 'Talk to it';
-        if (s === 'offline') VOICE = null;
-      },
-      onUser: (text, final) => {
-        $('said').innerHTML = final ? '' : '<span class="partial"></span>';
-        (final ? $('said') : $('said').firstChild).textContent = text;
-      },
-      onAgent: (text) => { $('agent').hidden = false; $('agent-text').textContent = text; },
-      onTool: refresh,
-      onError: (m) => { $('err').textContent = m; $('err').classList.add('show'); },
-    });
-  } catch (e) {
-    $('err').textContent = e.message;
-    $('err').classList.add('show');
-    $('talk').disabled = false;
-    VOICE = null;
-  }
-}
-
-// ── boot ────────────────────────────────────────────────────────────────────
-(async () => {
-  const [health, wf, catalog] = await Promise.all([
-    api('/api/health'), api('/api/workforce'), api('/api/actions'),
-  ]);
-  WF = wf;
-
-  // Offer this page to whatever agent is in the browser. Feature-detected, so
-  // it is a no-op where the API has not shipped.
-  const governed = catalog.actions
-    .filter((a) => a.risk.startsWith('L3') || a.risk.startsWith('L4'))
-    .map((a) => a.id);
-  const webmcp = registerWebMCP(governed);
-
-  // An agent acting through WebMCP is not clicking anything, so the page would
-  // otherwise sit still while decisions land. Keep it honest.
-  addEventListener('standingorder:decision', (e) => {
-    signal(e.detail.verdict, `${e.detail.request.action}: ${e.detail.reason}`);
-    refresh();
-  });
-
-  const c = health.corpus;
-  $('c-corpus').innerHTML = `<b>${wf.agents.length}</b> agents &middot; <b>${wf.departments.length}</b> departments`;
-
-  $('market').innerHTML = Object.keys(wf.platforms.presets)
-    .map((k) => `<option value="${k}">${k}</option>`).join('');
-  $('market').value = wf.platforms.default;
-
-  $('deps').innerHTML = '';
-  for (const d of wf.departments) {
-    const b = document.createElement('button');
-    b.dataset.id = d.id;
-    b.textContent = `${d.emoji}\u00a0 ${d.name}`;
-    b.onclick = () => renderDept(d.id);
-    $('deps').appendChild(b);
-  }
-  renderDept('ops');
-
-  if (!health.keyConfigured) {
-    setConn('no API key', false);
-    $('talk').disabled = true;
-  }
-
-  $('d-close').onclick = () => $('detail').close();
-  $('detail').addEventListener('close', () => { OPEN_AGENT = null; });
-  // Clicking the backdrop should dismiss, the way a sheet does on a phone.
-  $('detail').addEventListener('click', (e) => {
-    if (e.target === $('detail')) $('detail').close();
-  });
-
-  $('watch-add').onclick = async () => {
-    const url = $('watch-url').value.trim();
-    if (!url) return;
-    $('watch-add').disabled = true;
-    try {
-      const { watching } = await api('/api/watch', { url });
-      $('watch-url').value = '';
-      renderWatches(watching);
-    } catch (e) {
-      $('err').textContent = e.message;
-      $('err').classList.add('show');
-    }
-    $('watch-add').disabled = false;
-  };
-  $('watch-url').onkeydown = (e) => { if (e.key === 'Enter') $('watch-add').click(); };
-
-  $('run-watch').onclick = async () => {
-    const btn = $('run-watch');
-    btn.disabled = true;
-    btn.textContent = 'Checking…';
-    try {
-      const r = await api('/api/agents/run', { agent: 'A11' });
-      const note = $('ran');
-      const held = r.decisions.filter((d) => d.verdict !== 'ALLOW');
-      note.innerHTML =
-        `<b>Price Watch ran.</b><br>${r.observed.join('<br>')}` +
-        (r.decisions.length
-          ? `<br><br><b>It wanted to tell you about ${r.decisions.length} of them.</b> ` +
-            (held.length
-              ? `${held.length} did not go out: ${held.map((d) => d.reason).join('; ')}`
-              : 'All went out.')
-          : '<br><br>Nothing changed since the last check, so it had nothing to say.');
-      note.classList.add('show');
-      for (const d of r.decisions) signal(d.verdict, `${d.action}: ${d.reason}`);
-    } catch (e) {
-      $('err').textContent = e.message;
-      $('err').classList.add('show');
-    }
-    btn.disabled = false;
-    btn.textContent = 'Check now';
-    await refresh();
-  };
-
-  $('talk').onclick = talk;
-  $('run').onclick = runMission;
-  $('reset').onclick = async () => {
-    await api('/api/reset', {});
-    $('said').textContent = '';
-    $('agent').hidden = true;
-    await refresh();
-  };
-
-  $('foot').innerHTML =
-    `Every node here comes from <code>agents/workforce.json</code>, and every verdict from the ` +
-    `evaluator on the server. Nothing on this page is staged: with no policy compiled, a run of ` +
-    `the stock-out stops almost immediately, which is the correct answer and not a very ` +
-    `dramatic one. ` +
-    `An action shows <code>sent</code> only when an adapter really carried it out, ` +
-    `<code>simulated</code> when it was authorised but no adapter is configured for it here, ` +
-    `and <code>not run</code> when the policy refused. The evaluator is the same in all three.` +
-    `<br><br>` + (webmcp
-      ? `This page is registered with the browser through <code>navigator.modelContext</code>: ` +
-        `an agent in this tab can read the policy and attempt actions, and meets the same ` +
-        `evaluator you do. There is no faster path for being in the same window.`
-      : `An MCP server for external agents lives at <code>mcp/server.js</code>. This browser ` +
-        `has no <code>navigator.modelContext</code>, so the in-page equivalent is dormant here.`);
-
-  await refresh();
-})();
-</script>
+<script type="module" src="./app.js"></script>
 </body>
 </html>
