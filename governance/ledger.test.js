@@ -158,3 +158,26 @@ test('nothing in force is a state the page has to be able to show', async () => 
   assert.ok(body.includes('} else {'),
     'and it must have the branch that does it');
 });
+
+test('opening a mission keeps the rules already in force', async () => {
+  // A rule was spoken, recorded, and confirmed out loud, and then the mission
+  // that followed replaced the policy and deleted it. The workforce was refused
+  // the very action the person had just authorised, with the honest reason that
+  // no rule authorised it, which was true and appalling.
+  const { compile } = await import('./policy.js');
+  const standing = compile({ rules: [
+    { action: 'send_telegram_message', effect: 'ALLOW' },
+    { action: 'update_price', effect: 'DENY' },
+  ] });
+
+  // What the route does when a mission opens on top of it.
+  const spokenNow = [{ action: 'update_price', effect: 'ASK' }];
+  const spoken = new Set(spokenNow.map((r) => r.action));
+  const carried = standing.rules.filter((r) => !spoken.has(r.action));
+  const merged = [...carried, ...spokenNow];
+
+  const byAction = new Map(merged.map((r) => [r.action, r.effect]));
+  assert.equal(byAction.get('send_telegram_message'), 'ALLOW', 'the untouched rule survives');
+  assert.equal(byAction.get('update_price'), 'ASK', 'and the one restated now wins');
+  assert.equal(merged.length, 2, 'without leaving a duplicate behind');
+});

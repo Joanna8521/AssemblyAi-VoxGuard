@@ -630,8 +630,25 @@ const routes = {
     const needs = (body.needs ?? []).filter((a) => known.has(a));
     const unknownNeeds = (body.needs ?? []).filter((a) => !known.has(a));
 
+    // Whatever is already standing comes with it.
+    //
+    // Opening a mission used to replace session.policy outright, which threw
+    // away rules spoken moments earlier: the agent recorded one, said so, and
+    // then opened the mission that deleted it. The workforce went on to be
+    // refused an action the person had just authorised, for want of a rule that
+    // had been there. Rules spoken with this mission win where they collide.
+    const standing = session.policy?.rules ?? [];
+    const spoken = new Set(accepted.map((r) => r.action));
+    const carried = standing.filter((r) => !spoken.has(r.action));
+
     const mission = openMission(
-      { brief: body.brief, needs, rules: accepted, scope: body.scope, spokenIn: body.spokenIn },
+      {
+        brief: body.brief,
+        needs,
+        rules: [...carried, ...accepted],
+        scope: body.scope,
+        spokenIn: body.spokenIn,
+      },
       workforce.agents,
       { at: new Date().toISOString(), live: implementedAgents() },
     );
