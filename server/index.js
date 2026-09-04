@@ -16,6 +16,7 @@
 
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname, normalize } from 'node:path';
 
@@ -30,7 +31,49 @@ const WEB = join(HERE, '..', 'web');
 const PORT = Number(process.env.PORT ?? 8787);
 const API_KEY = process.env.ASSEMBLYAI_API_KEY ?? '';
 
+const RISK_ORDER = ['L0', 'L1', 'L2', 'L3', 'L4', 'L4-meta'];
+const byRisk = (a, b) => RISK_ORDER.indexOf(a) - RISK_ORDER.indexOf(b);
+
 const registry = load();
+
+/**
+ * The built-in workforce, annotated with what each of its actions costs.
+ *
+ * Loaded once and checked once: an agent that names an action the registry does
+ * not know would be an agent whose requests the evaluator cannot weigh, and it
+ * would fail as an ASK at runtime rather than as an error here, which is far
+ * too late to notice.
+ */
+const workforce = (() => {
+  const raw = JSON.parse(readFileSync(join(HERE, '..', 'agents', 'workforce.json'), 'utf8'));
+  const unknown = [];
+
+  const agents = raw.agents.map((a) => ({
+    ...a,
+    capabilities: a.actions.map((id) => {
+      const risk = registry.riskOf(id);
+      if (risk === null) unknown.push(`${a.id} -> ${id}`);
+      return {
+        action: id,
+        risk,
+        label: registry.label(id, 'en'),
+        adapter: registry.adapterOf(id),
+        real: registry.isReal(id),
+      };
+    }),
+    highestRisk: a.actions
+      .map((id) => registry.riskOf(id))
+      .filter(Boolean)
+      .sort(byRisk)
+      .at(-1) ?? null,
+  }));
+
+  if (unknown.length) {
+    throw new Error(`workforce.json names actions the registry does not have: ${unknown.join(', ')}`);
+  }
+  return { ...raw, agents };
+})();
+
 
 /** In-memory for now. A hackathon does not need Postgres to prove a point. */
 const state = {
@@ -116,6 +159,17 @@ const routes = {
     // adjusted later. Only six languages have voices; none of them is Mandarin.
     output: { voice: 'jane' },
     tools: toolsFor(registry),
+  }),
+
+  /**
+   * The workforce graph the canvas draws: agents, the pools they read and write,
+   * and what each agent is capable of costing.
+   */
+  'GET /api/workforce': async () => ({
+    platforms: workforce.platforms,
+    departments: workforce.departments,
+    pools: workforce.pools,
+    agents: workforce.agents,
   }),
 
   'GET /api/state': async () => ({

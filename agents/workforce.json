@@ -1,0 +1,828 @@
+{
+  "$comment": "The built-in commerce workforce, grouped into departments because a flat graph of three dozen agents is a picture nobody reads. Platform names are configuration, not content: the same agent is Shopify in one market and Shopee in another, and nothing about what it may do changes with the label.",
+  "version": 1,
+  "platforms": {
+    "default": "international",
+    "presets": {
+      "international": {
+        "marketplace_primary": "Shopify",
+        "marketplace_secondary": "Amazon",
+        "storefront": "Website",
+        "ads_primary": "Meta Ads",
+        "ads_secondary": "Google Ads",
+        "messaging": "Email",
+        "crm": "Klaviyo"
+      },
+      "taiwan": {
+        "marketplace_primary": "Shopee",
+        "marketplace_secondary": "Momo",
+        "storefront": "Website",
+        "ads_primary": "Meta Ads",
+        "ads_secondary": "Google Ads",
+        "messaging": "LINE",
+        "crm": "LINE OA"
+      }
+    }
+  },
+  "pools": [
+    {
+      "id": "metrics",
+      "name": "Performance",
+      "emoji": "📈",
+      "note": "Spend, revenue, conversion, by day and by campaign"
+    },
+    {
+      "id": "inventory",
+      "name": "Inventory",
+      "emoji": "📦",
+      "note": "Stock on hand per SKU per channel"
+    },
+    {
+      "id": "orders",
+      "name": "Orders",
+      "emoji": "🧾",
+      "note": "Orders, payment state, fulfilment state"
+    },
+    {
+      "id": "customers",
+      "name": "Customers",
+      "emoji": "👥",
+      "note": "Segments, contact permissions, history"
+    },
+    {
+      "id": "listings",
+      "name": "Listings",
+      "emoji": "🏷️",
+      "note": "Product pages, prices, availability per channel"
+    },
+    {
+      "id": "content",
+      "name": "Drafts",
+      "emoji": "✍️",
+      "note": "Copy and messages written but not sent"
+    },
+    {
+      "id": "signals",
+      "name": "Signals",
+      "emoji": "🚨",
+      "note": "Anomalies and alerts raised by the watchers"
+    }
+  ],
+  "agents": [
+    {
+      "id": "A01",
+      "name": "Inventory Watch",
+      "emoji": "📦",
+      "department": "ops",
+      "purpose": "Watches stock on every channel and raises a signal before something sells out.",
+      "schedule": "every 30 minutes",
+      "reads": [
+        "inventory"
+      ],
+      "writes": [
+        "signals"
+      ],
+      "actions": [
+        "read_inventory",
+        "analyze_data"
+      ]
+    },
+    {
+      "id": "A02",
+      "name": "Stock Forecast",
+      "emoji": "🔮",
+      "department": "ops",
+      "purpose": "Projects when each SKU runs out at the current rate, so purchasing has warning.",
+      "schedule": "daily 06:00",
+      "reads": [
+        "inventory",
+        "orders"
+      ],
+      "writes": [
+        "signals"
+      ],
+      "actions": [
+        "read_inventory",
+        "forecast",
+        "analyze_data"
+      ]
+    },
+    {
+      "id": "A03",
+      "name": "Emergency Response",
+      "emoji": "⚡",
+      "department": "ops",
+      "purpose": "Takes a stock-out or a pricing error off every channel at once, and drafts what to tell people.",
+      "triggered_by": [
+        "A01",
+        "A02",
+        "A15"
+      ],
+      "reads": [
+        "signals",
+        "listings",
+        "inventory"
+      ],
+      "writes": [
+        "listings",
+        "content"
+      ],
+      "actions": [
+        "delist_product",
+        "mark_out_of_stock",
+        "pause_ad",
+        "draft_message"
+      ]
+    },
+    {
+      "id": "A04",
+      "name": "Order Desk",
+      "emoji": "🧾",
+      "department": "ops",
+      "purpose": "Handles order exceptions. Everything it can do to an order costs money and cannot be undone.",
+      "reads": [
+        "orders"
+      ],
+      "writes": [
+        "orders"
+      ],
+      "actions": [
+        "read_orders",
+        "cancel_order",
+        "issue_refund"
+      ]
+    },
+    {
+      "id": "A05",
+      "name": "Logistics Watch",
+      "emoji": "🚚",
+      "department": "ops",
+      "purpose": "Flags shipments that have stopped moving before the customer notices.",
+      "schedule": "every 4 hours",
+      "reads": [
+        "orders"
+      ],
+      "writes": [
+        "signals"
+      ],
+      "actions": [
+        "read_orders",
+        "analyze_data"
+      ]
+    },
+    {
+      "id": "A06",
+      "name": "Ad Performance",
+      "emoji": "📣",
+      "department": "ads",
+      "purpose": "Reads campaign performance, pauses what is losing money, proposes budget moves for what is not.",
+      "schedule": "daily 09:00",
+      "reads": [
+        "metrics"
+      ],
+      "writes": [
+        "metrics",
+        "signals"
+      ],
+      "actions": [
+        "read_metrics",
+        "analyze_data",
+        "pause_ad",
+        "resume_ad",
+        "change_ad_budget"
+      ]
+    },
+    {
+      "id": "A07",
+      "name": "Creative Review",
+      "emoji": "🎨",
+      "department": "ads",
+      "purpose": "Finds the creatives with dying click-through and briefs replacements.",
+      "schedule": "weekly Mon 09:00",
+      "reads": [
+        "metrics",
+        "content"
+      ],
+      "writes": [
+        "signals"
+      ],
+      "actions": [
+        "read_metrics",
+        "analyze_data",
+        "draft_plan"
+      ]
+    },
+    {
+      "id": "A08",
+      "name": "Budget Pacing",
+      "emoji": "💰",
+      "department": "ads",
+      "purpose": "Watches spend against the month's plan and slows or lifts campaigns to hit it.",
+      "schedule": "daily 08:00",
+      "reads": [
+        "metrics"
+      ],
+      "writes": [
+        "metrics"
+      ],
+      "actions": [
+        "read_metrics",
+        "forecast",
+        "change_ad_budget"
+      ]
+    },
+    {
+      "id": "A09",
+      "name": "Retargeting",
+      "emoji": "🎯",
+      "department": "ads",
+      "purpose": "Builds audiences from behaviour and keeps them fresh.",
+      "schedule": "daily 10:00",
+      "reads": [
+        "customers",
+        "metrics"
+      ],
+      "writes": [
+        "customers"
+      ],
+      "actions": [
+        "read_metrics",
+        "analyze_data",
+        "draft_plan"
+      ]
+    },
+    {
+      "id": "A10",
+      "name": "Listing Desk",
+      "emoji": "🏷️",
+      "department": "catalog",
+      "purpose": "Publishes and updates product pages across channels, adapting each to its own format rules.",
+      "reads": [
+        "content",
+        "listings"
+      ],
+      "writes": [
+        "listings"
+      ],
+      "actions": [
+        "publish_product",
+        "update_listing",
+        "delist_product"
+      ]
+    },
+    {
+      "id": "A11",
+      "name": "Price Watch",
+      "emoji": "⚖️",
+      "department": "catalog",
+      "purpose": "Tracks competitor pricing on public pages and flags where we are badly out of line.",
+      "schedule": "daily 07:00",
+      "reads": [
+        "listings"
+      ],
+      "writes": [
+        "signals"
+      ],
+      "actions": [
+        "scrape_public_page",
+        "analyze_data"
+      ]
+    },
+    {
+      "id": "A12",
+      "name": "Repricer",
+      "emoji": "🔁",
+      "department": "catalog",
+      "purpose": "Moves prices within the band it has been given, and no further.",
+      "reads": [
+        "signals",
+        "listings",
+        "metrics"
+      ],
+      "writes": [
+        "listings"
+      ],
+      "actions": [
+        "update_price",
+        "analyze_data"
+      ]
+    },
+    {
+      "id": "A13",
+      "name": "Listing Audit",
+      "emoji": "🔎",
+      "department": "catalog",
+      "purpose": "Checks pages for missing images, thin descriptions and broken specs before they cost a sale.",
+      "schedule": "weekly Tue 09:00",
+      "reads": [
+        "listings"
+      ],
+      "writes": [
+        "signals",
+        "content"
+      ],
+      "actions": [
+        "scrape_public_page",
+        "analyze_data",
+        "draft_copy"
+      ]
+    },
+    {
+      "id": "A14",
+      "name": "Campaign Writer",
+      "emoji": "✍️",
+      "department": "content",
+      "purpose": "Writes ad copy and product descriptions from a brief. Writes only.",
+      "reads": [
+        "listings",
+        "metrics"
+      ],
+      "writes": [
+        "content"
+      ],
+      "actions": [
+        "draft_copy",
+        "draft_plan"
+      ]
+    },
+    {
+      "id": "A15",
+      "name": "Social Studio",
+      "emoji": "📱",
+      "department": "content",
+      "purpose": "Rewrites one idea into the shape each social channel wants. Writes the posts; Promo Sync is what puts them out.",
+      "reads": [
+        "content"
+      ],
+      "writes": [
+        "content"
+      ],
+      "actions": [
+        "draft_copy",
+        "draft_plan"
+      ]
+    },
+    {
+      "id": "A16",
+      "name": "Newsletter Studio",
+      "emoji": "📧",
+      "department": "content",
+      "purpose": "Builds the newsletter. Sending it is the Messaging desk's action, not this one's.",
+      "schedule": "weekly Thu 10:00",
+      "reads": [
+        "content",
+        "customers",
+        "metrics"
+      ],
+      "writes": [
+        "content"
+      ],
+      "actions": [
+        "draft_copy",
+        "draft_message"
+      ]
+    },
+    {
+      "id": "A17",
+      "name": "Video Brief",
+      "emoji": "🎬",
+      "department": "content",
+      "purpose": "Turns a product or a trend into a short-video script and shot list.",
+      "reads": [
+        "listings",
+        "metrics"
+      ],
+      "writes": [
+        "content"
+      ],
+      "actions": [
+        "draft_copy",
+        "draft_plan"
+      ]
+    },
+    {
+      "id": "A18",
+      "name": "Segment Builder",
+      "emoji": "👥",
+      "department": "crm",
+      "purpose": "Splits the customer list by behaviour and value, and keeps the splits current.",
+      "schedule": "daily 05:00",
+      "reads": [
+        "orders",
+        "customers"
+      ],
+      "writes": [
+        "customers"
+      ],
+      "actions": [
+        "read_orders",
+        "analyze_data"
+      ]
+    },
+    {
+      "id": "A19",
+      "name": "Loyalty Desk",
+      "emoji": "🏅",
+      "department": "crm",
+      "purpose": "Tracks repeat purchase and decides who has earned what.",
+      "schedule": "weekly Mon 08:00",
+      "reads": [
+        "orders",
+        "customers"
+      ],
+      "writes": [
+        "customers",
+        "content"
+      ],
+      "actions": [
+        "read_orders",
+        "analyze_data",
+        "draft_message"
+      ]
+    },
+    {
+      "id": "A20",
+      "name": "Review Desk",
+      "emoji": "⭐",
+      "department": "crm",
+      "purpose": "Reads new reviews and drafts replies. Posting one is public and permanent.",
+      "schedule": "every 6 hours",
+      "reads": [
+        "customers"
+      ],
+      "writes": [
+        "content"
+      ],
+      "actions": [
+        "read_reviews",
+        "draft_copy",
+        "reply_review"
+      ]
+    },
+    {
+      "id": "A21",
+      "name": "Returns Analysis",
+      "emoji": "↩️",
+      "department": "crm",
+      "purpose": "Groups return reasons and names the product problems hiding behind them.",
+      "schedule": "weekly Wed 09:00",
+      "reads": [
+        "orders"
+      ],
+      "writes": [
+        "signals"
+      ],
+      "actions": [
+        "read_orders",
+        "analyze_data"
+      ]
+    },
+    {
+      "id": "A22",
+      "name": "Cart Recovery",
+      "emoji": "🛒",
+      "department": "crm",
+      "purpose": "Finds abandoned carts and runs a staged win-back, escalating to a discount only if allowed.",
+      "schedule": "every 4 hours",
+      "reads": [
+        "orders",
+        "customers"
+      ],
+      "writes": [
+        "content"
+      ],
+      "actions": [
+        "read_orders",
+        "draft_message",
+        "apply_discount"
+      ]
+    },
+    {
+      "id": "A23",
+      "name": "Customer Desk",
+      "emoji": "💚",
+      "department": "msg",
+      "purpose": "Sends what was approved to the segment it was approved for. Reaches real people.",
+      "reads": [
+        "content",
+        "customers"
+      ],
+      "writes": [
+        "customers"
+      ],
+      "actions": [
+        "notify_customer",
+        "send_line_push",
+        "send_email"
+      ]
+    },
+    {
+      "id": "A24",
+      "name": "Broadcast Desk",
+      "emoji": "📢",
+      "department": "msg",
+      "purpose": "One message to a whole list. The least reversible thing in this building.",
+      "reads": [
+        "content",
+        "customers"
+      ],
+      "writes": [
+        "customers"
+      ],
+      "actions": [
+        "notify_customer",
+        "send_line_push",
+        "send_email"
+      ]
+    },
+    {
+      "id": "A25",
+      "name": "Ops Alerts",
+      "emoji": "🔔",
+      "department": "msg",
+      "purpose": "Tells the humans, not the customers. Signals go out over Telegram or LINE.",
+      "reads": [
+        "signals"
+      ],
+      "writes": [],
+      "actions": [
+        "send_telegram_message",
+        "send_line_push"
+      ]
+    },
+    {
+      "id": "A26",
+      "name": "Keyword Research",
+      "emoji": "🔑",
+      "department": "seo",
+      "purpose": "Finds the terms worth ranking for and what they would be worth.",
+      "schedule": "weekly Mon 07:00",
+      "reads": [
+        "metrics"
+      ],
+      "writes": [
+        "signals"
+      ],
+      "actions": [
+        "scrape_public_page",
+        "analyze_data"
+      ]
+    },
+    {
+      "id": "A27",
+      "name": "Rank Tracker",
+      "emoji": "📊",
+      "department": "seo",
+      "purpose": "Watches position for the terms that matter and flags falls.",
+      "schedule": "daily 06:30",
+      "reads": [
+        "metrics"
+      ],
+      "writes": [
+        "metrics",
+        "signals"
+      ],
+      "actions": [
+        "read_ranking",
+        "analyze_data"
+      ]
+    },
+    {
+      "id": "A28",
+      "name": "Technical Audit",
+      "emoji": "🔧",
+      "department": "seo",
+      "purpose": "Crawls the storefront for the technical faults that quietly cost traffic.",
+      "schedule": "weekly Sat 03:00",
+      "reads": [
+        "listings"
+      ],
+      "writes": [
+        "signals"
+      ],
+      "actions": [
+        "scrape_public_page",
+        "analyze_data"
+      ]
+    },
+    {
+      "id": "A29",
+      "name": "Content Gap",
+      "emoji": "🕳️",
+      "department": "seo",
+      "purpose": "Compares our coverage against competitors and names what is missing.",
+      "schedule": "monthly 1st 09:00",
+      "reads": [
+        "content",
+        "metrics"
+      ],
+      "writes": [
+        "signals",
+        "content"
+      ],
+      "actions": [
+        "scrape_public_page",
+        "analyze_data",
+        "draft_plan"
+      ]
+    },
+    {
+      "id": "A30",
+      "name": "Daily Revenue",
+      "emoji": "💵",
+      "department": "analytics",
+      "purpose": "One number, every morning, with the reason it moved.",
+      "schedule": "daily 08:00",
+      "reads": [
+        "orders",
+        "metrics"
+      ],
+      "writes": [
+        "metrics"
+      ],
+      "actions": [
+        "read_orders",
+        "read_metrics",
+        "generate_report",
+        "write_sheet"
+      ]
+    },
+    {
+      "id": "A31",
+      "name": "Anomaly Watch",
+      "emoji": "🚨",
+      "department": "analytics",
+      "purpose": "Compares today against the trailing baseline and raises a signal when something moves sharply.",
+      "schedule": "hourly",
+      "reads": [
+        "metrics",
+        "orders"
+      ],
+      "writes": [
+        "signals"
+      ],
+      "actions": [
+        "read_metrics",
+        "analyze_data",
+        "forecast"
+      ]
+    },
+    {
+      "id": "A32",
+      "name": "Funnel Analysis",
+      "emoji": "🔻",
+      "department": "analytics",
+      "purpose": "Finds the step where people leave, and what it costs.",
+      "schedule": "weekly Fri 09:00",
+      "reads": [
+        "metrics",
+        "orders"
+      ],
+      "writes": [
+        "signals"
+      ],
+      "actions": [
+        "read_metrics",
+        "analyze_data",
+        "generate_report"
+      ]
+    },
+    {
+      "id": "A33",
+      "name": "Unit Economics",
+      "emoji": "🧮",
+      "department": "analytics",
+      "purpose": "Works out what is actually left after fees, shipping, ads and returns.",
+      "schedule": "monthly 1st 08:00",
+      "reads": [
+        "orders",
+        "metrics"
+      ],
+      "writes": [
+        "metrics"
+      ],
+      "actions": [
+        "read_orders",
+        "read_metrics",
+        "analyze_data",
+        "generate_report"
+      ]
+    },
+    {
+      "id": "A34",
+      "name": "Promotion Planner",
+      "emoji": "🎪",
+      "department": "promo",
+      "purpose": "Plans a campaign: what is discounted, by how much, for how long.",
+      "reads": [
+        "metrics",
+        "listings"
+      ],
+      "writes": [
+        "content"
+      ],
+      "actions": [
+        "draft_plan",
+        "analyze_data"
+      ]
+    },
+    {
+      "id": "A35",
+      "name": "Promo Sync",
+      "emoji": "🔄",
+      "department": "promo",
+      "purpose": "Puts one campaign live everywhere at once, and takes it down the same way.",
+      "reads": [
+        "content",
+        "listings"
+      ],
+      "writes": [
+        "listings",
+        "content"
+      ],
+      "actions": [
+        "update_price",
+        "apply_discount",
+        "update_listing",
+        "publish_social_post"
+      ]
+    },
+    {
+      "id": "A36",
+      "name": "Scheduler",
+      "emoji": "⏰",
+      "department": "infra",
+      "purpose": "Registers work to run later, unattended. It causes nothing itself and can arrange anything.",
+      "reads": [
+        "signals"
+      ],
+      "writes": [],
+      "actions": [
+        "create_schedule"
+      ],
+      "note": "The escape hatch. Scheduling is not an effect, it is the capacity to have an effect after the person who set the policy has gone home. A governance layer that only weighs direct actions is walked around by this agent."
+    }
+  ],
+  "departments": [
+    {
+      "id": "ops",
+      "name": "Operations",
+      "emoji": "📦",
+      "purpose": "Keeps stock, orders and fulfilment straight, and reacts when one of them breaks."
+    },
+    {
+      "id": "ads",
+      "name": "Advertising",
+      "emoji": "📣",
+      "purpose": "Spends the ad budget and decides, daily, whether it is working."
+    },
+    {
+      "id": "catalog",
+      "name": "Catalogue",
+      "emoji": "🏷️",
+      "purpose": "Owns what is listed, where, at what price."
+    },
+    {
+      "id": "content",
+      "name": "Content",
+      "emoji": "✍️",
+      "purpose": "Writes. Never publishes; publishing is a different desk."
+    },
+    {
+      "id": "crm",
+      "name": "Customers",
+      "emoji": "👥",
+      "purpose": "Knows who the customers are and what they have agreed to receive."
+    },
+    {
+      "id": "msg",
+      "name": "Messaging",
+      "emoji": "💬",
+      "purpose": "The only desk that actually reaches a person."
+    },
+    {
+      "id": "seo",
+      "name": "Search",
+      "emoji": "🔍",
+      "purpose": "Organic visibility: keywords, technical health, gaps."
+    },
+    {
+      "id": "analytics",
+      "name": "Analytics",
+      "emoji": "📈",
+      "purpose": "Turns numbers into a sentence somebody can act on."
+    },
+    {
+      "id": "promo",
+      "name": "Promotions",
+      "emoji": "🎪",
+      "purpose": "Runs campaigns, and the discounts that make them work."
+    },
+    {
+      "id": "infra",
+      "name": "Infrastructure",
+      "emoji": "⚙️",
+      "purpose": "Storage, scheduling, and the connectors everything else borrows."
+    }
+  ]
+}
