@@ -180,6 +180,11 @@ const routes = {
     keyConfigured: Boolean(API_KEY),
     corpus: registry.corpus,
     adapters: adapterStatus(),
+    // Worth surfacing rather than inferring. On serverless the memory store
+    // looks like it works, because consecutive requests often land on the same
+    // warm instance, so "is state shared" is a question you want answered by
+    // the deployment rather than by a test that happened to pass.
+    state: describeState(),
   }),
 
   'GET /api/token': async () => mintToken(),
