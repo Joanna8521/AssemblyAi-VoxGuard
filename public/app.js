@@ -232,10 +232,11 @@ function showBoard() {
   $('flow').innerHTML = '<p class="empty">The shape of the work appears once there is some.</p>';
   $('run-mission').disabled = true;
 
-  // The three bands with nothing in them. Each already knows how to say that
-  // nothing was stated, which is the honest reading of an empty policy and
-  // better than three blank boxes.
-  renderBands({ rules: [] });
+  // Deliberately not touching the orders. Blanking them here wiped rules that
+  // were already in force the moment somebody pressed the microphone: the
+  // panel said nothing was stated while two prohibitions were being enforced.
+  // Whatever is in force is drawn by refresh, which knows.
+  refresh();
 }
 
 function renderMission(mission, bp) {
@@ -619,7 +620,15 @@ async function talk() {
         $('said').innerHTML = final ? '' : '<span class="partial"></span>';
         (final ? $('said') : $('said').firstChild).textContent = text;
       },
-      onAgent: (text) => { $('agent').hidden = false; $('agent-text').textContent = text; },
+      // Both the part-formed reply and the finished one. Only the final was
+      // drawn, so an answer that arrived as deltas left the panel showing the
+      // greeting from ten minutes earlier while the log said it had answered
+      // twice. What it says has to be readable, not only audible.
+      onAgent: (text, final = true) => {
+        $('agent').hidden = false;
+        $('agent-text').textContent = text;
+        $('agent').classList.toggle('partial', !final);
+      },
       onMission: (mission, bp) => { note(`mission ${mission.id} opened`); renderMission(mission, bp); },
       // Every tool call, named. A turn where the model answered without calling
       // anything is the commonest way for nothing to happen, and it is
@@ -829,6 +838,8 @@ const EXAMPLES = {
     b.textContent = 'Check';
     await refresh();
   };
+
+  renderBands({ rules: [] });
 
   // Said out loud on the page, not left to be inferred from behaviour.
   try {

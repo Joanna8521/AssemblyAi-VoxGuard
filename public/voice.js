@@ -45,6 +45,7 @@ export async function connect(h = {}) {
   // Whether this ending was asked for. Without it a clean close and a dropped
   // connection are the same event.
   let stopping = false;
+  let partial = '', replyId = null;
 
   const teardown = () => {
     if (closed) return;
@@ -93,7 +94,21 @@ export async function connect(h = {}) {
         // identical from the outside, and they need opposite responses.
         say('onTurn', 'thinking');
         break;
-      case 'transcript.agent':      say('onAgent', msg.text ?? ''); break;
+      // A delta is one word, in `delta`, not the sentence so far in `text`.
+      // Read as `text` it is undefined, and drawing that blanks the panel on
+      // every word: worse than not drawing it. So the words are accumulated
+      // here, and reset per reply rather than per message, or two answers in a
+      // row run into each other.
+      case 'transcript.agent.delta':
+        if (msg.reply_id !== replyId) { replyId = msg.reply_id; partial = ''; }
+        partial += (partial ? ' ' : '') + (msg.delta ?? '');
+        say('onAgent', partial, false);
+        break;
+      case 'transcript.agent':
+        partial = '';
+        replyId = null;
+        say('onAgent', msg.text ?? '', true);
+        break;
       case 'reply.started':         say('onTurn', 'answering'); break;
       case 'reply.done':            say('onTurn', 'listening'); break;
       case 'reply.audio':           play(msg.data ?? msg.audio); break;
