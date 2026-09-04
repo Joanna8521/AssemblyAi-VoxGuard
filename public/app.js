@@ -58,6 +58,7 @@ function renderFlow(bp) {
 
   const rail = document.createElement('div');
   rail.className = 'rail';
+  rail.id = 'rail';
 
   rail.appendChild(endcap(bp.source));
   rail.appendChild(linkEl('wakes'));
@@ -79,7 +80,9 @@ function renderFlow(bp) {
   rail.appendChild(gate);
 
   rail.appendChild(linkEl('cleared only'));
-  rail.appendChild(endcap('The outside world'));
+  const world = endcap('The outside world');
+  world.id = 'world';
+  rail.appendChild(world);
 
   flow.appendChild(rail);
 }
@@ -95,28 +98,79 @@ function signal(verdict) {
   lamps[verdict === 'DENY' ? 0 : verdict === 'ASK' ? 1 : 2].className = 'on';
 }
 
-function markStage(agentId, verdict) {
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Whose turn it is.
+ *
+ * A run used to flash every agent the same way at the same place, which showed
+ * that something happened and never who did it. The work is a relay, so it is
+ * drawn as one: one agent holds the stage, the rest step back, and the baton
+ * moves down the line in the order the pools actually force.
+ */
+function takeStage(agentId) {
+  const rail = $('rail');
+  if (rail) rail.classList.add('running');
+  for (const el of document.querySelectorAll('.stage.active')) {
+    el.classList.remove('active');
+    el.classList.add('done');
+  }
   const el = $(`s-${agentId}`);
-  if (!el) return;
-  el.classList.add('busy');
-  setTimeout(() => {
-    el.classList.remove('busy');
-    el.classList.add(verdict === 'ALLOW' ? 'cleared' : 'held');
-    setTimeout(() => el.classList.remove('cleared', 'held'), 2400);
-  }, 550);
+  if (el) {
+    el.classList.remove('done');
+    el.classList.add('active');
+    el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+  }
+  return el;
 }
 
-function packet(text) {
-  const gate = $('gate');
-  if (!gate) return;
+function endRun() {
+  const rail = $('rail');
+  if (!rail) return;
+  for (const el of rail.querySelectorAll('.stage')) el.classList.remove('active', 'done');
+  rail.classList.remove('running');
+}
+
+/**
+ * One request, in flight.
+ *
+ * Animated between two elements that are actually on the page rather than along
+ * hardcoded coordinates, so it stays correct when the rail wraps, the window is
+ * a phone, or the team has six agents instead of two.
+ */
+async function fly(fromEl, toEl, text, tone, ms = 620) {
+  const flow = $('flow');
+  if (!flow || !fromEl || !toEl) return;
+
+  const base = flow.getBoundingClientRect();
+  const a = fromEl.getBoundingClientRect();
+  const b = toEl.getBoundingClientRect();
+
   const p = document.createElement('span');
-  p.className = 'pkt';
+  p.className = `fly ${tone ?? ''}`;
   p.textContent = text;
-  p.style.left = '50%';
-  p.style.top = '50%';
-  gate.style.position = 'relative';
-  gate.appendChild(p);
-  setTimeout(() => p.remove(), 1250);
+  flow.appendChild(p);
+
+  // Kept inside the visible box. The rail scrolls sideways, so on a narrow
+  // window the world endcap sits off the edge and an unclamped flight throws
+  // the packet out of the panel entirely. Clamped, a cleared request still
+  // reads as leaving: it travels to the edge and goes.
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const point = (r, edge) => [
+    clamp(edge === 'right' ? r.right - base.left - 4 : r.left - base.left + 4, 8, base.width - 8),
+    clamp(r.top + r.height / 2 - base.top, 10, base.height - 10),
+  ];
+  const from = point(a, 'right');
+  const to = point(b, 'left');
+
+  const anim = p.animate([
+    { transform: `translate(${from[0]}px, ${from[1]}px) translate(-100%, -50%) scale(.82)`, opacity: 0 },
+    { transform: `translate(${(from[0] + to[0]) / 2}px, ${(from[1] + to[1]) / 2}px) translate(-50%, -50%) scale(1)`, opacity: 1, offset: .45 },
+    { transform: `translate(${to[0]}px, ${to[1]}px) translate(0, -50%) scale(.9)`, opacity: 1 },
+  ], { duration: ms, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
+
+  try { await anim.finished; } catch { /* the run was cut short */ }
+  return p;
 }
 
 // ── the mission ─────────────────────────────────────────────────────────────
@@ -232,9 +286,66 @@ function renderAudit(entries) {
   box.scrollTop = box.scrollHeight;
 }
 
+/**
+ * What the workforce has done over time.
+ *
+ * The recent list answers "what just happened" and expires with the screen. The
+ * ledger behind this answers the question a business actually comes back with a
+ * month later, which the session store could never have answered because it did
+ * not keep anything that long.
+ */
+async function renderReport() {
+  const box = $('report');
+  box.innerHTML = '<p class="empty">Reading the ledger…</p>';
+  try {
+    const d = await api('/api/report');
+    const r = d.report;
+
+    if (!r.window.decisions) {
+      box.innerHTML = `<p class="empty">Nothing decided in the last 30 days.` +
+        (d.entries ? ` The ledger holds ${d.entries} older.` : '') + `</p>`;
+      return;
+    }
+
+    const line = (k, v) => `<div class="rep"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+    const list = (rows, n = 4) => rows.slice(0, n)
+      .map((x) => line(x.name, x.count)).join('') || line('nothing', 0);
+
+    box.innerHTML =
+      `<div class="rep-hd">Last 30 days</div>` +
+      line('Decisions', r.window.decisions) +
+      line('Missions', r.missions) +
+      line('Cleared', r.verdicts.ALLOW) +
+      line('Held for you', r.verdicts.ASK) +
+      line('Refused outright', r.verdicts.DENY) +
+      line('You were needed', `${Math.round(r.interventionRate * 100)}%`) +
+
+      `<div class="rep-hd">How far it reached</div>` +
+      line('Carried out for real', r.reached.real) +
+      line('Authorised, sandboxed', r.reached.sandboxed) +
+
+      `<div class="rep-hd">Most often stopped</div>` + list(r.stoppedByAction) +
+      `<div class="rep-hd">Busiest</div>` + list(r.byAgent) +
+      `<div class="rep-hd">Kept</div>` +
+      line(d.kept, `${d.entries} entries`);
+  } catch (e) {
+    box.innerHTML = `<p class="empty">${e.message}</p>`;
+  }
+}
+
+function showTab(which) {
+  const isReport = which === 'report';
+  $('log').hidden = isReport;
+  $('report').hidden = !isReport;
+  $('tab-log').classList.toggle('on', !isReport);
+  $('tab-report').classList.toggle('on', isReport);
+  if (isReport) renderReport();
+}
+
 async function refresh() {
   const [state, pools] = await Promise.all([api('/api/state'), api('/api/pools')]);
   renderAudit(state.audit);
+  if (!$('report').hidden) renderReport();
   renderWatches(pools.pools?.listings);
   if (MISSION && state.policy) {
     MISSION.policy = state.policy;
@@ -254,15 +365,40 @@ async function runMission() {
   try {
     const r = await api('/api/missions/run', { id: MISSION?.id });
 
-    let done = 0, held = 0;
+    // Grouped by agent, in the order the server ran them, so the animation is
+    // the relay that happened rather than a shuffle of the same decisions.
+    const turns = [];
     for (const d of r.decisions) {
-      markStage(d.audit.skill, d.verdict);
-      packet(d.action);
-      signal(d.verdict);
-      d.verdict === 'ALLOW' ? done++ : held++;
-      if ($('g-pass')) { $('g-pass').textContent = done; $('g-hold').textContent = held; }
-      await new Promise((res) => setTimeout(res, 900));
+      const last = turns.at(-1);
+      if (last && last.id === d.audit.skill) last.items.push(d);
+      else turns.push({ id: d.audit.skill, name: d.agent, items: [d] });
     }
+
+    let done = 0, held = 0;
+    for (const turn of turns) {
+      const agentEl = takeStage(turn.id);
+      await wait(430);
+
+      for (const d of turn.items) {
+        // Out from the agent that wants it, as far as the gate.
+        await fly(agentEl ?? $('rail'), $('gate'), d.action, null, 560);
+        signal(d.verdict);
+
+        // And on to the world only if it was cleared. A request that stops at
+        // the gate has to be seen stopping, or the gate is set dressing.
+        if (d.verdict === 'ALLOW') {
+          done++;
+          await fly($('gate'), $('world'), d.action, 'ALLOW', 520);
+        } else {
+          held++;
+          await fly($('gate'), $('gate'), d.action, d.verdict, 300);
+        }
+        if ($('g-pass')) { $('g-pass').textContent = done; $('g-hold').textContent = held; }
+        for (const el of document.querySelectorAll('.fly')) el.remove();
+        await wait(260);
+      }
+    }
+    endRun();
     renderAttention(r.decisions);
     wantVoice(r.decisions.some((d) => d.verdict !== 'ALLOW'));
 
@@ -419,6 +555,9 @@ const EXAMPLES = {
     };
   }
 
+  $('tab-log').onclick = () => showTab('log');
+  $('tab-report').onclick = () => showTab('report');
+
   $('mic').onclick = talk;
   $('hero-mic').onclick = talk;
   $('run-mission').onclick = runMission;
@@ -450,7 +589,14 @@ const EXAMPLES = {
     b.textContent = '…';
     try {
       const r = await api('/api/agents/run', { agent: 'A11' });
-      for (const d of r.decisions ?? []) { signal(d.verdict); packet(d.action); }
+      for (const d of r.decisions ?? []) {
+        const agentEl = takeStage(d.audit?.skill ?? 'A11');
+        await fly(agentEl ?? $('rail'), $('gate'), d.action, null, 480);
+        signal(d.verdict);
+        if (d.verdict === 'ALLOW') await fly($('gate'), $('world'), d.action, 'ALLOW', 440);
+        for (const el of document.querySelectorAll('.fly')) el.remove();
+      }
+      endRun();
     } catch (e) { fail('err', e.message); }
     b.disabled = false;
     b.textContent = 'Check';

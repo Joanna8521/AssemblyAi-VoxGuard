@@ -14,6 +14,7 @@
  */
 
 import { readProduct, readCatalogue } from './web.js';
+import { readSheet, findColumn, toNumber } from './sheets.js';
 
 /**
  * @returns {{
@@ -48,6 +49,101 @@ export const implementedAgents = () => Object.keys(RUNNERS);
 // ── the ones that really work ───────────────────────────────────────────────
 
 const RUNNERS = {
+  /**
+   * Daily Revenue, reading the operator's own spreadsheet.
+   *
+   * The first agent here that looks at the business rather than at its rivals.
+   * It works out which columns hold the date and the money by the names people
+   * actually use, says which ones it picked, and compares the most recent day
+   * against the days before it.
+   *
+   * Where it cannot tell, it says so and stops. An agent that guesses a column
+   * and reports a number is worse than one that reports nothing, because the
+   * number is what somebody acts on.
+   */
+  async A30({ pools }) {
+    const sheets = pools.sheets ?? [];
+    if (!sheets.length) {
+      return {
+        observed: ['No spreadsheet connected. Paste a Google Sheets link that is shared ' +
+                   'as "anyone with the link can view".'],
+        intents: [],
+      };
+    }
+
+    const observed = [];
+    const intents = [];
+
+    for (const sheet of sheets) {
+      let data;
+      try {
+        data = await readSheet(sheet.url);
+      } catch (err) {
+        sheet.lastError = err.message;
+        observed.push(`${sheet.name ?? 'sheet'}: ${err.message}`);
+        continue;
+      }
+
+      delete sheet.lastError;
+      sheet.checkedAt = new Date().toISOString();
+      sheet.rows = data.count;
+      sheet.headers = data.headers;
+
+      const dateCol = findColumn(data.headers, ['date', '日期', 'day', '訂單日期', '成立時間']);
+      const moneyCol = findColumn(data.headers, ['revenue', 'total', 'amount', 'sales',
+        '金額', '營收', '訂單金額', '銷售額', '合計']);
+
+      if (!moneyCol) {
+        observed.push(`${sheet.name ?? 'sheet'}: ${data.count} rows, ` +
+          `but no column looks like money. Columns are ${data.headers.slice(0, 8).join(', ')}.`);
+        continue;
+      }
+
+      const values = data.rows
+        .map((r) => ({ when: dateCol ? r[dateCol] : null, value: toNumber(r[moneyCol]) }))
+        .filter((v) => v.value !== null);
+
+      if (!values.length) {
+        observed.push(`${sheet.name ?? 'sheet'}: found "${moneyCol}" but no numbers in it.`);
+        continue;
+      }
+
+      const total = values.reduce((s2, v) => s2 + v.value, 0);
+      const latest = values.at(-1);
+      const earlier = values.slice(0, -1);
+      const average = earlier.length
+        ? earlier.reduce((s2, v) => s2 + v.value, 0) / earlier.length
+        : null;
+
+      observed.push(
+        `${sheet.name ?? 'sheet'}: ${values.length} rows of "${moneyCol}"` +
+        `${dateCol ? ` by "${dateCol}"` : ''}, ${Math.round(total)} in total.`);
+
+      if (average === null) continue;
+
+      const change = Math.round((latest.value - average) / average * 1000) / 10;
+      observed.push(
+        `Latest ${latest.when ? `(${latest.when}) ` : ''}${Math.round(latest.value)} ` +
+        `against an average of ${Math.round(average)}, ${change >= 0 ? 'up' : 'down'} ` +
+        `${Math.abs(change)}%.`);
+
+      // A quiet day is not news. A drop somebody would want to know about is.
+      if (change <= -20) {
+        intents.push({
+          action: 'send_telegram_message',
+          parameters: {
+            text: `Revenue down ${Math.abs(change)}%\n` +
+                  `${sheet.name ?? 'sheet'}: latest ${Math.round(latest.value)} ` +
+                  `against an average of ${Math.round(average)}`,
+          },
+          why: `the latest figure is ${Math.abs(change)}% below the average`,
+        });
+      }
+    }
+
+    return { observed, intents };
+  },
+
   /**
    * Inventory Watch. Looks at the same watched products as Price Watch, but for
    * a different fact: whether anything can still be bought.
@@ -100,6 +196,17 @@ const RUNNERS = {
       ...out.map((w) => `${label(w)}: sold out at ${w.price}`),
       ...thin.map((w) => `${label(w)}: one variant left at ${w.price}`),
     ];
+
+    // The signal is written down, not just announced. Whatever runs next needs
+    // a cause it can point at, and a chain that starts from an announcement
+    // nobody recorded is a chain that starts from nowhere.
+    pools.signals = out.map((w) => ({
+      kind: 'out_of_stock',
+      product: label(w),
+      url: w.url,
+      price: w.price,
+      at: new Date().toISOString(),
+    }));
 
     const intents = [];
     for (const w of out) {
@@ -179,6 +286,88 @@ const RUNNERS = {
     }
 
     return { observed, intents };
+  },
+
+  /**
+   * Emergency Response, picking up what Inventory Watch put down.
+   *
+   * Everything it wants comes from a signal somebody else raised about a real
+   * product, so the chain has a cause at every link. None of it can be carried
+   * out for real: no credential for a marketplace or an ad account exists
+   * anywhere here, and each request says so when it is judged.
+   */
+  async A03({ pools }) {
+    const signals = (pools.signals ?? []).filter((s) => s.kind === 'out_of_stock');
+    if (!signals.length) {
+      return { observed: ['Nothing has been raised, so there is nothing to respond to.'], intents: [] };
+    }
+
+    const observed = [];
+    const intents = [];
+
+    // Handed forward, not just acted on. Customer Desk reads `content`, and
+    // reaching into `signals` behind its back would make the drawn graph a
+    // decoration rather than a description of what happens.
+    pools.content = signals.map((s) => ({
+      kind: 'out_of_stock_notice',
+      product: s.product,
+      line: `We are sorry: ${s.product} sold out before we could ship yours.`,
+      at: new Date().toISOString(),
+    }));
+
+    for (const signal of signals) {
+      observed.push(`Acting on ${signal.product} being sold out.`);
+      for (const [action, why] of [
+        ['pause_ad', 'ads pointing at something nobody can buy are burning money'],
+        ['delist_product', 'the listing should come down while it is unavailable'],
+        ['mark_out_of_stock', 'the storefront should say so rather than take the order'],
+      ]) {
+        intents.push({
+          action,
+          parameters: { platform: 'shopee', product: signal.product },
+          why: `${signal.product} is sold out and ${why}`,
+        });
+      }
+    }
+    return { observed, intents };
+  },
+
+  /**
+   * Customer Desk. The only one here that reaches a person who is not the
+   * operator, which is why it is usually the one that gets stopped.
+   */
+  async A23({ pools }) {
+    const notices = (pools.content ?? []).filter((c) => c.kind === 'out_of_stock_notice');
+    if (!notices.length) {
+      return { observed: ['Nothing written for a customer to receive.'], intents: [] };
+    }
+    return {
+      observed: notices.map((n) => `${n.product}: a line is ready for whoever ordered it.`),
+      intents: notices.map((n) => ({
+        action: 'notify_customer',
+        parameters: { customer_group: 'paid_affected', text: n.line },
+        why: `people have paid for ${n.product} and it is gone`,
+      })),
+    };
+  },
+
+  /**
+   * Order Desk. Everything it can do to an order costs money and cannot be
+   * undone, which is why it asks for the thing that is usually refused.
+   */
+  async A04({ pools }) {
+    const signals = (pools.signals ?? []).filter((s) => s.kind === 'out_of_stock');
+    if (!signals.length) {
+      return { observed: ['No orders in question.'], intents: [] };
+    }
+    return {
+      observed: signals.map((s) => `Orders for ${s.product} cannot be fulfilled.`),
+      intents: signals.map((s) => ({
+        action: 'issue_refund',
+        parameters: { amount: s.price ?? 0, count: 14 },
+        why: `nobody can be sent a ${s.product}`,
+      })),
+    };
   },
 
   /**

@@ -141,6 +141,7 @@
       "department": "ops",
       "purpose": "Handles order exceptions. Everything it can do to an order costs money and cannot be undone.",
       "reads": [
+        "signals",
         "orders"
       ],
       "writes": [

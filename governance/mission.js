@@ -81,12 +81,14 @@ export function blueprint(mission, agents) {
   const byId = new Map(agents.map((a) => [a.id, a]));
   const members = mission.team.map((m) => byId.get(m.id)).filter(Boolean);
 
-  // Anything that only runs on a signal comes after whatever raises it.
-  const order = [...members].sort((a, b) => {
-    const aWaits = (a.triggered_by ?? []).some((t) => members.some((m) => m.id === t));
-    const bWaits = (b.triggered_by ?? []).some((t) => members.some((m) => m.id === t));
-    return Number(aWaits) - Number(bWaits);
-  });
+  // Work flows along the pools, so the order comes from them.
+  //
+  // Sorting on triggered_by alone was not enough: an agent can depend on
+  // another without being woken by it, simply by reading a pool that one
+  // writes. Order Desk declares no trigger and still cannot act before
+  // Inventory Watch has said anything, and ordering it first got a truthful
+  // report that nothing had happened, which was the wrong truth.
+  const order = dependencyOrder(members);
 
   const pools = [...new Set(order.flatMap((a) => a.writes))];
 
@@ -113,6 +115,61 @@ export function blueprint(mission, agents) {
       denies: mission.policy.rules.filter((r) => r.effect === 'DENY').map((r) => r.action),
     },
   };
+}
+
+/**
+ * Members in an order where nobody runs before whatever it reads from.
+ *
+ * A plain topological sort over the pools, with triggers as extra edges. Cycles
+ * are real in a workforce (two agents can feed each other) so this breaks them
+ * by taking whoever is left rather than refusing to answer.
+ */
+function dependencyOrder(members) {
+  const writers = new Map();
+  for (const agent of members) {
+    for (const pool of agent.writes ?? []) {
+      if (!writers.has(pool)) writers.set(pool, []);
+      writers.get(pool).push(agent.id);
+    }
+  }
+
+  const needs = new Map(members.map((agent) => {
+    const upstream = new Set();
+    for (const pool of agent.reads ?? []) {
+      for (const id of writers.get(pool) ?? []) if (id !== agent.id) upstream.add(id);
+    }
+    for (const id of agent.triggered_by ?? []) {
+      if (members.some((m) => m.id === id)) upstream.add(id);
+    }
+    return [agent.id, upstream];
+  }));
+
+  const done = new Set();
+  const out = [];
+  while (out.length < members.length) {
+    const ready = members.filter((m) =>
+      !done.has(m.id) && [...needs.get(m.id)].every((id) => done.has(id)));
+    // Nothing ready means a cycle, and it has to be broken somewhere. Break it
+    // at a node others are still waiting on, never at a leaf: the agent with
+    // the fewest unmet dependencies is usually the one at the end of the queue,
+    // and letting it go first put Customer Desk ahead of the agent that writes
+    // the thing it reads. Among those, prefer whoever unblocks the most.
+    let batch = ready;
+    if (!batch.length) {
+      const left = members.filter((m) => !done.has(m.id));
+      const unmet = (m) => [...needs.get(m.id)].filter((id) => !done.has(id));
+      const dependents = (m) => left.filter((o) => needs.get(o.id).has(m.id)).length;
+      batch = [left
+        .filter((m) => dependents(m) > 0)
+        .concat(left)                                   // if every one is a leaf, any will do
+        .sort((a, b) =>
+          unmet(a).length - unmet(b).length ||
+          dependents(b) - dependents(a) ||
+          a.id.localeCompare(b.id))[0]];
+    }
+    for (const m of batch) { done.add(m.id); out.push(m); }
+  }
+  return out;
 }
 
 /** A one-line state of play, for a list where only the shape needs to read. */
