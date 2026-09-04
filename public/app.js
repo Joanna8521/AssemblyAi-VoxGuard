@@ -846,13 +846,18 @@ const EXAMPLES = {
   // apart is what a stale bundle looks like from the inside.
   try {
     const h = await api('/api/health');
-    const mine = document.querySelector('meta[name="build"]')?.content ?? '?';
+    // The page is stamped only where the handler serves it, which is not every
+    // deployment: a CDN that serves the file directly never gives it the
+    // chance. Absent a stamp this reports the server build and claims nothing
+    // about the bundle, rather than showing a mismatch that means nothing.
+    const mine = document.querySelector('meta[name="build"]')?.content ?? null;
     const chip = $('c-build');
-    chip.textContent = h.version === mine ? mine : `${mine} \u2260 ${h.version}`;
-    chip.title = h.version === mine
-      ? 'this page and the server are the same build'
-      : `this page was built from ${mine}; the server is running ${h.version}. Reload.`;
-    chip.classList.toggle('stale', h.version !== mine);
+    const stale = mine !== null && mine !== h.version;
+    chip.textContent = stale ? `${mine} \u2260 ${h.version}` : (h.version ?? '—');
+    chip.title = stale
+      ? `this page was built from ${mine}; the server is running ${h.version}. Reload.`
+      : 'the build the server is running';
+    chip.classList.toggle('stale', stale);
   } catch { $('c-build').textContent = 'offline'; }
 
   await refresh();

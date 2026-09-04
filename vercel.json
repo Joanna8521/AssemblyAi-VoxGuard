@@ -9,18 +9,6 @@
     {
       "source": "/api/:path*",
       "destination": "/api/index"
-    },
-    {
-      "source": "/",
-      "destination": "/api/index"
-    },
-    {
-      "source": "/index.html",
-      "destination": "/api/index"
-    },
-    {
-      "source": "/:file(app|voice|webmcp).js",
-      "destination": "/api/index"
     }
   ],
   "headers": [
@@ -43,6 +31,24 @@
     },
     {
       "source": "/:file(app|voice|webmcp).js",
+      "headers": [
+        {
+          "key": "cache-control",
+          "value": "no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "cache-control",
+          "value": "no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
       "headers": [
         {
           "key": "cache-control",
