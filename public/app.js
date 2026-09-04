@@ -704,5 +704,11 @@ const EXAMPLES = {
     await refresh();
   };
 
+  // Said out loud on the page, not left to be inferred from behaviour.
+  try {
+    const h = await api('/api/health');
+    $('c-build').textContent = h.version ?? '—';
+  } catch { $('c-build').textContent = 'offline'; }
+
   await refresh();
 })();

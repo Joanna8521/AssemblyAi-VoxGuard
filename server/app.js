@@ -96,6 +96,16 @@ const workforce = (() => {
  * person opens the page.
  */
 export const keyConfigured = () => Boolean(API_KEY);
+
+/**
+ * The commit this process was built from.
+ *
+ * Vercel puts it in the environment. Locally there is no build, so it says so
+ * rather than inventing a number that would then be wrong in the one situation
+ * this exists to settle.
+ */
+export const buildVersion = () =>
+  (process.env.VERCEL_GIT_COMMIT_SHA ?? '').slice(0, 7) || 'dev';
 export const describeState = () => (process.env.KV_REST_API_URL ? 'shared KV' : 'in this process only');
 
 const kv = process.env.KV_REST_API_URL ? makeKV() : null;
@@ -242,6 +252,10 @@ const routes = {
     // warm instance, so "is state shared" is a question you want answered by
     // the deployment rather than by a test that happened to pass.
     state: describeState(),
+    // Which build this is. Without it, "I changed that and nothing happened"
+    // costs a round of testing to work out that the browser was holding an
+    // older bundle. With it, the answer takes three seconds.
+    version: buildVersion(),
   }),
 
   'GET /api/token': async () => mintToken(),
