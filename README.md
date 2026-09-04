@@ -7,6 +7,8 @@
 Built for the [AssemblyAI Voice Agent Hackathon](https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon)
 (Sep 1-30, 2026).
 
+**Live:** https://signal-7bw4nwte4-joanna8521s-projects.vercel.app
+
 ---
 
 ## The problem
@@ -181,6 +183,46 @@ has failed at the thing it claims to be about.
 The OpenClaw v7 skill corpus itself is paid course material and is **not** included. Only
 derived metadata about it: skill ids, action names, risk levels, dependency edges, and the
 trigger phrase behind each edge. That is what the registry needs, and all it needs.
+
+---
+
+## Running it
+
+```sh
+cp .env.example .env      # then fill in the AssemblyAI key
+npm start                 # http://localhost:8787
+npm test                  # 53 tests, no dependencies
+```
+
+Everything except the voice connection works without a key: the policy, the
+evaluator, the adapters and the audit trail all run offline.
+
+### As an MCP server
+
+Signal Box governs whatever speaks MCP. Point a client at `mcp/server.js` and the
+workforce's consequential actions appear as tools, each one judged before it runs.
+
+```json
+{ "mcpServers": { "signal-box": {
+    "command": "node", "args": ["mcp/server.js"],
+    "env": { "SIGNAL_BOX_URL": "http://localhost:8787" } } } }
+```
+
+Ask it to issue a refund. It will not, and it will tell you why, and it will tell
+you that it cannot grant itself the permission.
+
+### Deployment notes
+
+The handler in `server/app.js` is shared by the local server and the Vercel
+function, so there is one routing table rather than two that agree until they do
+not.
+
+State is per session and the store is chosen from configuration:
+`governance/store.js` uses memory when it is the only process and a KV store when
+`KV_REST_API_URL` is set. On serverless the memory store appears to work, because
+consecutive requests often land on the same warm instance, and then fails on a
+cold start or under any concurrency. Intermittent is worse than broken: it passes
+a rehearsal and dies in front of an audience.
 
 ---
 

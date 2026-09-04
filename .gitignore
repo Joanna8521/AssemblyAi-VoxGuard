@@ -20,3 +20,9 @@
 node_modules/
 dist/
 .claude/
+.vercel
+
+# Vercel appends a blanket .env* rule here on link, which would switch the
+# example file back off, since the last matching rule wins. Keep the negation last.
+.env*
+!.env.example
