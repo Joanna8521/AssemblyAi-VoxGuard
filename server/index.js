@@ -165,6 +165,10 @@ const routes = {
    * The workforce graph the canvas draws: agents, the pools they read and write,
    * and what each agent is capable of costing.
    */
+  /** The action catalogue, so the MCP server can build its tool list from it. */
+  'GET /api/actions': async () => JSON.parse(
+    readFileSync(join(HERE, '..', 'registry', 'actions.json'), 'utf8')),
+
   'GET /api/workforce': async () => ({
     platforms: workforce.platforms,
     departments: workforce.departments,
@@ -249,6 +253,34 @@ const routes = {
     }
     const result = evaluate(request, state.policy, registry);
     return { request, ...result, audit: record(request, result) };
+  },
+
+  /**
+   * What would happen, without it having happened.
+   *
+   * Opening an agent asks the same question of every action it has, and those
+   * are questions, not decisions: recording them would bury the real verdicts
+   * under dozens of hypotheticals and make the audit trail useless for the one
+   * thing it is for. So this runs the evaluator and writes nothing.
+   */
+  'POST /api/preview': async (body) => {
+    const results = (body.actions ?? []).map((a) => {
+      const request = {
+        actionId: 'preview',
+        action: typeof a === 'string' ? a : a.action,
+        skill: body.skill ?? null,
+        parameters: (typeof a === 'string' ? {} : a.parameters) ?? {},
+      };
+      const { verdict, reason, reasonCode, risk } = evaluate(request, state.policy, registry);
+      return {
+        action: request.action,
+        verdict, reason, reasonCode, risk,
+        adapter: registry.adapterOf(request.action),
+        real: registry.isReal(request.action),
+        label: registry.label(request.action, 'en'),
+      };
+    });
+    return { policyVersion: state.policy?.version ?? null, results };
   },
 
   'POST /api/reset': async () => {

@@ -9,26 +9,26 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 :root{
-  --bg:#EDF0EE; --surface:#FFF; --surface-2:#F5F7F5; --surface-3:#E8ECEA;
-  --ink:#101A17; --muted:#5A6864; --faint:#8A9793;
-  --line:#D3DAD6; --line-strong:#B9C3BE; --rail:#C4CDC8;
-  --accent:#1C6C8C; --accent-soft:#E2EEF3;
-  --clear:#1E7F52; --clear-soft:#E1F0E8;
-  --deny:#B23A32; --deny-soft:#F7E4E2;
-  --caution:#9C6B10; --caution-soft:#F7EDDA;
-  --on-accent:#FFF;
+  --bg:#EAE4DC; --surface:#F5F1EA; --surface-2:#E3DCD2; --surface-3:#D8CFC3;
+  --ink:#302C26; --muted:#6B645A; --faint:#8B8276;
+  --line:#D3CABE; --line-strong:#BAB0A2; --rail:#C6BCAE;
+  --accent:#4B6364; --accent-soft:#DCE3E1;
+  --clear:#4D6340; --clear-soft:#E0E5D6;
+  --deny:#8D4A3F; --deny-soft:#F0DFDA;
+  --caution:#7A5B16; --caution-soft:#F0E6D0;
+  --on-accent:#F5F1EA;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root{
-  --bg:#0F1715; --surface:#17211E; --surface-2:#1D2825; --surface-3:#232F2B;
-  --ink:#E4EBE7; --muted:#8B9A95; --faint:#6E7E79;
-  --line:#26332F; --line-strong:#35443F; --rail:#2E3B37;
-  --accent:#57A8C8; --accent-soft:#16303B;
-  --clear:#4FB287; --clear-soft:#122C22;
-  --deny:#E0665C; --deny-soft:#331A18;
-  --caution:#DFAA3C; --caution-soft:#2E2413;
-  --on-accent:#0B1418;
+  --bg:#23201C; --surface:#2C2823; --surface-2:#332E27; --surface-3:#3B352C;
+  --ink:#EBE4D9; --muted:#A9A093; --faint:#867D71;
+  --line:#3B352C; --line-strong:#4D453A; --rail:#443D33;
+  --accent:#93AAA8; --accent-soft:#2A3635;
+  --clear:#9CB183; --clear-soft:#28301F;
+  --deny:#CD9084; --deny-soft:#3A2823;
+  --caution:#D0AC66; --caution-soft:#372E1C;
+  --on-accent:#23201C;
 }}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
@@ -138,6 +138,16 @@ select{font:12.5px var(--sans);padding:7px 9px;border-radius:3px;border:1px soli
 .gate .cnt{font:11px var(--mono);color:var(--muted)}
 .gate .cnt b{color:var(--ink)}
 .gate .why{font-size:12px;line-height:1.5;color:var(--muted);margin-top:8px;min-height:1.5em}
+.verdict-note{
+  max-width:430px;margin:12px auto 0;padding:11px 13px;border-radius:5px;
+  border:1px solid var(--line-strong);background:var(--surface);
+  font-size:12.5px;line-height:1.55;display:none;
+}
+.verdict-note.show{display:block;animation:enter .3s ease}
+@keyframes enter{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.verdict-note b{color:var(--ink)}
+.verdict-note.good{border-color:var(--clear);background:var(--clear-soft)}
+.verdict-note.hold{border-color:var(--caution);background:var(--caution-soft)}
 
 .split{display:flex;gap:10px;max-width:430px;margin:0 auto}
 .split>*{flex:1}
@@ -171,6 +181,36 @@ select{font:12.5px var(--sans);padding:7px 9px;border-radius:3px;border:1px soli
 .tag.real{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
 .err{margin-top:10px;padding:8px 10px;border-radius:3px;background:var(--deny-soft);border:1px solid var(--deny);font-size:12.5px;display:none}
 .err.show{display:block}
+/* agent detail */
+dialog{
+  border:1px solid var(--line-strong);border-radius:6px;padding:0;
+  background:var(--surface);color:var(--ink);max-width:560px;width:calc(100% - 24px);
+  box-shadow:0 18px 50px -18px rgba(0,0,0,.4);
+}
+dialog::backdrop{background:rgba(16,26,23,.42)}
+@media(max-width:620px){
+  dialog{margin:auto auto 0;width:100%;max-width:none;border-radius:10px 10px 0 0;border-bottom:0}
+}
+.d-hd{display:flex;align-items:flex-start;gap:11px;padding:15px 16px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.d-hd .ico{font-size:24px;line-height:1.1}
+.d-hd h3{margin:0;font-size:16px;letter-spacing:-.02em}
+.d-hd .dep{font:10.5px var(--mono);color:var(--faint);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.d-x{margin-left:auto;border:0;background:none;padding:4px 6px;font-size:17px;color:var(--muted);cursor:pointer}
+.d-bd{padding:15px 16px;max-height:64vh;overflow-y:auto}
+.d-purpose{font-size:14px;line-height:1.6;margin:0 0 14px}
+.d-facts{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+.pill{font:11px var(--mono);padding:4px 9px;border-radius:3px;border:1px solid var(--line);background:var(--surface-2);color:var(--muted)}
+.pill b{color:var(--ink);font-weight:600}
+.d-sec{font:600 10px var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
+.caps{display:flex;flex-direction:column;gap:1px}
+.cap{display:grid;grid-template-columns:1fr auto auto;gap:9px;align-items:center;padding:8px 9px;background:var(--surface-2);border-radius:3px}
+.cap .a{font:12px var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cap .a small{display:block;font:10.5px var(--sans);color:var(--faint);margin-top:1px}
+.cap .why{grid-column:1/-1;font-size:11.5px;line-height:1.45;color:var(--faint)}
+.d-ft{padding:11px 16px;border-top:1px solid var(--line);background:var(--surface-2);font-size:11.5px;line-height:1.5;color:var(--muted)}
+.node.agent{cursor:pointer}
+.node.agent:hover{border-color:var(--accent)}
+
 .foot{margin-top:18px;padding:12px 14px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);font-size:12.5px;line-height:1.6;color:var(--muted)}
 .foot code{font:11px var(--mono);background:var(--surface);padding:1px 4px;border-radius:2px;border:1px solid var(--line)}
 </style>
@@ -246,10 +286,29 @@ select{font:12.5px var(--sans);padding:7px 9px;border-radius:3px;border:1px soli
   </div>
 
   <div class="foot" id="foot"></div>
+
+  <dialog id="detail">
+    <div class="d-hd">
+      <span class="ico" id="d-ico"></span>
+      <div>
+        <h3 id="d-name"></h3>
+        <p class="dep" id="d-dep"></p>
+      </div>
+      <button class="d-x" id="d-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="d-bd">
+      <p class="d-purpose" id="d-purpose"></p>
+      <div class="d-facts" id="d-facts"></div>
+      <p class="d-sec">What it may do, right now</p>
+      <div class="caps" id="d-caps"></div>
+    </div>
+    <p class="d-ft" id="d-ft"></p>
+  </dialog>
 </div>
 
 <script type="module">
 import { connect } from './voice.js';
+import { registerWebMCP } from './webmcp.js';
 
 const $ = (id) => document.getElementById(id);
 const api = (p, body) => fetch(p, body
@@ -318,6 +377,7 @@ function renderDept(id) {
     const el = nodeEl('agent', a.emoji, a.name, `${when}  &middot;  ${a.actions.length} actions`, a.highestRisk);
     el.id = `n-${a.id}`;
     el.title = a.purpose;
+    el.onclick = () => openAgent(a.id);
     flow.appendChild(el);
     flow.appendChild(edgeEl(''));
   }
@@ -338,6 +398,70 @@ function renderDept(id) {
   flow.appendChild(gateEl());
   flow.appendChild(edgeEl('cleared only'));
   flow.appendChild(nodeEl('sink', '', 'The outside world', ''));
+
+  const note = document.createElement('div');
+  note.className = 'verdict-note';
+  note.id = 'run-note';
+  flow.appendChild(note);
+}
+
+/**
+ * An agent, opened.
+ *
+ * The list of what it *can* do is static and not very interesting. What it may
+ * do right now, under the policy currently in force, is the question only a
+ * governance layer can answer, so that is what this leads with. The verdicts
+ * come from the same evaluator that decides for real; the difference is that
+ * asking does not count as doing, so nothing lands in the audit.
+ */
+let OPEN_AGENT = null;
+
+async function openAgent(id) {
+  const a = WF.agents.find((x) => x.id === id);
+  if (!a) return;
+  OPEN_AGENT = id;
+
+  const dept = WF.departments.find((d) => d.id === a.department);
+  const poolName = (p) => {
+    const pool = WF.pools.find((x) => x.id === p);
+    return pool ? `${pool.emoji} ${pool.name}` : p;
+  };
+
+  $('d-ico').textContent = a.emoji;
+  $('d-name').textContent = a.name;
+  $('d-dep').textContent = `${a.id} \u00b7 ${dept.emoji} ${dept.name}`;
+  $('d-purpose').textContent = a.purpose;
+
+  const facts = [
+    ['Runs', a.schedule ?? (a.triggered_by ? `when ${a.triggered_by.join(' or ')} raises a signal` : 'on demand')],
+    ['Reads', a.reads.length ? a.reads.map(poolName).join(', ') : 'nothing'],
+    ['Writes', a.writes.length ? a.writes.map(poolName).join(', ') : 'nothing'],
+  ];
+  $('d-facts').innerHTML = facts
+    .map(([k, v]) => `<span class="pill">${k} <b>${v}</b></span>`).join('');
+
+  $('d-caps').innerHTML = '<p class="empty">Asking the evaluator...</p>';
+  $('detail').showModal();
+
+  const { policyVersion, results } = await api('/api/preview', { skill: id, actions: a.actions });
+  if (OPEN_AGENT !== id) return;
+
+  $('d-caps').innerHTML = '';
+  for (const r of results) {
+    const d = document.createElement('div');
+    d.className = 'cap';
+    d.innerHTML =
+      `<span class="a">${r.action}<small>${r.label}</small></span>` +
+      `<span class="tag ${r.real ? 'real' : ''}">${r.real ? 'real' : 'sandbox'}</span>` +
+      `<span class="v ${r.verdict}">${r.verdict}</span>` +
+      `<span class="why">${r.risk} &middot; ${r.reason}</span>`;
+    $('d-caps').appendChild(d);
+  }
+
+  const held = results.filter((r) => r.verdict !== 'ALLOW').length;
+  $('d-ft').textContent = policyVersion
+    ? `Judged against policy version ${policyVersion}. ${held} of ${results.length} would not go through as things stand. Change the policy by voice and reopen this to see it move.`
+    : `No policy has been compiled, so nothing consequential is assumed. ${held} of ${results.length} would stop here. Speak a policy and reopen this.`;
 }
 
 // ── live state ──────────────────────────────────────────────────────────────
@@ -450,13 +574,42 @@ async function runMission() {
     ['A04', 'issue_refund', { count: 14 }],
     ['A36', 'create_schedule', { action: 'notify_customer' }],
   ];
+  const outcomes = [];
   for (const [agent, action, params] of script) {
     const dept = WF.agents.find((a) => a.id === agent)?.department;
     if (dept && dept !== DEPT) renderDept(dept);
-    await fire(agent, action, params);
+    outcomes.push(await fire(agent, action, params));
     await new Promise((r) => setTimeout(r, 1150));
   }
   $('run').disabled = false;
+
+  // A bare counter reading "1 cleared, 6 held" looks like the run broke. It did
+  // not: holding is the whole product. Say which it is, and what to do next.
+  const cleared = outcomes.filter((o) => o.verdict === 'ALLOW');
+  const stopped = outcomes.filter((o) => o.verdict !== 'ALLOW');
+  const s = await api('/api/state');
+  const note = $('run-note');
+  if (!note) return;
+
+  if (!s.policy) {
+    note.className = 'verdict-note hold show';
+    note.innerHTML =
+      `<b>The run finished.</b> ${cleared.length} of ${outcomes.length} actions went through; ` +
+      `the other ${stopped.length} stopped at the evaluator because <b>nothing has been ` +
+      `authorised yet</b>. That is the system working, not failing: a workforce nobody has ` +
+      `spoken to does not get to touch the outside world.<br><br>` +
+      `Press <b>Talk to it</b>, say what it may and may not do, then run this again.`;
+  } else {
+    const named = stopped.map((o) => o.request.action);
+    note.className = `verdict-note ${stopped.length ? 'hold' : 'good'} show`;
+    note.innerHTML = stopped.length
+      ? `<b>The run finished under ${s.policy.policyId} v${s.policy.version}.</b> ` +
+        `${cleared.length} cleared. ${stopped.length} held: <b>${named.join(', ')}</b>. ` +
+        `Every one of those was refused because of something you said, and the audit below ` +
+        `records which rule and which version.`
+      : `<b>The run finished under ${s.policy.policyId} v${s.policy.version}.</b> ` +
+        `All ${cleared.length} actions cleared, because the policy covers all of them.`;
+  }
 }
 
 // ── voice ───────────────────────────────────────────────────────────────────
@@ -497,8 +650,24 @@ async function talk() {
 
 // ── boot ────────────────────────────────────────────────────────────────────
 (async () => {
-  const [health, wf] = await Promise.all([api('/api/health'), api('/api/workforce')]);
+  const [health, wf, catalog] = await Promise.all([
+    api('/api/health'), api('/api/workforce'), api('/api/actions'),
+  ]);
   WF = wf;
+
+  // Offer this page to whatever agent is in the browser. Feature-detected, so
+  // it is a no-op where the API has not shipped.
+  const governed = catalog.actions
+    .filter((a) => a.risk.startsWith('L3') || a.risk.startsWith('L4'))
+    .map((a) => a.id);
+  const webmcp = registerWebMCP(governed);
+
+  // An agent acting through WebMCP is not clicking anything, so the page would
+  // otherwise sit still while decisions land. Keep it honest.
+  addEventListener('signalbox:decision', (e) => {
+    signal(e.detail.verdict, `${e.detail.request.action}: ${e.detail.reason}`);
+    refresh();
+  });
 
   const c = health.corpus;
   $('c-corpus').innerHTML = `<b>${wf.agents.length}</b> agents &middot; <b>${wf.departments.length}</b> departments`;
@@ -522,6 +691,13 @@ async function talk() {
     $('talk').disabled = true;
   }
 
+  $('d-close').onclick = () => $('detail').close();
+  $('detail').addEventListener('close', () => { OPEN_AGENT = null; });
+  // Clicking the backdrop should dismiss, the way a sheet does on a phone.
+  $('detail').addEventListener('click', (e) => {
+    if (e.target === $('detail')) $('detail').close();
+  });
+
   $('talk').onclick = talk;
   $('run').onclick = runMission;
   $('reset').onclick = async () => {
@@ -536,7 +712,13 @@ async function talk() {
     `evaluator on the server. Nothing on this page is staged: with no policy compiled, a run of ` +
     `the stock-out stops almost immediately, which is the correct answer and not a very ` +
     `dramatic one. Actions marked <code>sandbox</code> have no credential anywhere and are ` +
-    `simulated; <code>real</code> ones are not. The evaluator is real either way.`;
+    `simulated; <code>real</code> ones are not. The evaluator is real either way.` +
+    `<br><br>` + (webmcp
+      ? `This page is registered with the browser through <code>navigator.modelContext</code>: ` +
+        `an agent in this tab can read the policy and attempt actions, and meets the same ` +
+        `evaluator you do. There is no faster path for being in the same window.`
+      : `An MCP server for external agents lives at <code>mcp/server.js</code>. This browser ` +
+        `has no <code>navigator.modelContext</code>, so the in-page equivalent is dormant here.`);
 
   await refresh();
 })();
