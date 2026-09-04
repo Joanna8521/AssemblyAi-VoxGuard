@@ -22,6 +22,7 @@ import { dirname, join, extname, normalize } from 'node:path';
 import { evaluate } from '../governance/evaluator.js';
 import { compile, amend, fingerprint } from '../governance/policy.js';
 import { load } from '../governance/registry.js';
+import { validateRules } from '../governance/validate.js';
 import { toolsFor, systemPrompt, greeting, inputConfig } from '../voice/tools.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -138,7 +139,7 @@ const routes = {
    */
   'POST /api/policy/compile': async (body) => {
     const at = new Date().toISOString();
-    const rules = body.rules ?? [];
+    const { accepted: rules, rejected } = validateRules(body.rules, registry);
 
     if (state.policy) {
       const before = new Map(state.policy.rules.map((r) => [r.action, r.effect]));
@@ -150,6 +151,7 @@ const routes = {
         merged: true,
         kept: [...before.keys()].filter((a) => !rules.some((r) => r.action === a)),
         restated: restated.map((r) => r.action),
+        rejected,
       };
     }
 
@@ -160,7 +162,7 @@ const routes = {
       spokenIn: body.spokenIn ?? null,
       at,
     });
-    return { policy: state.policy, fingerprint: fingerprint(state.policy), merged: false };
+    return { policy: state.policy, fingerprint: fingerprint(state.policy), merged: false, rejected };
   },
 
   'POST /api/policy/amend': async (body) => {
@@ -169,8 +171,9 @@ const routes = {
       e.status = 409;
       throw e;
     }
-    state.policy = amend(state.policy, body.changes ?? [], { at: new Date().toISOString() });
-    return { policy: state.policy, fingerprint: fingerprint(state.policy) };
+    const { accepted, rejected } = validateRules(body.changes, registry);
+    state.policy = amend(state.policy, accepted, { at: new Date().toISOString() });
+    return { policy: state.policy, fingerprint: fingerprint(state.policy), rejected };
   },
 
   /**

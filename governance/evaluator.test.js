@@ -16,6 +16,7 @@ import { evaluate, ALLOW, DENY, ASK } from './evaluator.js';
 import { compile, amend, fingerprint } from './policy.js';
 import { load } from './registry.js';
 import { toolsFor } from '../voice/tools.js';
+import { validateRules } from './validate.js';
 
 const registry = load();
 
@@ -258,6 +259,20 @@ describe('what the model is allowed to say', () => {
     assert.deepEqual([...rule.properties.effect.enum].sort(), [ALLOW, ASK, DENY].sort());
   });
 
+  test('the schema is guidance, so validation is what actually holds', () => {
+    // Measured: the API stores whatever schema it is sent, including keywords it
+    // does not implement, and a live run produced customer_group "floating pay"
+    // from an enum of six values. The enum shapes what the model tends to say.
+    // Only this rejects what it must not be allowed to have said.
+    const { accepted, rejected } = validateRules([
+      { action: 'notify_customer', effect: 'ALLOW', conditions: { customer_group: 'floating pay' } },
+      { action: 'pause_ad', effect: 'ALLOW' },
+    ], registry);
+    assert.deepEqual(accepted.map((r) => r.action), ['pause_ad']);
+    assert.equal(rejected.length, 1);
+    assert.match(rejected[0].reason, /paid_affected/);
+  });
+
   test('string-valued conditions are enumerated too, not free text', () => {
     // The action enum stops an invented capability. This stops an invented
     // value for a real one: a policy saying "paid" while the workforce asks
@@ -277,5 +292,67 @@ describe('what the model is allowed to say', () => {
 
   test('a condition field the vocabulary does not declare has no way in', () => {
     assert.equal(rule.properties.conditions.properties.whatever_i_like, undefined);
+  });
+});
+
+
+// ── nothing unreadable becomes policy ───────────────────────────────────────
+describe('validation, the boundary that actually holds', () => {
+  const only = (rules) => validateRules(rules, registry);
+
+  test('an action the workforce does not have is refused', () => {
+    const { rejected } = only([{ action: 'teleport', effect: 'ALLOW' }]);
+    assert.match(rejected[0].reason, /not a capability/);
+  });
+
+  test('a condition nobody declared is refused, and the message names the real ones', () => {
+    const { rejected } = only([
+      { action: 'notify_customer', effect: 'ALLOW', conditions: { vibe: 'good' } },
+    ]);
+    assert.match(rejected[0].reason, /customer_group/);
+  });
+
+  test('a comparator we never implemented is refused rather than ignored', () => {
+    const { rejected } = only([
+      { action: 'change_ad_budget', effect: 'ALLOW', conditions: { amount: { under: 50 } } },
+    ]);
+    assert.match(rejected[0].reason, /not a comparator/);
+  });
+
+  test('a number field will not take a sentence', () => {
+    const { rejected } = only([
+      { action: 'change_ad_budget', effect: 'ALLOW', conditions: { daily_total: 'about five thousand' } },
+    ]);
+    assert.match(rejected[0].reason, /must be a number/);
+  });
+
+  test('a real conditional rule passes untouched', () => {
+    const rule = {
+      action: 'change_ad_budget', effect: 'ALLOW',
+      conditions: { increase_percent: { lte: 20 }, daily_total: { lte: 5000 } },
+    };
+    const { accepted, rejected } = only([rule]);
+    assert.equal(rejected.length, 0);
+    assert.deepEqual(accepted, [rule]);
+  });
+
+  test('`in` may carry a list, and every member must be declared', () => {
+    const ok = only([{ action: 'notify_customer', effect: 'ALLOW',
+      conditions: { customer_group: { in: ['paid_affected', 'vip'] } } }]);
+    assert.equal(ok.rejected.length, 0);
+
+    const bad = only([{ action: 'notify_customer', effect: 'ALLOW',
+      conditions: { customer_group: { in: ['paid_affected', 'whoever'] } } }]);
+    assert.equal(bad.rejected.length, 1);
+  });
+
+  test('one bad rule does not take the good ones down with it', () => {
+    const { accepted, rejected } = only([
+      { action: 'pause_ad', effect: 'ALLOW' },
+      { action: 'nonsense', effect: 'ALLOW' },
+      { action: 'issue_refund', effect: 'DENY' },
+    ]);
+    assert.deepEqual(accepted.map((r) => r.action), ['pause_ad', 'issue_refund']);
+    assert.equal(rejected.length, 1);
   });
 });

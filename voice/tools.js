@@ -51,14 +51,17 @@ function conditionSchema(vocabulary) {
   return { type: 'object', description: CONDITION_HINT, properties };
 }
 
-function ruleSchema(actionIds, vocabulary) {
+function ruleSchema(actionIds, vocabulary, catalogue) {
   return {
     type: 'object',
     properties: {
       action: {
         type: 'string',
         enum: actionIds,
-        description: 'Which capability the user is speaking about.',
+        description:
+          'Which capability the user is speaking about. Read the list before ' +
+          'choosing: several names are close together and mean opposite things. ' +
+          catalogue,
       },
       effect: {
         type: 'string',
@@ -76,6 +79,9 @@ function ruleSchema(actionIds, vocabulary) {
 export function toolsFor(registry) {
   const actionIds = registry.actionIds;
   const vocabulary = registry.conditionVocabulary;
+  const catalogue = actionIds
+    .map((id) => `${id} = ${registry.label(id, 'en').toLowerCase()}`)
+    .join('; ');
 
   return [
     {
@@ -94,7 +100,7 @@ export function toolsFor(registry) {
           rules: {
             type: 'array',
             description: 'One entry per permission or prohibition the user stated.',
-            items: ruleSchema(actionIds, vocabulary),
+            items: ruleSchema(actionIds, vocabulary, catalogue),
           },
           scope: {
             type: 'string',
@@ -124,7 +130,7 @@ export function toolsFor(registry) {
           changes: {
             type: 'array',
             description: 'Only the rules whose effect or conditions the user just changed.',
-            items: ruleSchema(actionIds, vocabulary),
+            items: ruleSchema(actionIds, vocabulary, catalogue),
           },
         },
         required: ['changes'],
@@ -253,6 +259,10 @@ export function systemPrompt(corpus) {
     `  do not assume one call covered everything they meant to say.`,
     `- After each save, say back how many rules are now in force. The tool result`,
     `  carries the count, so this costs you nothing and lets them catch a miss.`,
+    `- If the result has anything under not_recorded, those rules were refused and`,
+    `  are not in force. Say which one and why, in plain words, and ask them to`,
+    `  restate it. Do not retry it yourself with a value you picked: the refusal`,
+    `  means nobody knows what they meant, and guessing is what it exists to stop.`,
     `- Capture only what they said. If they permitted two things and forbade one,`,
     `  that is three rules, not four. Do not round their intent up or down.`,
     `- If you did not catch something, or a phrase could mean two different rules,`,

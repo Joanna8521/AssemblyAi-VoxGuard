@@ -109,7 +109,7 @@ The same action, the same policy, a different verdict, because a person said one
 more sentence. And permission for fourteen people stayed permission for fourteen
 people.
 
-Three faults surfaced in that session and are fixed. Turn detection ended the
+Four faults surfaced across that session and the one after it, and all are fixed. Turn detection ended the
 turn after 1000 ms of silence, which is shorter than the pause between clauses
 when someone dictates a list. A second compile replaced the first instead of
 merging, so a rule spoken in the opening sentence disappeared. And, having heard
@@ -165,6 +165,14 @@ has failed at the thing it claims to be about.
   confirms them.
 - **No unmeasured numbers.** Where a figure has not been measured, this repository says so
   rather than printing a plausible one.
+- **A retraction.** An earlier version of this file said a model cannot express a capability
+  the workforce does not have, because the tool schema has no member for it. That was an
+  assumption and it is false. The API stores whatever JSON Schema it is sent, including
+  keywords it does not implement, and passes it to the model as advice; a live run produced
+  a condition value from outside a six-member enum without complaint. The schema shapes what
+  the model tends to say. What actually holds is server-side validation in
+  `governance/validate.js`, which refuses anything the registry does not declare and hands it
+  back with a reason so the agent asks instead of guessing.
 
 ---
 

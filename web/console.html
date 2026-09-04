@@ -254,6 +254,8 @@ const TOOLS = {
       merged_into_existing: r.merged === true,
       rules_in_force: r.policy.rules.map((x) => `${x.action}: ${x.effect}`),
       total_rules: r.policy.rules.length,
+      // Anything here was NOT recorded. The agent has to say so and ask.
+      not_recorded: (r.rejected ?? []).map((x) => `${x.rule.action ?? '?'}: ${x.reason}`),
       note: 'Recorded. Nothing has run yet.',
     };
   },
@@ -265,6 +267,7 @@ const TOOLS = {
       version: r.policy.version,
       changed: (args.changes ?? []).map((c) => `${c.action} -> ${c.effect}`),
       rules_in_force: r.policy.rules.map((x) => `${x.action}: ${x.effect}`),
+      not_recorded: (r.rejected ?? []).map((x) => `${x.rule.action ?? '?'}: ${x.reason}`),
     };
   },
   async report_status() {
