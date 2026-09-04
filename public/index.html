@@ -354,6 +354,10 @@ h1{font-size:16px;letter-spacing:-.02em}
    Vertical reads better on a phone and horizontal films better on a desk: the
    work moves left to right, the evaluator sits in the middle of the frame, and
    an action that stops there stops in the centre of the shot. */
+.note{font-size:11px;line-height:1.5;color:var(--muted);margin-top:8px}
+.note:empty{display:none}
+.w.sheet{border-left:3px solid var(--accent)}
+.w.sheet .t small{color:var(--accent)}
 .tabs{display:flex;gap:2px;background:var(--surface-3);border-radius:4px;padding:2px}
 .tab{border:0;background:none;border-radius:3px;cursor:pointer;padding:3px 8px;
   font:600 10px var(--mono);letter-spacing:.04em;color:var(--muted)}
@@ -544,14 +548,16 @@ h1{font-size:16px;letter-spacing:-.02em}
     </section>
 
     <section class="panel cell-watch">
-      <div class="panel-hd"><span class="eyebrow">Watching</span><h2>Price &amp; stock</h2>
+      <div class="panel-hd"><span class="eyebrow">Watching</span><h2>Rivals, and your own numbers</h2>
         <button id="run-watch" style="margin-left:auto;padding:5px 10px;font-size:11.5px">Check</button></div>
       <div class="panel-bd">
         <div class="watch-add">
-          <input id="watch-url" placeholder="https://a-rival.com/products/&hellip;" spellcheck="false">
-          <button id="watch-add">Watch</button>
+          <input id="watch-url" spellcheck="false"
+            placeholder="A rival&rsquo;s product page, or a Google Sheets link">
+          <button id="watch-add">Add</button>
         </div>
         <div class="watches" id="watches"></div>
+        <p class="note" id="watch-note"></p>
       </div>
     </section>
 

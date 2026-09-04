@@ -239,29 +239,76 @@ function renderAttention(decisions) {
 
 // ── watching ────────────────────────────────────────────────────────────────
 
-function renderWatches(listings) {
+/**
+ * Everything the workforce reads, in one list.
+ *
+ * A rival's product page and the shop's own spreadsheet are different kinds of
+ * source and the same kind of answer to "where do these numbers come from", so
+ * they share a panel. They are told apart by a mark rather than by a second box:
+ * asking somebody to sort a link into the right field before pasting it is work
+ * the page can do itself, and the desktop has no room for a second field anyway.
+ */
+function renderSources(pools) {
   const box = $('watches');
-  if (!listings?.length) {
-    box.innerHTML = '<p class="empty">Nothing watched.<br>Shopify shops read cleanest: ' +
-      'they publish price and stock rather than hiding it in the page.</p>';
+  const listings = pools?.listings ?? [];
+  const sheets = pools?.sheets ?? [];
+
+  if (!listings.length && !sheets.length) {
+    box.innerHTML = '<p class="empty">Nothing being read.<br>' +
+      'Paste a rival&rsquo;s product page, or a Google Sheet shared as ' +
+      '&ldquo;anyone with the link can view&rdquo;.</p>';
     return;
   }
+
   box.innerHTML = '';
+
+  for (const sheet of sheets) {
+    const d = document.createElement('div');
+    d.className = 'w sheet';
+    // What it says before anybody has read it must not look like a reading.
+    const state = sheet.lastError ? sheet.lastError
+      : sheet.rows != null ? `${sheet.rows} rows &middot; ${(sheet.headers ?? []).slice(0, 3).join(', ')}`
+      : 'not read yet';
+    d.innerHTML =
+      `<span class="t">${esc(sheet.name ?? 'spreadsheet')}<small>${state}</small></span>` +
+      `<span class="p">sheet</span>` +
+      `<button class="x" data-sheet="${esc(sheet.url)}" title="Stop reading">&times;</button>`;
+    box.appendChild(d);
+  }
+
   for (const w of listings) {
     const host = new URL(w.url).hostname.replace(/^www\./, '');
     const d = document.createElement('div');
     d.className = `w ${w.inStock === false ? 'out' : w.inStock ? 'ok' : ''}`;
     d.innerHTML =
-      `<span class="t">${w.title ?? host}<small>${w.lastError ? w.lastError
+      `<span class="t">${esc(w.title ?? host)}<small>${esc(w.lastError ? w.lastError
         : w.inStock === false ? 'sold out'
-        : w.inStock ? `${w.variantsInStock} in stock` : host}</small></span>` +
-      `<span class="p">${w.price ?? '—'}</span>` +
-      `<button class="x" data-url="${w.url}" title="Stop watching">&times;</button>`;
+        : w.inStock ? `${w.variantsInStock} in stock` : host)}</small></span>` +
+      `<span class="p">${w.price ?? '&mdash;'}</span>` +
+      `<button class="x" data-url="${esc(w.url)}" title="Stop watching">&times;</button>`;
     box.appendChild(d);
   }
+
   for (const b of box.querySelectorAll('.x')) {
-    b.onclick = async () => renderWatches((await api('/api/watch/remove', { url: b.dataset.url })).watching);
+    b.onclick = async () => {
+      const route = b.dataset.sheet ? '/api/sheets/remove' : '/api/watch/remove';
+      await api(route, { url: b.dataset.sheet ?? b.dataset.url });
+      renderSources((await api('/api/pools')).pools);
+    };
   }
+}
+
+/**
+ * Text into HTML, safely.
+ *
+ * A sheet is named by whoever shares it and a listing title comes off somebody
+ * else's storefront, so both are somebody else's input arriving in an
+ * innerHTML. Escaping at the point of insertion rather than trusting the source
+ * is the only version of this that stays true when a new source is added.
+ */
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 // ── audit ───────────────────────────────────────────────────────────────────
@@ -346,7 +393,7 @@ async function refresh() {
   const [state, pools] = await Promise.all([api('/api/state'), api('/api/pools')]);
   renderAudit(state.audit);
   if (!$('report').hidden) renderReport();
-  renderWatches(pools.pools?.listings);
+  renderSources(pools.pools);
   if (MISSION && state.policy) {
     MISSION.policy = state.policy;
     $('c-mission').textContent = `${MISSION.id} v${state.policy.version}`;
@@ -573,30 +620,56 @@ const EXAMPLES = {
     $('c-fp').textContent = '—';
   };
 
-  $('watch-add').onclick = async () => {
+  const addSource = async () => {
     const url = $('watch-url').value.trim();
     if (!url) return;
+    // A spreadsheet is read as a spreadsheet and a shop page as a shop page.
+    // Which one this is can be seen from the link, so it is not worth asking.
+    const isSheet = /docs\.google\.com\/spreadsheets\//.test(url);
     try {
-      renderWatches((await api('/api/watch', { url })).watching);
+      await api(isSheet ? '/api/sheets' : '/api/watch', { url });
       $('watch-url').value = '';
+      renderSources((await api('/api/pools')).pools);
     } catch (e) { fail('err', e.message); }
   };
-  $('watch-url').onkeydown = (e) => { if (e.key === 'Enter') $('watch-add').click(); };
+
+  $('watch-add').onclick = addSource;
+  // One handler. Two assignments to onkeydown meant the second silently
+  // replaced the first, which is the kind of thing that reads fine and is
+  // simply not there. isComposing is checked because a link can be pasted
+  // beside text somebody is still composing.
+  $('watch-url').onkeydown = (ev) => {
+    if (ev.key === 'Enter' && !ev.isComposing) addSource();
+  };
 
   $('run-watch').onclick = async () => {
     const b = $('run-watch');
     b.disabled = true;
     b.textContent = '…';
     try {
-      const r = await api('/api/agents/run', { agent: 'A11' });
-      for (const d of r.decisions ?? []) {
-        const agentEl = takeStage(d.audit?.skill ?? 'A11');
-        await fly(agentEl ?? $('rail'), $('gate'), d.action, null, 480);
-        signal(d.verdict);
-        if (d.verdict === 'ALLOW') await fly($('gate'), $('world'), d.action, 'ALLOW', 440);
-        for (const el of document.querySelectorAll('.fly')) el.remove();
+      // Whatever is being read gets read. Checking only the rival pages while a
+      // spreadsheet sits in the same list, under the same button, would be a
+      // button that quietly does less than the panel it sits on says it does.
+      const pools = (await api('/api/pools')).pools ?? {};
+      const who = ['A11'];
+      if ((pools.sheets ?? []).length) who.push('A30');
+
+      const notes = [];
+      for (const agent of who) {
+        const r = await api('/api/agents/run', { agent });
+        notes.push(...(r.observed ?? []));
+        for (const d of r.decisions ?? []) {
+          const agentEl = takeStage(d.audit?.skill ?? agent);
+          await fly(agentEl ?? $('rail'), $('gate'), d.action, null, 480);
+          signal(d.verdict);
+          if (d.verdict === 'ALLOW') await fly($('gate'), $('world'), d.action, 'ALLOW', 440);
+          for (const el of document.querySelectorAll('.fly')) el.remove();
+        }
       }
       endRun();
+      // A read that found nothing worth acting on still happened, and saying so
+      // beats a silent button that looks broken.
+      if (notes.length) $('watch-note').textContent = notes[notes.length - 1];
     } catch (e) { fail('err', e.message); }
     b.disabled = false;
     b.textContent = 'Check';

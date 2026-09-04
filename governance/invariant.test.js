@@ -102,3 +102,41 @@ describe('the adapter tells the truth about what it did', () => {
     assert.match(adapters, /authorised, but the adapter failed/);
   });
 });
+
+/**
+ * Nothing in the browser code may be assigned twice.
+ *
+ * Two `$('watch-url').onkeydown = ...` lines sat next to each other and the
+ * second silently replaced the first. JavaScript gives no warning for this, in
+ * either form it takes: a handler property assigned twice, or two functions
+ * declared with the same name. Both read as working code and one of them is
+ * simply not there, which is the worst kind of bug to look for by eye.
+ */
+test('no handler property and no function name is defined twice in the browser code', () => {
+  const dir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
+  const files = readdirSync(dir).filter((f) => f.endsWith('.js'));
+  const problems = [];
+
+  for (const file of files) {
+    const src = readFileSync(join(dir, file), 'utf8');
+
+    const handlers = new Map();
+    for (const m of src.matchAll(/\$\(\s*['"]([\w-]+)['"]\s*\)\s*\.\s*(on\w+)\s*=/g)) {
+      const key = `${m[1]}.${m[2]}`;
+      handlers.set(key, (handlers.get(key) ?? 0) + 1);
+    }
+    for (const [key, n] of handlers) {
+      if (n > 1) problems.push(`${file}: ${key} assigned ${n} times`);
+    }
+
+    const names = new Map();
+    for (const m of src.matchAll(/^(?:async\s+)?function\s+(\w+)\s*\(/gm)) {
+      names.set(m[1], (names.get(m[1]) ?? 0) + 1);
+    }
+    for (const [name, n] of names) {
+      if (n > 1) problems.push(`${file}: function ${name} declared ${n} times`);
+    }
+  }
+
+  assert.deepEqual(problems, [], problems.join('\n'));
+});
