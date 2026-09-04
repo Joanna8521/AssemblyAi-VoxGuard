@@ -22,7 +22,7 @@ import { dirname, join, extname, normalize } from 'node:path';
 import { evaluate } from '../governance/evaluator.js';
 import { compile, amend, fingerprint } from '../governance/policy.js';
 import { load } from '../governance/registry.js';
-import { toolsFor, systemPrompt, greeting } from '../voice/tools.js';
+import { toolsFor, systemPrompt, greeting, inputConfig } from '../voice/tools.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WEB = join(HERE, '..', 'web');
@@ -110,6 +110,10 @@ const routes = {
   'GET /api/session-config': async () => ({
     system_prompt: systemPrompt(registry.corpus),
     greeting: greeting(),
+    input: inputConfig(),
+    // Immutable once the session is established, so it is set here rather than
+    // adjusted later. Only six languages have voices; none of them is Mandarin.
+    output: { voice: 'jane' },
     tools: toolsFor(registry),
   }),
 
@@ -119,15 +123,44 @@ const routes = {
     audit: state.audit,
   }),
 
+  /**
+   * A second compile_policy inside a live mission merges rather than replaces.
+   *
+   * The agent is told compile_policy is for the first statement of a mission,
+   * and it calls it twice anyway when a person keeps talking. Replacing on the
+   * second call silently drops whatever the first one authorized. Losing an
+   * authorization without telling anyone is the exact failure this system
+   * exists to prevent, so it must not be the failure the system itself has.
+   *
+   * Merging keeps every rule, increments the version, and records the overlap,
+   * so the audit trail shows a rule was restated rather than hiding that it
+   * changed.
+   */
   'POST /api/policy/compile': async (body) => {
+    const at = new Date().toISOString();
+    const rules = body.rules ?? [];
+
+    if (state.policy) {
+      const before = new Map(state.policy.rules.map((r) => [r.action, r.effect]));
+      state.policy = amend(state.policy, rules, { at });
+      const restated = rules.filter((r) => before.has(r.action) && before.get(r.action) === r.effect);
+      return {
+        policy: state.policy,
+        fingerprint: fingerprint(state.policy),
+        merged: true,
+        kept: [...before.keys()].filter((a) => !rules.some((r) => r.action === a)),
+        restated: restated.map((r) => r.action),
+      };
+    }
+
     state.policy = compile({
       missionId: body.missionId ?? state.missionId,
       scope: body.scope ?? 'mission',
-      rules: body.rules ?? [],
+      rules,
       spokenIn: body.spokenIn ?? null,
-      at: new Date().toISOString(),
+      at,
     });
-    return { policy: state.policy, fingerprint: fingerprint(state.policy) };
+    return { policy: state.policy, fingerprint: fingerprint(state.policy), merged: false };
   },
 
   'POST /api/policy/amend': async (body) => {

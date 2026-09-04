@@ -140,21 +140,50 @@ Agent 可自主：Read／Search／Analyze／Reason／Draft／Recommend／Plan
 
 政策**不是**靠 LLM 自由發揮再去 parse，而是由 tool call 的 schema 保證結構。這落實 SDD 的 LLM Boundary：LLM 負責理解語言，**最終授權由結構化政策 + 確定性 evaluator 決定**。
 
-### 6.2 多語言：中／英／日
+### 6.2 語言：全英文 demo（2026-09-04 實測後改寫）
 
-**不打「支援很多語言」這張牌**，打兩張更硬的：
+**先前這一節主張中／英／日三語 demo。實測推翻了它，原文作廢。**
 
-**(a) 句中語碼轉換。** 台灣電商老闆的真實語言長這樣：
+#### 量到的事實
 
-> 「ROAS 低於 1 的先 **pause** 掉，蝦皮那邊 **delist**，但 campaign B 表現好可以加 budget，不要超過五千。」
+| 項目 | 結果 | 如何得知 |
+|---|---|---|
+| STT 語言 | 18 種，含中文、日文，句中語碼轉換 | 官方文件 |
+| **TTS 語言** | **只有 6 種：英／義／西／德／葡／法** | 官方 voices 頁 ＋ **實測** |
+| 可用 voice_id | **恰好 16 個**（alba, eve, george, jane, jean, mary, michael, anna, charles, paul, vera, giovanni, lola, juergen, rafael, estelle） | 逐一送進 `session.update` 探測；`mei`／`hana`／`multilingual`／`auto` 等一律被拒 |
 
-一句話混兩種語言，而且英文詞正好是平台術語。這是 Universal-3.5 Pro 的頭號功能（**no config，自動**），而且是真實情境不是硬湊。
+> **Voice Agent API 現在講不出中文，也講不出日文。** 聽得懂，回不了。
 
-**(b) 政策是語言中立的。** 同一份規則用中文、英文、日文講，**編出來的 policy 物件完全相同**。Demo 時三語各講一次，跑出同一個 fingerprint。
+第一次真人測試就撞上這件事：agent 的**文字**回覆是中文，**語音**不是。
 
-**Contextual prompting**：預先餵入領域術語（蝦皮／Momo／ROAS／delist／pause_ad／skill 代號），拉高混語辨識率。
+#### 決定
 
-**韓文與台語**：韓文不在 18 語清單內，**拿到 key 後實測再決定，未經實測不得寫進任何對外文件**。台語不支援——但**不當缺陷處理**：轉錄信心不足時**拒絕編譯政策、回頭問人**，這正好是安全原則的展示。
+**Demo 全程英文。** 使用者講英文，agent 用英文語音回答，兩端都完整。
+
+理由：評審是英語使用者，Presentation 是四項評分之一，而「voice agent 講不出你的語言」在鏡頭前是明顯的破綻。
+
+#### 代價，以及怎麼補
+
+代價是**語碼轉換這張技術牌不能用現場語音演**。那本來是我們最強的一張，也正好是對手方法論的已知弱點（其 V-4 未量測項）。
+
+補法有三，都不需要 TTS 講中文：
+
+1. **STT 仍設定為多語**。`transcription_prompt` 明寫「說話者可能在句中切換到英文」，`keyterms` 涵蓋平台與指標術語。這一層的能力是真的，只是不在主線 demo 演。
+2. **「同一份政策，三種語言，同一個指紋」改為可驗證的性質，不是表演**。`governance/evaluator.test.js` 有一支測試釘住它：中英日三份規則陳述編出同一個 fingerprint。**斷言變成測試，比在影片裡講一句更硬。**
+3. **畫布保留三語切換**。那裡展示的是輸入逐字稿與編譯結果，兩者都不依賴 TTS，所以不涉及不實陳述。
+
+#### 辨識強化（已實作）
+
+`session.input` 兩個互補的槓桿：
+
+- **`keyterms`**（上限 100）：平台名（Shopee／Momo／PChome／Amazon）、廣告指標（ROAS／CTR／CPC）、以及命名不可逆動作的動詞（delist／refund／cancel order）
+- **`transcription_prompt`**（上限 1750 字元）：描述這是電商營運對話，會出現金額、百分比、訂單數，並要求區分 delist／delete／unlist 與 pause／cancel
+
+這不是為調而調。**第一次真人測試裡「delist」就被聽成「delete」**——一個字母之差，卻是「從賣場下架」與「銷毀」的差別。當時是 agent 靠上下文救回來的，而那正是治理系統最不該依賴的一條路徑。
+
+#### 韓文與台語
+
+韓文不在 18 種之內，台語不支援。**未經實測不得寫進任何對外文件。** 轉錄信心不足時拒絕編譯政策、回頭問人，這是安全原則的展示，不是缺陷。
 
 ### 6.3 歧義處理
 

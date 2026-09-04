@@ -124,6 +124,52 @@ export function toolsFor(registry) {
 }
 
 /**
+ * Recognition settings for `session.input`.
+ *
+ * Two levers, and the docs treat them as complementary rather than alternatives:
+ * `transcription_prompt` supplies the domain so the model knows which vocabulary
+ * is likely, and `keyterms` names the exact strings that must come back right.
+ *
+ * This is not tuning for its own sake. In the first live run "delist" came back
+ * as "delete": one letter, and the difference between taking a product off a
+ * marketplace and destroying it. The agent recovered from context, which is
+ * precisely the recovery a governance system should not have to rely on.
+ */
+export function inputConfig() {
+  return {
+    // Up to 100 strings. These are the words an operator says that a general
+    // model has no reason to expect: marketplace names, ad metrics, and the
+    // verbs that name an irreversible act.
+    keyterms: [
+      'Shopee', 'Momo', 'PChome', 'Yahoo Shopping', 'Amazon', 'LINE', 'LINE Shopping',
+      'Meta Ads', 'Google Ads', 'Facebook Ads', 'campaign', 'ad set', 'ad group',
+      'ROAS', 'ROI', 'CPC', 'CPM', 'CTR', 'AOV', 'LTV', 'CAC', 'GA4', 'UTM',
+      'delist', 'relist', 'unlist', 'out of stock', 'restock', 'backorder',
+      'pause', 'unpause', 'resume', 'budget', 'daily budget', 'bid',
+      'refund', 'partial refund', 'chargeback', 'cancel order', 'paid order',
+      'abandoned cart', 'retargeting', 'EDM', 'newsletter', 'push notification',
+      'broadcast', 'segment', 'audience', 'SKU', 'listing', 'markdown', 'coupon',
+      'flash sale', 'promo code', 'fulfilment', 'shipment', 'inventory',
+    ],
+
+    // Max 1750 characters. Describes the situation, not the desired output.
+    transcription_prompt: [
+      'This is an ecommerce operations conversation. A store owner is telling an',
+      'automation system what its agents are and are not allowed to do: pausing',
+      'advertising campaigns, delisting products from marketplaces, notifying',
+      'customers, cancelling orders, issuing refunds, and changing ad budgets.',
+      'Expect marketplace names such as Shopee, Momo, PChome and Amazon, ad',
+      'platform names such as Meta and Google, and metrics such as ROAS and CTR.',
+      'Expect amounts of money, percentages, and counts of orders or customers.',
+      'The speaker may switch into English for platform and metric terms in the',
+      'middle of a sentence in another language; that is normal in this domain.',
+      'Distinguish carefully between similar-sounding operational verbs: delist,',
+      'delete, and unlist are different acts, as are pause and cancel.',
+    ].join(' '),
+  };
+}
+
+/**
  * The agent's standing instructions.
  *
  * Written to keep it out of the decision. It transcribes intent into structure
@@ -150,9 +196,12 @@ export function systemPrompt(corpus) {
     `- If you did not catch something, or a phrase could mean two different rules,`,
     `  ask. A missed rule costs one more sentence; a guessed one is exactly the`,
     `  failure this system exists to prevent.`,
-    `- Reply in whatever language the user spoke, including when they mix languages`,
-    `  mid-sentence, which commerce operators do constantly. Platform and metric`,
-    `  terms like ROAS, campaign, delist and pause often arrive in English inside`,
+    `- Always speak English back, whatever language you were spoken to in. Speech`,
+    `  recognition here covers eighteen languages, but the voices available to you`,
+    `  do not include Mandarin or Japanese, so replying in those would produce`,
+    `  something unintelligible. Understand any language; answer in English.`,
+    `- Operators mix languages mid-sentence constantly, and platform and metric`,
+    `  terms like ROAS, campaign, delist and pause usually arrive in English inside`,
     `  another language. That is normal speech, not an error to correct.`,
     `- Keep spoken replies to a sentence or two. This is a control surface, not a`,
     `  conversation.`,
