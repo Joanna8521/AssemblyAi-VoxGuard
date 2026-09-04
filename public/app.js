@@ -499,6 +499,12 @@ async function refresh() {
   // result, and shown nowhere: the panel went on saying nothing was stated
   // while two rules were in force. Of every way to be wrong, a governance tool
   // under-reporting what it is enforcing is close to the worst.
+  // Always from what the server says is in force, including when the answer is
+  // nothing. Drawing only when a policy existed left the last policy's rules on
+  // screen after a reset had cleared them, so the panel claimed two
+  // prohibitions were being enforced when none were. A governance tool showing
+  // rules that are not in force is worse than one showing none: it is not a
+  // gap, it is a false statement about what is allowed.
   if (state.policy) {
     if (MISSION) MISSION.policy = state.policy;
     $('c-mission').textContent = MISSION
@@ -506,6 +512,10 @@ async function refresh() {
       : `standing v${state.policy.version}`;
     $('c-fp').textContent = state.fingerprint ?? '—';
     renderBands(state.policy);
+  } else {
+    $('c-mission').textContent = 'no mission';
+    $('c-fp').textContent = '—';
+    renderBands({ rules: [] });
   }
 }
 
@@ -764,8 +774,10 @@ const EXAMPLES = {
     $('hero-panel').hidden = false;
     $('said').textContent = '';
     $('agent').hidden = true;
-    $('c-mission').textContent = 'no mission';
-    $('c-fp').textContent = '—';
+    // Everything else comes back from the server. Setting a couple of labels by
+    // hand is how the rule bands got left showing a policy that no longer
+    // existed: the panels nobody remembered to clear keep the old answer.
+    await refresh();
   };
 
   /**

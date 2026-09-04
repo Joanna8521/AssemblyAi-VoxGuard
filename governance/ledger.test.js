@@ -141,3 +141,20 @@ test('starting again does not throw away what was connected', async () => {
   assert.equal(after.policy, null, 'but the permissions do not');
   assert.deepEqual(after.audit, [], 'nor the decisions');
 });
+
+test('nothing in force is a state the page has to be able to show', async () => {
+  // The rule bands were drawn only when a policy existed, so a reset that
+  // cleared one left its prohibitions on screen. The failure is not a gap; it
+  // is the page stating that two actions are forbidden when nothing forbids
+  // them, which is the wrong direction for this tool to be wrong in.
+  const { readFileSync } = await import('node:fs');
+  const src = readFileSync(new URL('../public/app.js', import.meta.url), 'utf8');
+
+  const refresh = src.slice(src.indexOf('async function refresh()'));
+  const body = refresh.slice(0, refresh.indexOf('\n}\n') + 3);
+
+  assert.match(body, /renderBands\(\{ rules: \[\] \}\)/,
+    'refresh must clear the bands when the server reports no policy');
+  assert.ok(body.includes('} else {'),
+    'and it must have the branch that does it');
+});
