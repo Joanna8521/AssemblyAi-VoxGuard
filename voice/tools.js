@@ -14,6 +14,16 @@
 
 const EFFECTS = ['ALLOW', 'DENY', 'ASK'];
 
+/**
+ * `type: 'function'` is mandatory. Measured, not read: the REST reference lists
+ * tool fields without it, the events reference includes it, and sending a tool
+ * without it is rejected as "Invalid session configuration" with a null `param`,
+ * naming nothing. tools/probe_session.js is the experiment that settled it, and
+ * a second round with the field present confirmed every parameter shape we use
+ * is accepted, so the field was the whole story.
+ */
+const FUNCTION_TOOL = 'function';
+
 const CONDITION_HINT =
   'Optional. Only include a condition the user actually stated out loud, e.g. ' +
   '"up to 20 percent" -> {"increase_percent": {"lte": 20}}, or "only the paid ' +
@@ -47,6 +57,7 @@ export function toolsFor(registry) {
 
   return [
     {
+      type: FUNCTION_TOOL,
       name: 'compile_policy',
       description:
         'Call this when the user states, for the first time in this mission, what ' +
@@ -78,6 +89,7 @@ export function toolsFor(registry) {
     },
 
     {
+      type: FUNCTION_TOOL,
       name: 'amend_policy',
       description:
         'Call this when a policy already exists and the user changes their mind ' +
@@ -99,6 +111,7 @@ export function toolsFor(registry) {
     },
 
     {
+      type: FUNCTION_TOOL,
       name: 'report_status',
       description:
         'Call this when the user asks what has happened, what was blocked, what is ' +
