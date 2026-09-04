@@ -15,7 +15,7 @@
 
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -23,13 +23,13 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 
 describe('nothing reaches an adapter except through the evaluator', () => {
-  const server = read('server/index.js');
+  const server = read('server/app.js');
 
   test('the adapter is called from exactly one place', () => {
     // `perform(` with a preceding word character would be a different symbol.
     const calls = server.match(/(?<![\w.])perform\(/g) ?? [];
     assert.equal(calls.length, 1,
-      `perform() is called ${calls.length} times in server/index.js. ` +
+      `perform() is called ${calls.length} times in server/app.js. ` +
       'A second call site is a second way for something to reach the world.');
   });
 
@@ -47,17 +47,28 @@ describe('nothing reaches an adapter except through the evaluator', () => {
       'evaluate() must run before perform(), or the check is decoration');
   });
 
-  test('no adapter module is imported anywhere but the server', () => {
+  test('no adapter is imported anywhere but the server', () => {
     // A route, a tool, or the MCP server reaching an adapter directly would
     // bypass everything above without touching any of it.
+    //
+    // The whole tree is walked rather than a list of directories, because a
+    // hardcoded list stops covering the thing it was written for the moment
+    // somebody adds a directory, which is exactly the mistake this exists to
+    // catch. It has already happened once: web/ became public/ and the check
+    // silently pointed at nothing.
+    const skip = new Set(['node_modules', '.git', 'adapters', 'server', '電商Skills+Subagents']);
     const offenders = [];
-    for (const dir of ['governance', 'voice', 'mcp', 'web']) {
-      for (const file of readdirSync(join(ROOT, dir))) {
-        if (!file.endsWith('.js')) continue;
-        const src = read(join(dir, file));
-        if (/from\s+['"][^'"]*adapters\//.test(src)) offenders.push(`${dir}/${file}`);
+
+    (function walk(dir) {
+      for (const name of readdirSync(join(ROOT, dir || '.'))) {
+        if (skip.has(name) || name.startsWith('.')) continue;
+        const rel = dir ? `${dir}/${name}` : name;
+        if (statSync(join(ROOT, rel)).isDirectory()) { walk(rel); continue; }
+        if (!name.endsWith('.js')) continue;
+        if (/from\s+['"][^'"]*adapters\//.test(read(rel))) offenders.push(rel);
       }
-    }
+    })('');
+
     assert.deepEqual(offenders, [],
       `${offenders.join(', ')} imports an adapter directly, going around the evaluator`);
   });

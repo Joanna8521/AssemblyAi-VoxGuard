@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/index.js": { "maxDuration": 30 }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "referrer-policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "x-content-type-options", "value": "nosniff" },
+        { "key": "permissions-policy", "value": "microphone=(self)" }
+      ]
+    }
+  ]
+}
