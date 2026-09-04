@@ -1,18 +1,53 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "api/index.js": { "maxDuration": 30 }
+    "api/index.js": {
+      "maxDuration": 30
+    }
   },
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/index" }
+    {
+      "source": "/api/:path*",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/index.html",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/:file(app|voice|webmcp).js",
+      "destination": "/api/index"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "referrer-policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "x-content-type-options", "value": "nosniff" },
-        { "key": "permissions-policy", "value": "microphone=(self)" }
+        {
+          "key": "referrer-policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "x-content-type-options",
+          "value": "nosniff"
+        },
+        {
+          "key": "permissions-policy",
+          "value": "microphone=(self)"
+        }
+      ]
+    },
+    {
+      "source": "/:file(app|voice|webmcp).js",
+      "headers": [
+        {
+          "key": "cache-control",
+          "value": "no-store, must-revalidate"
+        }
       ]
     }
   ]
