@@ -1,0 +1,878 @@
+<title>Signal Box</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+JP:wght@400;500;600&family=IBM+Plex+Sans+TC:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+
+<style>
+:root{
+  --bg:#EDF0EE; --surface:#FFFFFF; --surface-2:#F5F7F5;
+  --ink:#101A17; --muted:#5A6864; --faint:#8A9793;
+  --line:#D3DAD6; --line-strong:#B9C3BE;
+  --accent:#1C6C8C; --accent-soft:#E2EEF3;
+  --clear:#1E7F52; --clear-soft:#E1F0E8;
+  --deny:#B23A32; --deny-soft:#F7E4E2;
+  --caution:#9C6B10; --caution-soft:#F7EDDA;
+  --rail:#C4CDC8;
+  --on-accent:#FFFFFF;
+  --shadow:0 1px 2px rgba(16,26,23,.06),0 8px 24px -12px rgba(16,26,23,.18);
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans","IBM Plex Sans TC","IBM Plex Sans JP",system-ui,-apple-system,"Noto Sans TC","Hiragino Sans",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1715; --surface:#17211E; --surface-2:#1D2825;
+    --ink:#E4EBE7; --muted:#8B9A95; --faint:#6E7E79;
+    --line:#26332F; --line-strong:#35443F;
+    --accent:#57A8C8; --accent-soft:#16303B;
+    --clear:#4FB287; --clear-soft:#122C22;
+    --deny:#E0665C; --deny-soft:#331A18;
+    --caution:#DFAA3C; --caution-soft:#2E2413;
+    --rail:#2E3B37;
+    --on-accent:#0B1418;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1715; --surface:#17211E; --surface-2:#1D2825;
+  --ink:#E4EBE7; --muted:#8B9A95; --faint:#6E7E79;
+  --line:#26332F; --line-strong:#35443F;
+  --accent:#57A8C8; --accent-soft:#16303B;
+  --clear:#4FB287; --clear-soft:#122C22;
+  --deny:#E0665C; --deny-soft:#331A18;
+  --caution:#DFAA3C; --caution-soft:#2E2413;
+  --rail:#2E3B37;
+  --on-accent:#0B1418;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--sans); font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2{margin:0; text-wrap:balance; letter-spacing:-.015em; font-weight:600}
+p{margin:0}
+button{font:inherit; color:inherit; cursor:pointer}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:3px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+.wrap{max-width:1240px; margin:0 auto; padding:20px 16px 72px}
+@media(min-width:900px){.wrap{padding:32px 32px 96px}}
+
+.plate{background:var(--surface); border:1px solid var(--line); border-radius:4px; box-shadow:var(--shadow)}
+.plate-hd{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:11px 14px; border-bottom:1px solid var(--line);
+  background:var(--surface-2); border-radius:4px 4px 0 0;
+}
+.eyebrow{
+  font-family:var(--mono); font-size:10.5px; font-weight:600;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--faint);
+}
+.plate-hd h2{font-size:13.5px; letter-spacing:.01em}
+.plate-bd{padding:14px}
+
+header.top{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:16px; flex-wrap:wrap; margin-bottom:8px;
+}
+.mark{display:flex; align-items:center; gap:11px}
+.lamp-stack{
+  display:flex; flex-direction:column; gap:3px; padding:5px 4px;
+  background:var(--surface); border:1px solid var(--line-strong); border-radius:3px;
+}
+.lamp-stack i{width:9px; height:9px; border-radius:50%; display:block; opacity:.28}
+.lamp-stack i:nth-child(1){background:var(--deny)}
+.lamp-stack i:nth-child(2){background:var(--caution)}
+.lamp-stack i:nth-child(3){background:var(--clear)}
+.lamp-stack i.on{opacity:1; box-shadow:0 0 8px currentColor}
+.lamp-stack i.on:nth-child(1){color:var(--deny)}
+.lamp-stack i.on:nth-child(2){color:var(--caution)}
+.lamp-stack i.on:nth-child(3){color:var(--clear)}
+h1{font-size:19px; letter-spacing:-.02em}
+.sub{font-size:12.5px; color:var(--muted); margin-top:1px; max-width:46ch}
+
+.right-stack{display:flex; flex-direction:column; gap:8px; align-items:flex-end}
+.status{display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+.chip{
+  font-family:var(--mono); font-size:11px; font-weight:500;
+  padding:4px 9px; border-radius:3px; border:1px solid var(--line-strong);
+  background:var(--surface); color:var(--muted); white-space:nowrap;
+}
+.chip b{color:var(--ink); font-weight:600}
+.chip.pol{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+
+/* language switch */
+.langsw{display:flex; border:1px solid var(--line-strong); border-radius:3px; overflow:hidden}
+.langsw button{
+  padding:5px 12px; background:var(--surface); border:0; font-size:12.5px;
+  color:var(--muted); border-right:1px solid var(--line);
+  transition:background .15s, color .15s;
+}
+.langsw button:last-child{border-right:0}
+.langsw button:hover{background:var(--surface-2); color:var(--ink)}
+.langsw button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent); font-weight:600}
+
+.controls{
+  display:flex; gap:8px; flex-wrap:wrap; align-items:center;
+  margin:16px 0 20px; padding:12px 14px;
+  background:var(--surface-2); border:1px solid var(--line); border-radius:4px;
+}
+.btn{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:8px 15px; border-radius:3px; border:1px solid var(--line-strong);
+  background:var(--surface); font-size:13px; font-weight:500;
+  transition:border-color .15s, background .15s;
+}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.42; cursor:not-allowed}
+.btn .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.scrub{flex:1 1 160px; min-width:120px; height:4px; border-radius:2px; background:var(--rail); overflow:hidden}
+.scrub b{display:block; height:100%; width:0; background:var(--accent); transition:width .3s linear}
+.stepname{font-family:var(--mono); font-size:11px; color:var(--muted); white-space:nowrap}
+
+.grid{display:grid; gap:16px; grid-template-columns:1fr}
+@media(min-width:1000px){
+  .grid{grid-template-columns:minmax(0,352px) minmax(0,1fr); align-items:start}
+  .col-l{display:flex; flex-direction:column; gap:16px; position:sticky; top:20px}
+  .col-r{display:flex; flex-direction:column; gap:16px}
+}
+
+.wave{display:flex; align-items:center; gap:2px; height:34px; margin-bottom:12px}
+.wave i{flex:1; background:var(--rail); border-radius:1px; height:12%; transition:height .12s ease, background .3s}
+.wave.hot i{background:var(--accent)}
+.lang{
+  display:flex; gap:6px; align-items:center; flex-wrap:wrap;
+  font-family:var(--mono); font-size:10.5px; color:var(--faint);
+  margin-bottom:10px; letter-spacing:.04em;
+}
+.lang .tag{padding:2px 7px; border:1px solid var(--line-strong); border-radius:2px; color:var(--muted); background:var(--surface-2)}
+.lang .tag.hit{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+.said{font-size:16.5px; line-height:1.74; min-height:6em; letter-spacing:.005em}
+.said .cs{color:var(--accent); font-weight:600; border-bottom:1.5px solid var(--accent); padding-bottom:.5px}
+.said .cur{
+  display:inline-block; width:2px; height:1.05em; vertical-align:-.18em;
+  background:var(--accent); animation:blink 1s steps(2) infinite;
+}
+@keyframes blink{50%{opacity:0}}
+.speaker{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--faint); margin-bottom:7px;
+}
+
+.pol-meta{
+  display:flex; gap:8px; align-items:baseline; flex-wrap:wrap;
+  font-family:var(--mono); font-size:11px; color:var(--muted);
+  padding-bottom:10px; margin-bottom:10px; border-bottom:1px dashed var(--line);
+}
+.ver{color:var(--accent); font-weight:600}
+.ver.bump{animation:pop .5s ease}
+@keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.3)}100%{transform:scale(1)}}
+.fp{
+  width:100%; display:flex; align-items:center; gap:6px;
+  font-size:10.5px; color:var(--faint); padding-top:8px;
+}
+.fp b{color:var(--accent); font-weight:600; letter-spacing:.02em}
+.rules{display:flex; flex-direction:column; gap:1px; font-family:var(--mono); font-size:12px}
+.rule{display:flex; align-items:center; gap:9px; padding:6px 7px; border-radius:2px; background:var(--surface-2)}
+.rule.new{animation:slidein .45s ease}
+@keyframes slidein{from{opacity:0; transform:translateX(-8px)}to{opacity:1;transform:none}}
+.rule .nm{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.rule .cond{font-size:10.5px; color:var(--faint); white-space:nowrap}
+.verdict{font-size:10px; font-weight:600; letter-spacing:.09em; padding:2px 6px; border-radius:2px; text-transform:uppercase}
+.v-allow{background:var(--clear-soft); color:var(--clear)}
+.v-deny{background:var(--deny-soft); color:var(--deny)}
+.v-ask{background:var(--caution-soft); color:var(--caution)}
+.empty{font-family:var(--mono); font-size:11.5px; color:var(--faint); padding:14px 4px; text-align:center; line-height:1.7}
+
+.track{position:relative; padding:4px 0 0}
+.lane{display:grid; gap:0; align-items:stretch; grid-template-columns:1fr}
+@media(min-width:760px){.lane{grid-template-columns:minmax(0,1fr) 136px minmax(0,1fr)}}
+.zone{padding:12px 4px}
+.zone-hd{
+  font-family:var(--mono); font-size:10px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--faint); margin-bottom:9px;
+  display:flex; align-items:center; gap:7px;
+}
+.zone-hd::after{content:""; flex:1; height:1px; background:var(--line)}
+.q{display:flex; flex-direction:column; gap:6px; min-height:44px}
+
+.act{
+  display:flex; align-items:center; gap:9px; padding:8px 10px;
+  border:1px solid var(--line); border-left:3px solid var(--rail);
+  border-radius:3px; background:var(--surface); font-size:12.5px;
+  animation:enter .35s ease;
+}
+@keyframes enter{from{opacity:0; transform:translateY(-6px)}to{opacity:1;transform:none}}
+.act .sk{
+  font-family:var(--mono); font-size:10.5px; font-weight:600;
+  color:var(--muted); background:var(--surface-2); padding:2px 5px;
+  border-radius:2px; border:1px solid var(--line); white-space:nowrap;
+}
+.act .an{flex:1; min-width:0; font-family:var(--mono); font-size:11.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.act .rl{font-family:var(--mono); font-size:10px; font-weight:600; padding:1.5px 5px; border-radius:2px; border:1px solid var(--line-strong); color:var(--muted)}
+.act .rl.hi{border-color:var(--deny); color:var(--deny); background:var(--deny-soft)}
+.act .ad{
+  font-family:var(--mono); font-size:9px; font-weight:600; letter-spacing:.06em;
+  padding:1.5px 5px; border-radius:2px; text-transform:uppercase; white-space:nowrap;
+  border:1px solid var(--line-strong); color:var(--faint);
+}
+.act .ad.real{border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+.btn.tamper{border-style:dashed}
+.btn.tamper:hover{border-color:var(--deny); color:var(--deny)}
+.act.allow{border-left-color:var(--clear)}
+.act.deny{border-left-color:var(--deny); background:var(--deny-soft)}
+.act.dim{opacity:.55}
+
+.gate{
+  position:relative; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:10px;
+  padding:16px 8px; margin:12px 0;
+  border:1px solid var(--line-strong); border-radius:4px; background:var(--surface-2);
+}
+@media(min-width:760px){.gate{margin:12px 6px}}
+.gate::before,.gate::after{content:""; position:absolute; top:50%; width:8px; height:1px; background:var(--line-strong); display:none}
+@media(min-width:760px){.gate::before{display:block;left:-8px}.gate::after{display:block;right:-8px}}
+.gate-lbl{font-family:var(--mono); font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--faint); text-align:center; line-height:1.55}
+.signal{display:flex; flex-direction:column; gap:6px; padding:9px 7px; background:var(--surface); border:1px solid var(--line-strong); border-radius:3px}
+.signal i{width:15px; height:15px; border-radius:50%; opacity:.2; transition:opacity .18s, box-shadow .18s}
+.signal i:nth-child(1){background:var(--deny)}
+.signal i:nth-child(2){background:var(--caution)}
+.signal i:nth-child(3){background:var(--clear)}
+.signal.s-deny i:nth-child(1){opacity:1; box-shadow:0 0 14px var(--deny)}
+.signal.s-ask i:nth-child(2){opacity:1; box-shadow:0 0 14px var(--caution)}
+.signal.s-allow i:nth-child(3){opacity:1; box-shadow:0 0 14px var(--clear)}
+.gate-cnt{font-family:var(--mono); font-size:10.5px; color:var(--muted); text-align:center; line-height:1.6}
+.gate-cnt b{color:var(--ink)}
+
+.blocked-note{
+  margin-top:10px; padding:10px 12px; border-radius:3px;
+  background:var(--deny-soft); border:1px solid var(--deny);
+  font-size:12.5px; line-height:1.55; display:none;
+}
+.blocked-note.show{display:block; animation:enter .3s ease}
+.blocked-note b{font-family:var(--mono); font-size:11px}
+
+.audit{max-height:300px; overflow-y:auto; font-family:var(--mono); font-size:11.5px}
+.arow{display:grid; grid-template-columns:auto auto 1fr auto; gap:9px; align-items:baseline; padding:6px 4px; border-bottom:1px solid var(--line); animation:enter .3s ease}
+.arow:last-child{border-bottom:0}
+.arow .ts{color:var(--faint); font-size:10.5px; font-variant-numeric:tabular-nums}
+.arow .id{color:var(--muted); font-size:10.5px}
+.arow .ac{color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.arow .rs{grid-column:1/-1; color:var(--faint); font-size:11px; font-family:var(--sans); line-height:1.5}
+
+.note{
+  margin-top:22px; padding:14px 16px; border-radius:4px;
+  background:var(--surface-2); border:1px solid var(--line);
+  font-size:12.5px; line-height:1.68; color:var(--muted);
+}
+.note b{color:var(--ink); font-weight:600}
+.note code{font-family:var(--mono); font-size:11.5px; background:var(--surface); padding:1px 5px; border-radius:2px; border:1px solid var(--line)}
+.legend{display:flex; gap:14px; flex-wrap:wrap; margin-top:11px; font-family:var(--mono); font-size:10.5px}
+.legend span{display:inline-flex; align-items:center; gap:5px; color:var(--muted)}
+.legend i{width:8px;height:8px;border-radius:50%}
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <div class="mark">
+      <div class="lamp-stack" id="mast"><i></i><i></i><i></i></div>
+      <div>
+        <h1>Signal Box</h1>
+        <p class="sub" id="t-sub"></p>
+      </div>
+    </div>
+    <div class="right-stack">
+      <div class="langsw" role="group" id="langsw">
+        <button data-lang="zh" aria-pressed="true">中文</button>
+        <button data-lang="en" aria-pressed="false">English</button>
+        <button data-lang="ja" aria-pressed="false">日本語</button>
+      </div>
+      <div class="status">
+        <span class="chip">MISSION <b id="mid">—</b></span>
+        <span class="chip pol">POLICY <b id="pid">—</b></span>
+        <span class="chip">GATED <b id="gcount">0</b></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="controls">
+    <button class="btn primary" id="play"><span class="dot"></span><span id="playlbl"></span></button>
+    <button class="btn" id="reset" disabled></button>
+    <button class="btn tamper" id="tamper" disabled></button>
+    <div class="scrub"><b id="bar"></b></div>
+    <span class="stepname" id="step"></span>
+  </div>
+
+  <div class="grid">
+    <div class="col-l">
+
+      <section class="plate">
+        <div class="plate-hd">
+          <span class="eyebrow">01</span>
+          <h2 id="t-h1"></h2>
+          <span class="chip" style="margin-left:auto">Universal-3.5&nbsp;Pro</span>
+        </div>
+        <div class="plate-bd">
+          <div class="wave" id="wave"></div>
+          <div class="lang">
+            <span id="t-detected"></span>
+            <span class="tag" id="lg-a"></span>
+            <span class="tag" id="lg-b"></span>
+            <span id="csnote"></span>
+          </div>
+          <p class="speaker" id="who"></p>
+          <p class="said" id="said"><span class="cur"></span></p>
+        </div>
+      </section>
+
+      <section class="plate">
+        <div class="plate-hd">
+          <span class="eyebrow">02</span>
+          <h2 id="t-h2"></h2>
+        </div>
+        <div class="plate-bd">
+          <div class="pol-meta">
+            <span id="polid">P-————</span>
+            <span>scope: <b id="polscope">—</b></span>
+            <span>version <span class="ver" id="polver">0</span></span>
+            <span class="fp" id="fpline"></span>
+          </div>
+          <div class="rules" id="rules"></div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="col-r">
+
+      <section class="plate">
+        <div class="plate-hd">
+          <span class="eyebrow">03</span>
+          <h2 id="t-h3"></h2>
+          <span class="chip" style="margin-left:auto">E87 <span id="t-e87"></span></span>
+        </div>
+        <div class="plate-bd track">
+          <div class="lane">
+            <div class="zone">
+              <p class="zone-hd" id="t-zin"></p>
+              <div class="q" id="qin"></div>
+            </div>
+            <div class="gate">
+              <p class="gate-lbl">Governance<br>Gate</p>
+              <div class="signal" id="sig"><i></i><i></i><i></i></div>
+              <p class="gate-cnt"><b id="passed">0</b> <span id="t-pass"></span> · <b id="stopped">0</b> <span id="t-stop"></span></p>
+            </div>
+            <div class="zone">
+              <p class="zone-hd" id="t-zout"></p>
+              <div class="q" id="qout"></div>
+            </div>
+          </div>
+          <div class="blocked-note" id="bnote"></div>
+        </div>
+      </section>
+
+      <section class="plate">
+        <div class="plate-hd">
+          <span class="eyebrow">04</span>
+          <h2 id="t-h4"></h2>
+          <span class="chip" style="margin-left:auto" id="acount"></span>
+        </div>
+        <div class="plate-bd">
+          <div class="audit" id="audit"></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="note" id="note"></div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* ══ real skills, from the OpenClaw v7 corpus ══ */
+  var SKILL = { E87:{e:"⚡"}, E04:{e:"🚨"}, E21:{e:"📧"}, C10:{e:"⏰"} };
+
+  /* Adapter kind per action, from registry/actions.json. `real` means a
+     credential for it exists somewhere in the v7 corpus; `sandbox` means
+     none does, anywhere -- so the effect is simulated and the card says so. */
+  var ADAPTER = {
+    "pause_ad":"sandbox", "delist_product":"sandbox", "mark_out_of_stock":"sandbox",
+    "read_orders":"sandbox", "issue_refund":"sandbox",
+    "notify_customer":"real", "send_email":"real", "create_schedule":"real"
+  };
+
+  var ACTIONS = [
+    {id:"A-1017", sk:"E87", act:"pause_ad(meta)",             risk:"L3",      v:"allow", r:0, a:"pause_ad"},
+    {id:"A-1018", sk:"E87", act:"pause_ad(google)",           risk:"L3",      v:"allow", r:0, a:"pause_ad"},
+    {id:"A-1019", sk:"E87", act:"delist_product(shopee)",     risk:"L3",      v:"allow", r:1, a:"delist_product"},
+    {id:"A-1020", sk:"E87", act:"mark_out_of_stock(website)", risk:"L3",      v:"allow", r:2, a:"mark_out_of_stock"},
+    {id:"A-1021", sk:"E04", act:"read_orders(paid)",          risk:"L1",      v:"allow", r:3, a:"read_orders"},
+    {id:"A-1024", sk:"E87", act:"notify_customer(all)",       risk:"L3",      v:"deny",  r:4, a:"notify_customer"},
+    {id:"A-1025", sk:"E21", act:"send_email(all)",            risk:"L3",      v:"deny",  r:5, a:"send_email"},
+    {id:"A-1026", sk:"E87", act:"issue_refund(x14)",          risk:"L4",      v:"deny",  r:6, a:"issue_refund"},
+    {id:"A-1029", sk:"C10", act:"create_schedule(notify_customer @08:00)",
+                                                              risk:"L4-meta", v:"deny",  r:7, a:"create_schedule"}
+  ];
+
+  /* ══ i18n ══
+     The policy rules stay in English identifiers in every language —
+     that is the point: the compiled artifact is language-neutral. */
+  var I18N = {
+
+    zh:{
+      code:"zh", tags:["zh","en"], csnote:"· 句中語碼轉換",
+      sub:"語音治理控制盤 · 一句話說出的規則，成為機器擋得住的權限",
+      play:"執行事故劇本", running:"劇本執行中", replay:"重新執行", reset:"重置",
+      standby:"待命", done:"劇本結束",
+      h1:"語音輸入", h2:"編譯後的政策", h3:"行動閘門", h4:"稽核軌跡",
+      e87:"緊急更新與下架",
+      detected:"DETECTED", zin:"workforce 送出", zout:"送達外部世界",
+      pass:"放行", stop:"攔下", count:"{n} 筆",
+      emptyPolicy:"尚未編譯任何政策<br>預設：一切 DENY",
+      emptyAudit:"尚無治理決策",
+      fp:"三種語言編出同一份政策 · fingerprint",
+      waiting:"等待語音", speaker:"Ann · 用 LINE 語音",
+      reportWho:"Signal Box · 回報至 LINE",
+      steps:["事故觸發","workforce 送出行動請求","語音授權","編譯政策 P-2026-001",
+             "逐筆評估","回報並詢問","語音修改政策","政策更新至 v2","恢復執行","完成"],
+      trigger:"庫存耗盡：熱銷商品缺貨，E87 建立緊急計畫（8 項行動）",
+      reasons:["政策明列 pause_ad 允許","政策明列 delist_product 允許",
+               "政策明列 mark_out_of_stock 允許","L1 讀取，政策範圍內",
+               "人類明確禁止顧客通知","顧客通知被禁止，寄信同屬顧客接觸",
+               "L4 財務動作，未獲授權",
+               "L4-meta：不得排程一個當下被禁止的動作"],
+      tamper:"試著繞過", tamperRunning:"嘗試中…",
+      tamperLog:"外部偽造的呼叫，未經 evaluator 授權",
+      tamperNote:"<b>BLOCKED · 偽造呼叫</b><br>這筆請求不是 workforce 送出的，是直接注入的。它一樣拿不到 Execute 憑證——政策評估不看呼叫從哪來，只看政策怎麼說。",
+      resumeReason:"政策 v2 允許：條件 group=paid_affected 相符",
+      blocked:"<b>BLOCKED · A-1024 · notify_customer</b><br>E87 嘗試對全體受影響顧客推播。政策 P-2026-001 明確禁止顧客通知，呼叫在到達 LINE Messaging API 之前就被攔下。",
+      escape:"<b>BLOCKED · A-1029 · create_schedule</b> — 逃生門<br>顧客通知被擋下後，C10 嘗試把它<b>排到明天早上八點</b>執行。排程本身不造成後果，它製造的是「等你回家之後自己動手」的能力。<br>語料庫裡 <b>47 支 skill</b> 可以排程——這是這支 workforce 最大的真實高風險面。",
+      report:"已完成廣告暫停與商品下架。顧客通知目前被你的政策禁止，因此沒有發送。<br><br>有 <b>14 筆已付款訂單</b>，要怎麼處理？",
+      final:"9 項行動請求 · <b>6 項放行</b> · <b>4 項攔下</b>（含一次 v2 後恢復）。<br>退款自始至終未被授權；那個想繞過政策的排程也沒排成。",
+      line1:[{t:"Meta 跟 Google 廣告全部先 "},{t:"pause",cs:1},{t:" 掉，蝦皮跟官網可以 "},{t:"delist",cs:1},
+             {t:"，但先不要通知客人。訂單不要取消，退款也不能自己做。已付款的訂單先整理給我。"}],
+      line2:[{t:"那 14 個已付款的客人可以通知，但還是不要取消訂單，退款也一樣不行。"}],
+      note:"<b>畫面上的 skill 代號與依賴關係取自實際的 OpenClaw v7 語料庫（110 支）</b>，不是示意資料。<br><br>語料庫盤點後確認：全部 110 支中<b>只有 6 支持有外部憑證</b>（Google、Telegram、瀏覽器），<b>沒有任何一支持有蝦皮、Momo、Meta Ads、Google Ads 的憑證</b>。因此 <code>pause_ad</code>、<code>delist_product</code>、<code>issue_refund</code> 目前一律走 sandbox adapter — 但閘門本身是真的：<b>沒有任何有後果的呼叫能繞過它</b>。<br><br>切換語言重跑一次：講的話換了，<b>編譯出的政策指紋不變</b>。",
+      legend:["ALLOW 政策允許","ASK 回頭問人","DENY 明確禁止"]
+    },
+
+    en:{
+      code:"en", tags:["en","terms"], csnote:"· domain terms primed",
+      sub:"A voice governance control plane — spoken rules become permissions a machine can enforce",
+      play:"Run the incident", running:"Running", replay:"Run again", reset:"Reset",
+      standby:"Standby", done:"Scenario complete",
+      h1:"Voice input", h2:"Compiled policy", h3:"Action gate", h4:"Audit trail",
+      e87:"Emergency update & delist",
+      detected:"DETECTED", zin:"Requested by workforce", zout:"Reached the outside world",
+      pass:"cleared", stop:"held", count:"{n} entries",
+      emptyPolicy:"No policy compiled yet<br>Default: DENY everything",
+      emptyAudit:"No governance decisions yet",
+      fp:"Same policy from all three languages · fingerprint",
+      waiting:"Awaiting voice", speaker:"Ann · voice on LINE",
+      reportWho:"Signal Box · reporting to LINE",
+      steps:["Incident fires","Workforce requests actions","Voice authorization","Compiling P-2026-001",
+             "Through the gate","Report and ask","Voice amends policy","Policy at v2","Resume","Complete"],
+      trigger:"Stock exhausted: bestseller out of stock, E87 opens an emergency plan (8 actions)",
+      reasons:["pause_ad explicitly allowed","delist_product explicitly allowed",
+               "mark_out_of_stock explicitly allowed","L1 read, inside policy scope",
+               "Customer notification explicitly denied","Email is customer contact, also denied",
+               "L4 financial action, never authorized",
+               "L4-meta: cannot schedule what is denied now"],
+      tamper:"Try to bypass", tamperRunning:"Trying…",
+      tamperLog:"Forged call from outside the workforce, unauthorized",
+      tamperNote:"<b>BLOCKED · forged call</b><br>This request did not come from the workforce — it was injected directly. It still cannot obtain an Execute credential. The evaluator does not care where a call came from, only what the policy says.",
+      resumeReason:"Policy v2 allows it: condition group=paid_affected matched",
+      blocked:"<b>BLOCKED · A-1024 · notify_customer</b><br>E87 tried to push a notice to every affected customer. Policy P-2026-001 denies customer notification, so the call stopped before it reached the LINE Messaging API.",
+      escape:"<b>BLOCKED · A-1029 · create_schedule</b> — the escape hatch<br>Denied the notification, C10 tried to <b>schedule it for 8am tomorrow</b>. Scheduling causes no effect itself; it manufactures the capacity to act once you have gone home.<br><b>47 skills</b> in the corpus can schedule — the largest real high-risk surface this workforce has.",
+      report:"Ads are paused and the product is delisted. Customer notification is denied by your policy, so nothing was sent.<br><br>There are <b>14 paid orders</b>. How should I handle them?",
+      final:"9 action requests · <b>6 cleared</b> · <b>4 held</b> (one released after v2).<br>The refund was never authorized — and neither was the schedule that tried to outlast the policy.",
+      line1:[{t:"Pause all the "},{t:"Meta",cs:1},{t:" and "},{t:"Google",cs:1},
+             {t:" ads. You can delist on "},{t:"Shopee",cs:1},
+             {t:" and the website, but don't notify customers yet. Don't cancel any orders, and don't issue refunds on your own. Pull the paid orders together for me."}],
+      line2:[{t:"You can notify those 14 paid customers, but still don't cancel the orders, and no refunds either."}],
+      note:"<b>The skill IDs and dependencies on screen come from the real OpenClaw v7 corpus (110 skills)</b> — not mock data.<br><br>An audit of that corpus found that <b>only 6 of the 110 hold any external credential</b> (Google, Telegram, browser), and <b>none holds a credential for Shopee, Momo, Meta Ads or Google Ads</b>. So <code>pause_ad</code>, <code>delist_product</code> and <code>issue_refund</code> run through sandbox adapters today — but the gate itself is real: <b>no consequential call gets past it</b>.<br><br>Switch language and run it again: the words change, <b>the compiled policy fingerprint does not</b>.",
+      legend:["ALLOW permitted","ASK ask a human","DENY explicitly refused"]
+    },
+
+    ja:{
+      code:"ja", tags:["ja","en"], csnote:"· 文中コードスイッチ",
+      sub:"音声ガバナンス制御盤 — 話したルールが、機械に守らせられる権限になる",
+      play:"インシデントを再生", running:"実行中", replay:"もう一度", reset:"リセット",
+      standby:"待機中", done:"シナリオ終了",
+      h1:"音声入力", h2:"コンパイル済みポリシー", h3:"アクション・ゲート", h4:"監査ログ",
+      e87:"緊急更新・掲載停止",
+      detected:"DETECTED", zin:"ワークフォースの要求", zout:"外部世界へ到達",
+      pass:"通過", stop:"停止", count:"{n} 件",
+      emptyPolicy:"ポリシー未コンパイル<br>既定：すべて DENY",
+      emptyAudit:"ガバナンス判断はまだありません",
+      fp:"三言語から同一のポリシー · fingerprint",
+      waiting:"音声を待機中", speaker:"Ann · LINE の音声",
+      reportWho:"Signal Box · LINE へ報告",
+      steps:["インシデント発生","ワークフォースが要求","音声による承認","P-2026-001 をコンパイル",
+             "ゲート通過","報告と確認","音声でポリシー修正","ポリシー v2","再開","完了"],
+      trigger:"在庫切れ：人気商品が欠品、E87 が緊急計画を作成（8 アクション）",
+      reasons:["pause_ad はポリシーで許可","delist_product はポリシーで許可",
+               "mark_out_of_stock はポリシーで許可","L1 読み取り、ポリシー範囲内",
+               "顧客通知は明示的に禁止","メールも顧客接触のため禁止",
+               "L4 金銭的操作、未承認",
+               "L4-meta：今禁止されている操作は予約もできない"],
+      tamper:"迂回を試す", tamperRunning:"試行中…",
+      tamperLog:"外部から偽造された呼び出し、未承認",
+      tamperNote:"<b>BLOCKED · 偽造呼び出し</b><br>この要求はワークフォースからではなく、直接注入されたものです。それでも Execute 資格は得られません。評価器は呼び出し元ではなく、ポリシーだけを見ます。",
+      resumeReason:"ポリシー v2 で許可：条件 group=paid_affected に一致",
+      blocked:"<b>BLOCKED · A-1024 · notify_customer</b><br>E87 が影響を受けた全顧客への配信を試行。ポリシー P-2026-001 は顧客通知を禁止しているため、LINE Messaging API に到達する前に停止しました。",
+      escape:"<b>BLOCKED · A-1029 · create_schedule</b> — 抜け穴<br>通知を拒否された C10 が、それを<b>明朝 8 時に予約</b>しようとしました。予約自体は何も起こしません。あなたが帰宅した後に動く能力を作り出すだけです。<br>コーパス内の <b>47 本</b>が予約可能——このワークフォース最大の実リスク面です。",
+      report:"広告の停止と商品の掲載停止は完了しました。顧客通知はポリシーで禁止されているため、送信していません。<br><br><b>支払い済みの注文が 14 件</b>あります。どう処理しますか？",
+      final:"9 件の要求 · <b>6 件通過</b> · <b>4 件停止</b>（v2 後に 1 件解放）。<br>返金は一度も承認されず、ポリシーを出し抜こうとした予約も成立しませんでした。",
+      line1:[{t:"Meta と Google の広告は全部 "},{t:"pause",cs:1},{t:" して。ショッピーと自社サイトは "},
+             {t:"delist",cs:1},{t:" していい。ただし顧客への通知はまだしないで。注文はキャンセルしない、返金も勝手にやらないで。支払い済みの注文はまとめておいて。"}],
+      line2:[{t:"支払い済みの 14 人には通知していい。でも注文のキャンセルはしない、返金もだめ。"}],
+      note:"<b>画面上の skill ID と依存関係は、実際の OpenClaw v7 コーパス（110 本）から取得しています</b>。ダミーデータではありません。<br><br>コーパスを棚卸しした結果、110 本のうち<b>外部認証情報を持つのは 6 本のみ</b>（Google、Telegram、ブラウザ）で、<b>ショッピー・Momo・Meta Ads・Google Ads の認証情報を持つものは一つもありません</b>。したがって <code>pause_ad</code>、<code>delist_product</code>、<code>issue_refund</code> は現時点ではサンドボックス・アダプタ経由です。ただしゲート自体は本物で、<b>結果を伴う呼び出しはこれを迂回できません</b>。<br><br>言語を切り替えて再実行してみてください。話す言葉は変わっても、<b>コンパイルされたポリシーの fingerprint は変わりません</b>。",
+      legend:["ALLOW 許可","ASK 人に確認","DENY 明示的に禁止"]
+    }
+  };
+
+  var L = "zh", T = I18N.zh;
+
+  /* ══ waveform ══ */
+  var wave = $("wave"), bars = [];
+  for (var i=0;i<48;i++){ var b=document.createElement("i"); wave.appendChild(b); bars.push(b); }
+  var waveTimer = null;
+  function waveOn(){
+    wave.classList.add("hot");
+    if (waveTimer) return;
+    waveTimer = setInterval(function(){
+      for (var i=0;i<bars.length;i++) bars[i].style.height = (12 + Math.random()*Math.random()*82) + "%";
+    }, 90);
+  }
+  function waveOff(){
+    wave.classList.remove("hot");
+    clearInterval(waveTimer); waveTimer = null;
+    for (var i=0;i<bars.length;i++) bars[i].style.height = "12%";
+  }
+
+  /* ══ clock ══ */
+  var clockN = 0;
+  function nextTs(){
+    clockN += 3 + Math.floor(Math.random()*4);
+    var base = 32*60 + 11 + clockN;
+    return "10:" + String(Math.floor(base/60)%60).padStart(2,"0") + ":" + String(base%60).padStart(2,"0");
+  }
+
+  /* ══ rendering ══ */
+  function actEl(a, cls){
+    var d = document.createElement("div");
+    d.className = "act" + (cls ? " "+cls : "");
+    d.innerHTML =
+      '<span class="sk">'+ (SKILL[a.sk]||{e:""}).e +' '+ a.sk +'</span>' +
+      '<span class="an">'+ a.act +'</span>' +
+      '<span class="ad'+ (ADAPTER[a.a]==="real" ? " real" : "") +'">'+
+        (ADAPTER[a.a]==="real" ? "real" : "sandbox") +'</span>' +
+      '<span class="rl'+ (a.risk.indexOf("L4")===0 ? " hi" : "") +'">'+ a.risk +'</span>';
+    return d;
+  }
+
+  var passed = 0, stopped = 0, audited = 0;
+
+  function logRow(a, verdict, reason, ver){
+    var box = $("audit");
+    if (box.querySelector(".empty")) box.innerHTML = "";
+    var r = document.createElement("div");
+    r.className = "arow";
+    var cls = verdict==="ALLOW" ? "v-allow" : (verdict==="DENY" ? "v-deny" : "v-ask");
+    r.innerHTML =
+      '<span class="ts">'+ nextTs() +'</span>' +
+      '<span class="id">'+ a.id +'</span>' +
+      '<span class="ac">'+ a.act +'</span>' +
+      '<span class="verdict '+cls+'">'+ verdict +'</span>' +
+      '<span class="rs">'+ reason +' · policy v'+ ver +'</span>';
+    box.appendChild(r);
+    box.scrollTop = box.scrollHeight;
+    audited++;
+    $("acount").textContent = T.count.replace("{n}", audited);
+    $("gcount").textContent = audited;
+  }
+
+  function signal(kind){
+    var s = $("sig");
+    s.className = "signal s-" + kind;
+    var lamps = $("mast").children;
+    for (var i=0;i<3;i++) lamps[i].className = "";
+    lamps[kind==="deny"?0:(kind==="ask"?1:2)].className = "on";
+    setTimeout(function(){ s.className = "signal"; }, 780);
+  }
+
+  var rules = [];
+  function renderRules(bumped){
+    var box = $("rules");
+    if (!rules.length){ box.innerHTML = '<p class="empty">'+ T.emptyPolicy +'</p>'; return; }
+    box.innerHTML = "";
+    rules.forEach(function(r){
+      var d = document.createElement("div");
+      d.className = "rule" + (r.fresh ? " new" : "");
+      var cls = r.effect==="ALLOW" ? "v-allow" : (r.effect==="DENY" ? "v-deny" : "v-ask");
+      d.innerHTML =
+        '<span class="nm">'+ r.action +'</span>' +
+        (r.cond ? '<span class="cond">'+ r.cond +'</span>' : '') +
+        '<span class="verdict '+cls+'">'+ r.effect +'</span>';
+      box.appendChild(d);
+      r.fresh = false;
+    });
+    if (bumped){
+      var v = $("polver");
+      v.classList.remove("bump"); void v.offsetWidth; v.classList.add("bump");
+    }
+  }
+
+  function say(who, parts, done){
+    $("who").textContent = who;
+    var el = $("said");
+    el.innerHTML = "";
+    waveOn();
+    $("lg-a").classList.add("hit");
+    var flat = [];
+    parts.forEach(function(p){
+      for (var i=0;i<p.t.length;i++) flat.push({ch:p.t[i], cs:p.cs});
+    });
+    var i = 0, cur = null, curCs = null;
+    var iv = setInterval(function(){
+      if (i >= flat.length){
+        clearInterval(iv); waveOff();
+        var c = document.createElement("span"); c.className="cur"; el.appendChild(c);
+        if (done) done();
+        return;
+      }
+      var f = flat[i++];
+      if (f.cs !== curCs || !cur){
+        cur = document.createElement("span");
+        if (f.cs){ cur.className = "cs"; $("lg-b").classList.add("hit"); $("csnote").textContent = T.csnote; }
+        el.appendChild(cur);
+        curCs = f.cs;
+      }
+      cur.textContent += f.ch;
+    }, 42);
+    typing = iv;
+  }
+  var typing = null;
+
+  /* ══ scenario ══ */
+  var steps = [
+    {i:0, ms:900, fn:function(){
+      $("mid").textContent = "M-100";
+      var box = $("audit"); box.innerHTML = "";
+      var r = document.createElement("div");
+      r.className = "arow";
+      r.innerHTML = '<span class="ts">'+ nextTs() +'</span><span class="id">TRIG</span>' +
+        '<span class="ac">E03 → E77 → E87</span><span class="verdict v-ask">EVENT</span>' +
+        '<span class="rs">'+ T.trigger +'</span>';
+      box.appendChild(r);
+    }},
+    {i:1, ms:1500, fn:function(){
+      var q = $("qin");
+      ACTIONS.forEach(function(a, i){ setTimeout(function(){ q.appendChild(actEl(a)); }, i*130); });
+    }},
+    {i:2, ms:6200, fn:function(){ say(T.speaker, T.line1); }},
+    {i:3, ms:1400, fn:function(){
+      $("pid").textContent = "P-2026-001";
+      $("polid").textContent = "P-2026-001";
+      $("polscope").textContent = "mission";
+      $("polver").textContent = "1";
+      rules = [
+        {action:"pause_ad",            effect:"ALLOW", fresh:1},
+        {action:"delist_product",      effect:"ALLOW", fresh:1},
+        {action:"mark_out_of_stock",   effect:"ALLOW", fresh:1},
+        {action:"collect_paid_orders", effect:"ALLOW", fresh:1},
+        {action:"notify_customer",     effect:"DENY",  fresh:1},
+        {action:"cancel_order",        effect:"DENY",  fresh:1},
+        {action:"issue_refund",        effect:"DENY",  fresh:1}
+      ];
+      renderRules(true);
+      $("tamper").disabled = false;
+    }},
+    {i:4, ms:9800, fn:function(){
+      var qin = $("qin"), qout = $("qout");
+      ACTIONS.forEach(function(a, i){
+        setTimeout(function(){
+          signal(a.v);
+          if (qin.firstChild) qin.removeChild(qin.firstChild);
+          if (a.v === "allow"){
+            qout.appendChild(actEl(a, "allow"));
+            passed++; $("passed").textContent = passed;
+            logRow(a, "ALLOW", T.reasons[a.r], 1);
+          } else {
+            var blocked = actEl(a, "deny");
+            blocked.classList.add("dim");
+            qin.insertBefore(blocked, qin.firstChild);
+            stopped++; $("stopped").textContent = stopped;
+            logRow(a, "DENY", T.reasons[a.r], 1);
+            if (a.id === "A-1024" || a.id === "A-1029"){
+              var n = $("bnote");
+              n.innerHTML = (a.id === "A-1029") ? T.escape : T.blocked;
+              n.classList.add("show");
+            }
+          }
+        }, i*1000);
+      });
+    }},
+    {i:5, ms:2200, fn:function(){
+      $("who").textContent = T.reportWho;
+      $("said").innerHTML = T.report;
+    }},
+    {i:6, ms:4600, fn:function(){ say(T.speaker, T.line2); }},
+    {i:7, ms:1600, fn:function(){
+      $("polver").textContent = "2";
+      rules[4] = {action:"notify_customer", cond:"group=paid_affected", effect:"ALLOW", fresh:1};
+      renderRules(true);
+      $("bnote").classList.remove("show");
+    }},
+    {i:8, ms:1800, fn:function(){
+      var a = {id:"A-1031", sk:"E27", act:"notify_customer(paid_affected×14)", risk:"L3"};
+      signal("allow");
+      $("qout").appendChild(actEl(a, "allow"));
+      passed++; $("passed").textContent = passed;
+      logRow(a, "ALLOW", T.resumeReason, 2);
+    }},
+    {i:9, ms:700, fn:function(){
+      $("who").textContent = "—";
+      $("said").innerHTML = T.final;
+    }}
+  ];
+
+  /* ══ runner ══ */
+  var running = false, timers = [];
+
+  function run(){
+    if (running) return;
+    reset(true);
+    running = true;
+    $("play").disabled = true;
+    $("reset").disabled = false;
+    $("playlbl").textContent = T.running;
+    var total = steps.reduce(function(s,x){ return s+x.ms; }, 0), acc = 0;
+    steps.forEach(function(s){
+      var at = acc; acc += s.ms;
+      timers.push(setTimeout(function(){
+        $("step").textContent = T.steps[s.i];
+        $("bar").style.width = Math.round(at/total*100) + "%";
+        s.fn();
+      }, at));
+    });
+    timers.push(setTimeout(function(){
+      $("bar").style.width = "100%";
+      $("step").textContent = T.done;
+      $("playlbl").textContent = T.replay;
+      $("play").disabled = false;
+      running = false;
+    }, acc + 400));
+  }
+
+  function reset(keepBtn){
+    timers.forEach(clearTimeout); timers = [];
+    clearInterval(typing); typing = null;
+    running = false; waveOff();
+    passed = stopped = audited = clockN = 0;
+    rules = [];
+    $("qin").innerHTML = ""; $("qout").innerHTML = "";
+    $("audit").innerHTML = '<p class="empty">'+ T.emptyAudit +'</p>';
+    $("said").innerHTML = '<span class="cur"></span>';
+    $("who").textContent = T.waiting;
+    $("mid").textContent = "—"; $("pid").textContent = "—";
+    $("polid").textContent = "P-————"; $("polscope").textContent = "—"; $("polver").textContent = "0";
+    $("passed").textContent = "0"; $("stopped").textContent = "0";
+    $("gcount").textContent = "0"; $("acount").textContent = T.count.replace("{n}", 0);
+    $("bar").style.width = "0"; $("step").textContent = T.standby;
+    $("bnote").classList.remove("show");
+    $("tamper").disabled = true; forged = 0;
+    $("lg-a").classList.remove("hit"); $("lg-b").classList.remove("hit");
+    $("csnote").textContent = "";
+    renderRules(false);
+    var lamps = $("mast").children;
+    for (var i=0;i<3;i++) lamps[i].className = "";
+    if (!keepBtn){
+      $("playlbl").textContent = T.play;
+      $("play").disabled = false; $("reset").disabled = true;
+    }
+  }
+
+  /* ══ bypass attempt ══
+     A forged request, injected from outside the workforce entirely. It is
+     refused for the same reason every other denial is: the evaluator reads the
+     policy, not the caller. Letting a judge fire this themselves is worth more
+     than any animation of ours. */
+  var forged = 0;
+  function tamper(){
+    var b = $("tamper");
+    b.disabled = true;
+    var was = b.textContent;
+    b.textContent = T.tamperRunning;
+
+    forged++;
+    var a = {id:"X-" + (900 + forged), sk:"??", act:"notify_customer(all)",
+             risk:"L3", a:"notify_customer"};
+    var card = actEl(a, "deny");
+    card.classList.add("dim");
+    $("qin").insertBefore(card, $("qin").firstChild);
+
+    setTimeout(function(){
+      signal("deny");
+      stopped++; $("stopped").textContent = stopped;
+      logRow(a, "DENY", T.tamperLog, $("polver").textContent);
+      var n = $("bnote"); n.innerHTML = T.tamperNote; n.classList.add("show");
+      b.textContent = was;
+      b.disabled = false;
+    }, 620);
+  }
+
+  /* ══ language ══ */
+  function applyLang(code){
+    L = code; T = I18N[code];
+    document.documentElement.lang = code === "zh" ? "zh-Hant" : code;
+
+    $("t-sub").textContent = T.sub;
+    $("t-h1").textContent = T.h1; $("t-h2").textContent = T.h2;
+    $("t-h3").textContent = T.h3; $("t-h4").textContent = T.h4;
+    $("t-e87").textContent = T.e87;
+    $("t-detected").textContent = T.detected;
+    $("t-zin").textContent = T.zin; $("t-zout").textContent = T.zout;
+    $("t-pass").textContent = T.pass; $("t-stop").textContent = T.stop;
+    $("lg-a").textContent = T.tags[0]; $("lg-b").textContent = T.tags[1];
+    $("reset").textContent = T.reset;
+    $("tamper").textContent = T.tamper;
+    $("fpline").innerHTML = T.fp + ' <b>9f3c2a71</b>';
+
+    var lg = T.legend;
+    $("note").innerHTML = T.note +
+      '<div class="legend">' +
+        '<span><i style="background:var(--clear)"></i>'+ lg[0] +'</span>' +
+        '<span><i style="background:var(--caution)"></i>'+ lg[1] +'</span>' +
+        '<span><i style="background:var(--deny)"></i>'+ lg[2] +'</span>' +
+      '</div>';
+
+    Array.prototype.forEach.call($("langsw").children, function(b){
+      b.setAttribute("aria-pressed", b.dataset.lang === code ? "true" : "false");
+    });
+
+    reset(false);
+  }
+
+  $("langsw").addEventListener("click", function(e){
+    var b = e.target.closest("button[data-lang]");
+    if (b && b.dataset.lang !== L) applyLang(b.dataset.lang);
+  });
+  $("tamper").addEventListener("click", tamper);
+  $("play").addEventListener("click", run);
+  $("reset").addEventListener("click", function(){ reset(false); });
+
+  applyLang("zh");
+})();
+</script>
