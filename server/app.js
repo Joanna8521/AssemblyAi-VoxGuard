@@ -33,6 +33,7 @@ import { validateRules } from '../governance/validate.js';
 import { MemoryStore, KVStore, sessionIdFrom } from '../governance/store.js';
 import { perform, adapterStatus } from '../adapters/index.js';
 import { runAgent, implementedAgents } from '../runtime/run.js';
+import { open as openMission, blueprint, digest } from '../governance/mission.js';
 import { toolsFor, systemPrompt, greeting, inputConfig } from '../voice/tools.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -431,6 +432,97 @@ const routes = {
 
     await save();
     return { ...run, decisions };
+  },
+
+  /**
+   * Open a mission: compose a team and compile its boundaries from one
+   * description, at the same moment, from the same sentence.
+   */
+  'POST /api/missions': async (body, { session, save }) => {
+    const { accepted, rejected } = validateRules(body.rules, registry);
+    const known = new Set(registry.actionIds);
+    const needs = (body.needs ?? []).filter((a) => known.has(a));
+    const unknownNeeds = (body.needs ?? []).filter((a) => !known.has(a));
+
+    const mission = openMission(
+      { brief: body.brief, needs, rules: accepted, scope: body.scope, spokenIn: body.spokenIn },
+      workforce.agents,
+      { at: new Date().toISOString() },
+    );
+
+    session.missions ??= [];
+    session.missions.unshift(mission);
+    session.missions = session.missions.slice(0, 10);
+    // The newest mission is the one a bare policy question is about.
+    session.policy = mission.policy;
+    await save();
+
+    return {
+      mission,
+      blueprint: blueprint(mission, workforce.agents),
+      rejected,
+      unknownNeeds,
+    };
+  },
+
+  'GET /api/missions': async (_body, { session }) => ({
+    missions: (session.missions ?? []).map(digest),
+  }),
+
+  'POST /api/missions/get': async (body, { session }) => {
+    const mission = (session.missions ?? []).find((m) => m.id === body.id);
+    if (!mission) {
+      const e = new Error(`no mission ${body.id}`);
+      e.status = 404;
+      throw e;
+    }
+    return { mission, blueprint: blueprint(mission, workforce.agents) };
+  },
+
+  /**
+   * Run every agent on a mission's team that has an implementation, and put
+   * each intent through the same evaluator as everything else. The ones that
+   * are only described say so rather than pretending to have worked.
+   */
+  'POST /api/missions/run': async (body, { session, save }) => {
+    const mission = (session.missions ?? []).find((m) => m.id === body.id)
+      ?? (session.missions ?? [])[0];
+    if (!mission) {
+      const e = new Error('no mission to run');
+      e.status = 404;
+      throw e;
+    }
+
+    const previousPolicy = session.policy;
+    session.policy = mission.policy;    // judged against its own boundaries
+
+    const observed = [];
+    const decisions = [];
+    for (const member of mission.team) {
+      const run = await runAgent(member.id, { session, workforce });
+      observed.push(...run.observed.map((o) => `${member.name}: ${o}`));
+      for (const intent of run.intents) {
+        const request = {
+          actionId: `A-${1000 + session.audit.length}`,
+          action: intent.action,
+          skill: member.id,
+          parameters: intent.parameters ?? {},
+        };
+        const decision = await decide(session, request);
+        decisions.push({
+          agent: member.name, why: intent.why, action: request.action,
+          verdict: decision.verdict, reason: decision.reason, audit: decision.audit,
+        });
+      }
+    }
+
+    mission.runs.push({ at: new Date().toISOString(), observed, decisions });
+    mission.policy = session.policy;    // an amendment mid-run belongs to it
+    session.policy = mission.policy;
+    if (previousPolicy && previousPolicy.missionId !== mission.id) { /* kept above */ }
+    await save();
+
+    return { mission: digest(mission), observed, decisions };
   },
 
   'POST /api/reset': async (_body, { id }) => {

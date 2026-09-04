@@ -49,6 +49,56 @@ export const implementedAgents = () => Object.keys(RUNNERS);
 
 const RUNNERS = {
   /**
+   * Inventory Watch. Looks at the same watched products as Price Watch, but for
+   * a different fact: whether anything can still be bought.
+   *
+   * This is a real stock-out detector, not a simulated one. A Shopify storefront
+   * publishes per-variant availability, so "sold out" here is the shop saying so
+   * rather than us inferring it. Where a page will not say, it says nothing:
+   * a guessed stock level is the number somebody would act on.
+   */
+  async A01({ pools }) {
+    const watches = pools.listings ?? [];
+    const readable = watches.filter((w) => w.inStock !== null && w.inStock !== undefined);
+
+    if (!watches.length) {
+      return { observed: ['Nothing is being watched, so there is no stock to watch.'], intents: [] };
+    }
+    if (!readable.length) {
+      return {
+        observed: [`${watches.length} watched, none of which states availability. ` +
+                   'Run Price Watch first, or watch a shop that publishes stock.'],
+        intents: [],
+      };
+    }
+
+    const out = readable.filter((w) => w.inStock === false);
+    const thin = readable.filter((w) => w.inStock && w.variantsInStock === 1);
+
+    const observed = [
+      `${readable.length} products readable, ${out.length} sold out, ${thin.length} down to a last variant.`,
+      ...out.map((w) => `${label(w)}: sold out at ${w.price}`),
+      ...thin.map((w) => `${label(w)}: one variant left at ${w.price}`),
+    ];
+
+    const intents = [];
+    for (const w of out) {
+      // Raising the signal is this agent's whole job. Whether anybody hears it,
+      // and what anybody does about it, is not.
+      if (w.reportedOut) continue;
+      w.reportedOut = true;
+      intents.push({
+        action: 'send_telegram_message',
+        parameters: { text: `Out of stock\n${label(w)}\nlast seen at ${w.price}\n${w.url}` },
+        why: `${label(w)} is sold out`,
+      });
+    }
+    for (const w of readable.filter((x) => x.inStock)) delete w.reportedOut;
+
+    return { observed, intents };
+  },
+
+  /**
    * Price Watch. Fetches every watched page, reads the price the page states,
    * and compares it to the price it stated last time.
    *

@@ -86,6 +86,50 @@ export function toolsFor(registry) {
   return [
     {
       type: FUNCTION_TOOL,
+      name: 'start_mission',
+      description:
+        'Call this when the user describes a situation they want handled, rather than ' +
+        'only stating rules. One sentence usually carries both, and they are different ' +
+        'things that both have to be extracted.\n\n' +
+        '`needs` is the work: what would actually have to be done to deal with what they ' +
+        'described. Include reading and analysis, not only the dramatic parts. If a ' +
+        'product is out of stock, somebody has to look at stock before anything else.\n\n' +
+        '`rules` is the boundary: only what they said out loud about what may and may not ' +
+        'happen. An action can appear in both, and often should. "Ask me before telling ' +
+        'customers" means notify_customer is needed AND carries an ASK.\n\n' +
+        'Do not invent needs to look thorough or rules to look careful. If they did not ' +
+        'mention refunds, refunds are not a rule; the evaluator already refuses what ' +
+        'nobody authorised.',
+      parameters: {
+        type: 'object',
+        properties: {
+          brief: {
+            type: 'string',
+            description: 'The situation in their own words, one sentence.',
+          },
+          needs: {
+            type: 'array',
+            description: 'The actions this work requires. ' + catalogue,
+            items: { type: 'string', enum: actionIds },
+          },
+          rules: {
+            type: 'array',
+            description: 'Only the permissions and prohibitions they actually stated.',
+            items: ruleSchema(actionIds, vocabulary, catalogue),
+          },
+          scope: {
+            type: 'string',
+            enum: ['mission', 'session'],
+            description: 'mission unless they said something like "from now on".',
+          },
+        },
+        required: ['brief', 'needs'],
+      },
+      execution_mode: 'interactive',
+    },
+
+    {
+      type: FUNCTION_TOOL,
       name: 'compile_policy',
       description:
         'Call this when the user states, for the first time in this mission, what ' +
@@ -236,8 +280,17 @@ export function systemPrompt(corpus) {
     `of an AI commerce workforce of ${n} skills that run on their own, without the`,
     `user watching.`,
     ``,
-    `Your main job: when the user states what the workforce may or may not do, turn`,
-    `it into policy by calling compile_policy or amend_policy.`,
+    `Two things arrive in one sentence and both matter.`,
+    ``,
+    `When somebody describes a situation they want dealt with, call start_mission.`,
+    `It takes the work the situation requires and the boundaries they put around it,`,
+    `and those are not the same list. "The product is out of stock, deal with it, but`,
+    `don't refund anyone" needs stock read, ads paused and the listing taken down,`,
+    `and carries one prohibition. Miss the work and nothing happens; miss the`,
+    `boundary and the wrong thing happens.`,
+    ``,
+    `When they are only adding or changing rules on work already under way, call`,
+    `compile_policy or amend_policy instead.`,
     ``,
     `Around that, be a useful colleague. If they ask what a term means, what the`,
     `current policy says, what got blocked, or how any of this works, answer them`,
