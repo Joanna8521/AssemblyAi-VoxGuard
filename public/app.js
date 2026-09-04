@@ -253,6 +253,19 @@ function renderSources(pools) {
   const listings = pools?.listings ?? [];
   const sheets = pools?.sheets ?? [];
 
+  const hero = $('hero-sources');
+  if (hero) {
+    const named = [
+      ...sheets.map((s) => s.name ?? 'a spreadsheet'),
+      ...listings.map((w) => {
+        try { return new URL(w.url).hostname.replace(/^www\./, ''); } catch { return w.url; }
+      }),
+    ];
+    hero.textContent = named.length
+      ? `Already reading: ${[...new Set(named)].join(', ')}`
+      : '';
+  }
+
   if (!listings.length && !sheets.length) {
     box.innerHTML = '<p class="empty">Nothing being read.<br>' +
       'Paste a rival&rsquo;s product page, or a Google Sheet shared as ' +
@@ -620,26 +633,41 @@ const EXAMPLES = {
     $('c-fp').textContent = '—';
   };
 
-  const addSource = async () => {
-    const url = $('watch-url').value.trim();
+  /**
+   * Connect something for the workforce to read.
+   *
+   * Takes the input it was given rather than one fixed field, because the same
+   * action belongs in two places: on the first screen, where sources should be
+   * connected before the work that needs them, and in the panel once a mission
+   * is open. It was only in the second, which meant a visitor arriving at the
+   * app had nowhere at all to paste a link.
+   */
+  const addSource = async (inputId, errorId) => {
+    const input = $(inputId);
+    const url = input.value.trim();
     if (!url) return;
     // A spreadsheet is read as a spreadsheet and a shop page as a shop page.
     // Which one this is can be seen from the link, so it is not worth asking.
     const isSheet = /docs\.google\.com\/spreadsheets\//.test(url);
     try {
       await api(isSheet ? '/api/sheets' : '/api/watch', { url });
-      $('watch-url').value = '';
+      input.value = '';
       renderSources((await api('/api/pools')).pools);
-    } catch (e) { fail('err', e.message); }
+    } catch (e) { fail(errorId, e.message); }
   };
 
-  $('watch-add').onclick = addSource;
+  $('hero-add').onclick = () => addSource('hero-url', 'hero-err');
+  $('hero-url').onkeydown = (ev) => {
+    if (ev.key === 'Enter' && !ev.isComposing) addSource('hero-url', 'hero-err');
+  };
+
+  $('watch-add').onclick = () => addSource('watch-url', 'err');
   // One handler. Two assignments to onkeydown meant the second silently
   // replaced the first, which is the kind of thing that reads fine and is
   // simply not there. isComposing is checked because a link can be pasted
   // beside text somebody is still composing.
   $('watch-url').onkeydown = (ev) => {
-    if (ev.key === 'Enter' && !ev.isComposing) addSource();
+    if (ev.key === 'Enter' && !ev.isComposing) addSource('watch-url', 'err');
   };
 
   $('run-watch').onclick = async () => {

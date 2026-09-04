@@ -354,6 +354,15 @@ h1{font-size:16px;letter-spacing:-.02em}
    Vertical reads better on a phone and horizontal films better on a desk: the
    work moves left to right, the evaluator sits in the middle of the frame, and
    an action that stops there stops in the centre of the shot. */
+/* Sources belong on the first screen. They were only reachable once a mission
+   was open, which put connecting the numbers after the work that needs them. */
+.hero-src{width:100%;max-width:460px;margin:15px auto 0;padding-top:13px;
+  border-top:1px solid var(--line)}
+.hero-src .hd{display:block;font:9.5px var(--mono);letter-spacing:.13em;
+  text-transform:uppercase;color:var(--faint);margin-bottom:7px}
+.hero-src .watch-add{margin-bottom:0}
+.hero-src .note{margin-top:6px}
+.hero-src .note{text-align:left}
 .note{font-size:11px;line-height:1.5;color:var(--muted);margin-top:8px}
 .note:empty{display:none}
 .w.sheet{border-left:3px solid var(--accent)}
@@ -526,6 +535,15 @@ h1{font-size:16px;letter-spacing:-.02em}
           change our own prices to match.</button>
         <button data-eg="rivals">Watch what my competitors are charging and tell me when
           anything moves.</button>
+      </div>
+      <div class="hero-src">
+        <span class="hd">and what should it read?</span>
+        <div class="watch-add">
+          <input id="hero-url" spellcheck="false"
+            placeholder="A rival&rsquo;s product page, or a Google Sheets link">
+          <button id="hero-add">Add</button>
+        </div>
+        <p class="note" id="hero-sources"></p>
       </div>
       <div class="err" id="hero-err"></div>
     </div>
