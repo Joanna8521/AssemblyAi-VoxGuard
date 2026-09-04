@@ -76,32 +76,58 @@ function ruleSchema(actionIds, vocabulary, catalogue) {
   };
 }
 
+/**
+ * The tools, shaped by what this API will actually call.
+ *
+ * Measured, not assumed. Speaking the same sentence into a live session across
+ * about eighty runs gives one hard constraint:
+ *
+ *     { brief }                     called, 3 of 3
+ *     { brief, needs }              called, 5 of 5
+ *     { brief, needs, anything }    never called, 0 of 11
+ *
+ * Three parameters produces no tool call at all, and no error either: the reply
+ * completes, empty, and the agent goes on talking as though it had acted. That
+ * is why a mission was never opened however the prompt was worded, and why the
+ * shape below is the way it is rather than the obvious one.
+ *
+ * So a rule is not an object with an action, an effect and conditions. It is a
+ * list of actions handed to the tool named after the effect. Conditions are not
+ * spoken here at all; they are added afterwards through amend, where they are
+ * one parameter on their own.
+ *
+ * The enums stay, and matter more than they seem to: a free-form parameter made
+ * the agent stop and ask the user what to put in it, while a constrained one it
+ * simply filled. They are still not a guarantee - the API stores schemas
+ * verbatim and does not enforce them - so validateRules on the server remains
+ * the only thing standing between a spoken rule and the evaluator.
+ */
 export function toolsFor(registry) {
   const actionIds = registry.actionIds;
-  const vocabulary = registry.conditionVocabulary;
-  const catalogue = actionIds
-    .map((id) => `${id} = ${registry.label(id, 'en').toLowerCase()}`)
-    .join('; ');
+
+  const actions = (description) => ({
+    type: 'object',
+    required: ['actions'],
+    properties: {
+      actions: {
+        type: 'array',
+        description,
+        items: { type: 'string', enum: actionIds },
+      },
+    },
+  });
 
   return [
     {
       type: FUNCTION_TOOL,
       name: 'start_mission',
       description:
-        'Call this when the user describes a situation they want handled, rather than ' +
-        'only stating rules. One sentence usually carries both, and they are different ' +
-        'things that both have to be extracted.\n\n' +
-        '`needs` is the work: what would actually have to be done to deal with what they ' +
-        'described. Include reading and analysis, not only the dramatic parts. If a ' +
-        'product is out of stock, somebody has to look at stock before anything else.\n\n' +
-        '`rules` is the boundary: only what they said out loud about what may and may not ' +
-        'happen. An action can appear in both, and often should. "Ask me before telling ' +
-        'customers" means notify_customer is needed AND carries an ASK.\n\n' +
-        'Do not invent needs to look thorough or rules to look careful. If they did not ' +
-        'mention refunds, refunds are not a rule; the evaluator already refuses what ' +
-        'nobody authorised.',
+        'Call this the moment the user asks for anything to be handled, watched, ' +
+        'checked or chased. Do not ask which product, which numbers or which ' +
+        'actions first: choose the needs yourself and open it.',
       parameters: {
         type: 'object',
+        required: ['brief', 'needs'],
         properties: {
           brief: {
             type: 'string',
@@ -109,76 +135,43 @@ export function toolsFor(registry) {
           },
           needs: {
             type: 'array',
-            description: 'The actions this work requires. ' + catalogue,
+            description:
+              'Everything that would have to be done, reading and analysis included.',
             items: { type: 'string', enum: actionIds },
           },
-          rules: {
-            type: 'array',
-            description: 'Only the permissions and prohibitions they actually stated.',
-            items: ruleSchema(actionIds, vocabulary, catalogue),
-          },
-          scope: {
-            type: 'string',
-            enum: ['mission', 'session'],
-            description: 'mission unless they said something like "from now on".',
-          },
         },
-        required: ['brief', 'needs'],
       },
       execution_mode: 'interactive',
     },
 
     {
       type: FUNCTION_TOOL,
-      name: 'compile_policy',
+      name: 'forbid',
       description:
-        'Call this when the user states, for the first time in this mission, what ' +
-        'the AI workforce is and is not allowed to do. Turn every permission and ' +
-        'every prohibition they spoke into a rule. Rules you were not told are not ' +
-        'rules: never add one to be helpful, and never soften or strengthen one. If ' +
-        'you did not understand part of what they said, leave it out and ask them ' +
-        'about it instead of guessing.',
-      parameters: {
-        type: 'object',
-        properties: {
-          rules: {
-            type: 'array',
-            description: 'One entry per permission or prohibition the user stated.',
-            items: ruleSchema(actionIds, vocabulary, catalogue),
-          },
-          scope: {
-            type: 'string',
-            enum: ['mission', 'session'],
-            description:
-              'session if they said something like "for the rest of today" or "from ' +
-              'now on"; mission if they were speaking about this situation only. ' +
-              'When unclear, use mission, the shorter-lived of the two.',
-          },
-        },
-        required: ['rules'],
-      },
+        'Actions the user said must never happen. "Never touch prices", "don\'t ' +
+        'refund anyone", "no ads". Call it alongside start_mission when both were ' +
+        'said in one breath.',
+      parameters: actions('The actions to forbid.'),
       execution_mode: 'interactive',
     },
 
     {
       type: FUNCTION_TOOL,
-      name: 'amend_policy',
+      name: 'ask_first',
       description:
-        'Call this when a policy already exists and the user changes their mind ' +
-        'about part of it, typically after you have reported that something was ' +
-        'blocked. Send only the rules that change. Everything you do not mention ' +
-        'stays exactly as it was, so do not resend rules just to be safe.',
-      parameters: {
-        type: 'object',
-        properties: {
-          changes: {
-            type: 'array',
-            description: 'Only the rules whose effect or conditions the user just changed.',
-            items: ruleSchema(actionIds, vocabulary, catalogue),
-          },
-        },
-        required: ['changes'],
-      },
+        'Actions the user wants to be consulted about before they happen. "Ask me ' +
+        'before you tell customers", "check with me first".',
+      parameters: actions('The actions to hold for approval.'),
+      execution_mode: 'interactive',
+    },
+
+    {
+      type: FUNCTION_TOOL,
+      name: 'permit',
+      description:
+        'Actions the user said may happen on their own. Asking to be told is one ' +
+        'of these: "tell me when takings drop" permits send_telegram_message.',
+      parameters: actions('The actions to allow.'),
       execution_mode: 'interactive',
     },
 
@@ -187,18 +180,16 @@ export function toolsFor(registry) {
       name: 'set_alert_threshold',
       description:
         'How far the latest daily figure must fall below the recent average before ' +
-        'Daily Revenue raises it. Defaults to 20 percent. Call this only when the ' +
-        'user names a different number; it changes what gets raised, not what is ' +
-        'permitted, so it is not a policy rule and does not go through the gate.',
+        'it is raised. It is 20% unless they say otherwise. Not a permission.',
       parameters: {
         type: 'object',
+        required: ['drop_percent'],
         properties: {
           drop_percent: {
             type: 'number',
-            description: 'A positive number of percent, for example 30 for "a third off".',
+            description: 'A positive percentage, for example 30.',
           },
         },
-        required: ['drop_percent'],
       },
       execution_mode: 'interactive',
     },
@@ -208,8 +199,7 @@ export function toolsFor(registry) {
       name: 'report_status',
       description:
         'Call this when the user asks what has happened, what was blocked, what is ' +
-        'waiting, or what the current policy says. Returns the live state; read the ' +
-        'result back to them in their own language.',
+        'waiting, or what the current orders say.',
       parameters: { type: 'object', properties: {} },
       execution_mode: 'interactive',
     },
@@ -314,21 +304,23 @@ export function systemPrompt(corpus) {
     `You are the voice interface to Standing Order, which governs an AI commerce`,
     `workforce of ${n} skills that run unattended.`,
     ``,
-    `TOOLS`,
-    `- Work described, with or without limits: start_mission. Give it the actions`,
-    `  the work needs and every rule they stated.`,
-    `- Rules alone: compile_policy. Works with no mission open. It merges, so call`,
-    `  it again as more rules arrive.`,
-    `- Changing a rule already in force: amend_policy.`,
-    `- A different drop threshold than 20%: set_alert_threshold.`,
-    `- Asked what happened, what is blocked, what the policy says: report_status.`,
+    `Never reply to the user without first calling a tool. Talking alone records`,
+    `nothing, and leaves them watching a page that has not moved.`,
+    ``,
+    `- Anything to be handled, watched, checked or chased: start_mission.`,
+    `- What they said must never happen: forbid.`,
+    `- What they want to be consulted about first: ask_first.`,
+    `- What may happen on its own: permit. Asking to be told is one of these:`,
+    `  "tell me when takings drop" permits send_telegram_message.`,
+    `- A drop percentage other than 20: set_alert_threshold.`,
+    `- Asked what happened or what is blocked: report_status.`,
+    ``,
+    `One sentence usually carries a situation and its limits together, so it`,
+    `usually takes start_mission and then forbid or ask_first in the same turn.`,
     ``,
     `RULES`,
-    `- Act on each turn as it arrives. Never wait for more speech. Work described`,
-    `  means start_mission now, with whatever you have. Limits arriving in a later`,
-    `  turn are added with compile_policy; it merges.`,
-    `- "Tell me when", "let me know", "alert me" grant send_telegram_message. Put`,
-    `  it in as ALLOW beside whatever they prohibited in the same breath.`,
+    `- Act on each turn as it arrives. Never wait for more speech.`,
+    `- Never ask which product, which numbers or which actions. Choose them.`,
     `- Capture exactly what they said, no more. If a phrase could mean two rules,`,
     `  ask. If you did not catch something, say so.`,
     `- Never say a rule is recorded, an action permitted, or anything done, unless`,

@@ -150,11 +150,13 @@ export async function connect(h = {}) {
    */
   async function runTool(name, args) {
     if (name === 'start_mission') {
+      // No rules here any more: they arrive as their own calls, because a tool
+      // with three parameters is never called at all. Whatever policy is
+      // already standing is carried into the mission by the server.
       const r = await api('/api/missions', {
         brief: args.brief ?? '',
         needs: args.needs ?? [],
-        rules: args.rules ?? [],
-        scope: args.scope ?? 'mission',
+        scope: 'mission',
       });
       say('onMission', r.mission, r.blueprint);
       return {
@@ -177,28 +179,20 @@ export async function connect(h = {}) {
       };
     }
 
-    if (name === 'compile_policy') {
-      const r = await api('/api/policy/compile', {
-        rules: args.rules ?? [], scope: args.scope ?? 'mission',
-      });
+    // Three tools, one effect each, because a rule cannot be spoken as an object
+    // here: a tool with three parameters is never called at all. They all land
+    // in the same compiler, which merges, so saying "never refund" and later
+    // "and never cancel" keeps both.
+    const EFFECTS = { forbid: 'DENY', ask_first: 'ASK', permit: 'ALLOW' };
+    if (EFFECTS[name]) {
+      const rules = (args.actions ?? []).map((action) => ({ action, effect: EFFECTS[name] }));
+      const r = await api('/api/policy/compile', { rules, scope: 'mission' });
       return {
-        policy_id: r.policy.policyId,
-        version: r.policy.version,
-        merged_into_existing: r.merged === true,
+        effect: EFFECTS[name],
         rules_in_force: r.policy.rules.map((x) => `${x.action}: ${x.effect}`),
         total_rules: r.policy.rules.length,
         not_recorded: (r.rejected ?? []).map((x) => `${x.rule.action ?? '?'}: ${x.reason}`),
         note: 'Recorded. Nothing has run yet.',
-      };
-    }
-
-    if (name === 'amend_policy') {
-      const r = await api('/api/policy/amend', { changes: args.changes ?? [] });
-      return {
-        policy_id: r.policy.policyId,
-        version: r.policy.version,
-        rules_in_force: r.policy.rules.map((x) => `${x.action}: ${x.effect}`),
-        not_recorded: (r.rejected ?? []).map((x) => `${x.rule.action ?? '?'}: ${x.reason}`),
       };
     }
 

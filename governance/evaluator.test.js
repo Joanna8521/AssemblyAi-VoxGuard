@@ -244,19 +244,54 @@ describe('policy is language-neutral', () => {
 // ── the model's output space is bounded by the registry, structurally ───────
 describe('what the model is allowed to say', () => {
   const tools = toolsFor(registry);
-  const compile = tools.find((t) => t.name === 'compile_policy');
-  const rule = compile.parameters.properties.rules.items;
+  const byName = new Map(tools.map((t) => [t.name, t]));
 
   test('every tool declares type function, which the API requires', () => {
     for (const t of tools) assert.equal(t.type, 'function', `${t.name} needs type: function`);
   });
 
-  test('actions are an enum of the registry, so a hallucinated one cannot be expressed', () => {
-    assert.deepEqual([...rule.properties.action.enum].sort(), [...registry.actionIds].sort());
+  test('no tool takes more than two parameters, because three are never called', () => {
+    // Measured against a live session, speaking the same sentence roughly eighty
+    // times. { brief } was called 3 of 3, { brief, needs } 5 of 5, and every
+    // three-parameter shape 0 of 11 - with no error: the reply completes, empty,
+    // and the agent carries on talking as though it had acted. A rule therefore
+    // cannot be an object with an action, an effect and conditions; the effect
+    // is the name of the tool instead.
+    for (const t of tools) {
+      const n = Object.keys(t.parameters?.properties ?? {}).length;
+      assert.ok(n <= 2, `${t.name} takes ${n} parameters; at three the API stops calling it`);
+    }
   });
 
-  test('effects are exactly the three verdicts', () => {
-    assert.deepEqual([...rule.properties.effect.enum].sort(), [ALLOW, ASK, DENY].sort());
+  test('the three effects each have a tool, so nothing spoken has nowhere to go', () => {
+    for (const name of ['forbid', 'ask_first', 'permit']) {
+      assert.ok(byName.has(name), `${name} is missing, so that effect cannot be recorded`);
+    }
+  });
+
+  test('actions are an enum of the registry, so a hallucinated one cannot be expressed', () => {
+    const enums = [
+      byName.get('start_mission').parameters.properties.needs.items.enum,
+      ...['forbid', 'ask_first', 'permit'].map(
+        (n) => byName.get(n).parameters.properties.actions.items.enum),
+    ];
+    for (const e of enums) {
+      assert.deepEqual([...e].sort(), [...registry.actionIds].sort());
+    }
+  });
+
+  test('every enumerated parameter is constrained, since free text makes it stop and ask', () => {
+    // A free-form parameter changed the behaviour, not just the output: the
+    // agent asked the user what to put in it instead of calling anything.
+    // Constrained ones it simply filled.
+    for (const t of tools) {
+      for (const [key, spec] of Object.entries(t.parameters?.properties ?? {})) {
+        if (key === 'brief' || spec.type === 'number') continue;
+        const items = spec.items ?? spec;
+        assert.ok(Array.isArray(items.enum),
+          `${t.name}.${key} is free-form; the agent will ask rather than call`);
+      }
+    }
   });
 
   test('the schema is guidance, so validation is what actually holds', () => {
@@ -273,28 +308,15 @@ describe('what the model is allowed to say', () => {
     assert.match(rejected[0].reason, /paid_affected/);
   });
 
-  test('string-valued conditions are enumerated too, not free text', () => {
-    // The action enum stops an invented capability. This stops an invented
-    // value for a real one: a policy saying "paid" while the workforce asks
-    // about "paid_affected" is a refusal nobody can account for.
-    const conditions = rule.properties.conditions.properties;
-    const vocabulary = registry.conditionVocabulary;
-
-    for (const [field, spec] of Object.entries(vocabulary)) {
-      const declared = conditions[field];
-      assert.ok(declared, `${field} is missing from the tool schema`);
-      if (spec.enum) {
-        const [literal] = declared.oneOf;
-        assert.deepEqual(literal.enum, spec.enum, `${field} must offer only its declared values`);
-      }
-    }
-  });
-
-  test('a condition field the vocabulary does not declare has no way in', () => {
-    assert.equal(rule.properties.conditions.properties.whatever_i_like, undefined);
+  test('a condition nobody declared is refused, whatever route it arrives by', () => {
+    // Conditions are no longer spoken - there is no parameter for them - so the
+    // schema cannot be what stops an invented one. This always was the thing
+    // that stopped it.
+    const { rejected } = validateRules(
+      [{ action: 'pause_ad', effect: 'ALLOW', conditions: { whatever_i_like: 1 } }], registry);
+    assert.equal(rejected.length, 1);
   });
 });
-
 
 // ── nothing unreadable becomes policy ───────────────────────────────────────
 describe('validation, the boundary that actually holds', () => {
