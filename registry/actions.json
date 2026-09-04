@@ -1,0 +1,58 @@
+{
+  "$comment": "Canonical action catalog for Signal Box. Risk belongs to the ACTION, never to the skill — one skill routinely spans L1 reads and L4 financial writes. adapter is what a real deployment would need; 'sandbox' means the v7 corpus holds no credential that could perform it (see registry/README.md).",
+  "version": 1,
+  "risk_levels": {
+    "L0": {"name": "Reason", "default": "AUTO"},
+    "L1": {"name": "Read", "default": "AUTO"},
+    "L2": {"name": "Draft / internal write", "default": "AUTO"},
+    "L3": {"name": "External write", "default": "POLICY"},
+    "L4": {"name": "Financial / destructive", "default": "ASK"},
+    "L4-meta": {"name": "Creates future autonomous execution", "default": "ASK"}
+  },
+  "actions": [
+    {"id": "analyze_data",           "risk": "L0", "reversible": true,  "financial": false, "customer": false, "adapter": "none",     "label": {"zh": "分析資料", "en": "Analyze data", "ja": "データ分析"}},
+    {"id": "forecast",               "risk": "L0", "reversible": true,  "financial": false, "customer": false, "adapter": "none",     "label": {"zh": "預測推估", "en": "Forecast", "ja": "予測"}},
+
+    {"id": "read_metrics",           "risk": "L1", "reversible": true,  "financial": false, "customer": false, "adapter": "google",   "label": {"zh": "讀取成效數據", "en": "Read metrics", "ja": "指標を読む"}},
+    {"id": "read_inventory",         "risk": "L1", "reversible": true,  "financial": false, "customer": false, "adapter": "sandbox",  "label": {"zh": "讀取庫存", "en": "Read inventory", "ja": "在庫を読む"}},
+    {"id": "read_orders",            "risk": "L1", "reversible": true,  "financial": false, "customer": true,  "adapter": "sandbox",  "label": {"zh": "讀取訂單", "en": "Read orders", "ja": "注文を読む"}},
+    {"id": "read_reviews",           "risk": "L1", "reversible": true,  "financial": false, "customer": true,  "adapter": "browser",  "label": {"zh": "讀取評價", "en": "Read reviews", "ja": "レビューを読む"}},
+    {"id": "read_ranking",           "risk": "L1", "reversible": true,  "financial": false, "customer": false, "adapter": "browser",  "label": {"zh": "讀取排名", "en": "Read ranking", "ja": "順位を読む"}},
+    {"id": "scrape_public_page",     "risk": "L1", "reversible": true,  "financial": false, "customer": false, "adapter": "browser",  "label": {"zh": "擷取公開頁面", "en": "Scrape public page", "ja": "公開ページ取得"}},
+    {"id": "read_sheet",             "risk": "L1", "reversible": true,  "financial": false, "customer": false, "adapter": "google",   "label": {"zh": "讀取試算表", "en": "Read spreadsheet", "ja": "スプレッドシート読取"}},
+    {"id": "read_email",             "risk": "L1", "reversible": true,  "financial": false, "customer": true,  "adapter": "google",   "label": {"zh": "讀取信件", "en": "Read email", "ja": "メール読取"}},
+    {"id": "read_drive",             "risk": "L1", "reversible": true,  "financial": false, "customer": false, "adapter": "google",   "label": {"zh": "讀取雲端檔案", "en": "Read Drive", "ja": "Drive 読取"}},
+    {"id": "read_calendar",          "risk": "L1", "reversible": true,  "financial": false, "customer": false, "adapter": "google",   "label": {"zh": "讀取行事曆", "en": "Read calendar", "ja": "カレンダー読取"}},
+
+    {"id": "draft_copy",             "risk": "L2", "reversible": true,  "financial": false, "customer": false, "adapter": "none",     "label": {"zh": "草擬文案", "en": "Draft copy", "ja": "コピー草案"}},
+    {"id": "draft_message",          "risk": "L2", "reversible": true,  "financial": false, "customer": false, "adapter": "none",     "label": {"zh": "草擬訊息", "en": "Draft message", "ja": "メッセージ草案"}},
+    {"id": "draft_plan",             "risk": "L2", "reversible": true,  "financial": false, "customer": false, "adapter": "none",     "label": {"zh": "草擬方案", "en": "Draft plan", "ja": "プラン草案"}},
+    {"id": "generate_report",        "risk": "L2", "reversible": true,  "financial": false, "customer": false, "adapter": "none",     "label": {"zh": "產生報表", "en": "Generate report", "ja": "レポート生成"}},
+    {"id": "write_sheet",            "risk": "L2", "reversible": true,  "financial": false, "customer": false, "adapter": "google",   "label": {"zh": "寫入試算表", "en": "Write spreadsheet", "ja": "スプレッドシート書込"}},
+    {"id": "write_drive",            "risk": "L2", "reversible": true,  "financial": false, "customer": false, "adapter": "google",   "label": {"zh": "寫入雲端檔案", "en": "Write Drive", "ja": "Drive 書込"}},
+
+    {"id": "send_email",             "risk": "L3", "reversible": false, "financial": false, "customer": true,  "adapter": "google",   "label": {"zh": "寄送信件", "en": "Send email", "ja": "メール送信"}},
+    {"id": "send_line_push",         "risk": "L3", "reversible": false, "financial": false, "customer": true,  "adapter": "line",     "label": {"zh": "LINE 推播", "en": "LINE push", "ja": "LINE 配信"}},
+    {"id": "send_telegram_message",  "risk": "L3", "reversible": false, "financial": false, "customer": false, "adapter": "telegram", "label": {"zh": "Telegram 訊息", "en": "Telegram message", "ja": "Telegram 送信"}},
+    {"id": "notify_customer",        "risk": "L3", "reversible": false, "financial": false, "customer": true,  "adapter": "line",     "label": {"zh": "通知顧客", "en": "Notify customer", "ja": "顧客へ通知"}},
+    {"id": "reply_review",           "risk": "L3", "reversible": false, "financial": false, "customer": true,  "adapter": "sandbox",  "label": {"zh": "回覆評價", "en": "Reply to review", "ja": "レビュー返信"}},
+    {"id": "publish_product",        "risk": "L3", "reversible": true,  "financial": false, "customer": true,  "adapter": "sandbox",  "label": {"zh": "發布商品", "en": "Publish product", "ja": "商品公開"}},
+    {"id": "update_listing",         "risk": "L3", "reversible": true,  "financial": false, "customer": true,  "adapter": "sandbox",  "label": {"zh": "更新賣場頁", "en": "Update listing", "ja": "商品ページ更新"}},
+    {"id": "delist_product",         "risk": "L3", "reversible": true,  "financial": false, "customer": true,  "adapter": "sandbox",  "label": {"zh": "商品下架", "en": "Delist product", "ja": "商品を取り下げ"}},
+    {"id": "mark_out_of_stock",      "risk": "L3", "reversible": true,  "financial": false, "customer": true,  "adapter": "sandbox",  "label": {"zh": "標記缺貨", "en": "Mark out of stock", "ja": "在庫切れ表示"}},
+    {"id": "update_price",           "risk": "L3", "reversible": true,  "financial": true,  "customer": true,  "adapter": "sandbox",  "label": {"zh": "更新售價", "en": "Update price", "ja": "価格変更"}},
+    {"id": "publish_social_post",    "risk": "L3", "reversible": false, "financial": false, "customer": true,  "adapter": "sandbox",  "label": {"zh": "發布社群貼文", "en": "Publish social post", "ja": "SNS 投稿"}},
+    {"id": "pause_ad",               "risk": "L3", "reversible": true,  "financial": true,  "customer": false, "adapter": "sandbox",  "label": {"zh": "暫停廣告", "en": "Pause ad", "ja": "広告停止"}},
+    {"id": "resume_ad",              "risk": "L3", "reversible": true,  "financial": true,  "customer": false, "adapter": "sandbox",  "label": {"zh": "恢復廣告", "en": "Resume ad", "ja": "広告再開"}},
+
+    {"id": "change_ad_budget",       "risk": "L4", "reversible": true,  "financial": true,  "customer": false, "adapter": "sandbox",  "label": {"zh": "調整廣告預算", "en": "Change ad budget", "ja": "広告予算変更"}},
+    {"id": "apply_discount",         "risk": "L4", "reversible": false, "financial": true,  "customer": true,  "adapter": "sandbox",  "label": {"zh": "套用折扣", "en": "Apply discount", "ja": "割引適用"}},
+    {"id": "cancel_order",           "risk": "L4", "reversible": false, "financial": true,  "customer": true,  "adapter": "sandbox",  "label": {"zh": "取消訂單", "en": "Cancel order", "ja": "注文キャンセル"}},
+    {"id": "issue_refund",           "risk": "L4", "reversible": false, "financial": true,  "customer": true,  "adapter": "sandbox",  "label": {"zh": "退款", "en": "Issue refund", "ja": "返金"}},
+    {"id": "delete_content",         "risk": "L4", "reversible": false, "financial": false, "customer": false, "adapter": "google",   "label": {"zh": "刪除內容", "en": "Delete content", "ja": "コンテンツ削除"}},
+    {"id": "deploy_service",         "risk": "L4", "reversible": false, "financial": false, "customer": false, "adapter": "openclaw",  "label": {"zh": "部署／重啟服務", "en": "Deploy or restart service", "ja": "デプロイ・再起動"}},
+
+    {"id": "create_schedule",        "risk": "L4-meta", "reversible": true, "financial": false, "customer": false, "adapter": "openclaw", "label": {"zh": "建立定時排程", "en": "Create schedule", "ja": "スケジュール作成"},
+     "note": "Meta-action: does not itself cause an effect, but manufactures the capacity to act autonomously while nobody is watching. A governance layer that only stops direct actions is bypassed entirely by scheduling one for 8am tomorrow."}
+  ]
+}
