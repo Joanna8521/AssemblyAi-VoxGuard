@@ -217,3 +217,68 @@ export function extractTitle(html) {
   const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   return title ? strip(title[1]).slice(0, 160) : null;
 }
+
+// ── reading a product ───────────────────────────────────────────────────────
+
+/**
+ * What a product page says about itself.
+ *
+ * Shopify serves `/products/<handle>.json` on every storefront by design, and a
+ * large share of independent clothing brands run on Shopify. Reading that is not
+ * scraping a page behind a shop's back; it is a published interface, and it
+ * carries stock as well as price, which HTML almost never does.
+ *
+ * Everything else falls back to the page itself: structured data first, then
+ * Open Graph, then currency in the text. Which route produced the answer is
+ * reported, because a wrong price should be traceable to how it was found.
+ */
+export async function readProduct(input) {
+  const url = new URL(input);
+
+  if (/\/products\/[^/]+$/.test(url.pathname)) {
+    // `.js` and `.json` are both public and they are not the same. Only `.js`
+    // carries `available`; `.json` omits it entirely, and reading a missing
+    // field as false turns "unknown" into "sold out", which is a number
+    // somebody would act on. Measured, after doing exactly that.
+    for (const ext of ['.js', '.json']) {
+      try {
+        const res = await fetchPublicPage(`${url.origin}${url.pathname}${ext}${url.search}`);
+        const body = JSON.parse(res.html);
+        const product = body.product ?? body;
+        const variants = product?.variants ?? [];
+        if (!variants.length) continue;
+
+        const cheapest = variants.reduce((a, b) => Number(a.price) <= Number(b.price) ? a : b);
+        const knowsStock = variants.some((v) => 'available' in v);
+
+        return {
+          via: `shopify${ext}`,
+          title: product.title,
+          // `.js` states price in cents, `.json` in the shop's units.
+          price: ext === '.js' ? Number(cheapest.price) / 100 : Number(cheapest.price),
+          currency: null,
+          inStock: knowsStock ? variants.some((v) => v.available) : null,
+          variantsInStock: knowsStock ? variants.filter((v) => v.available).length : null,
+          variants: variants.length,
+        };
+      } catch {
+        // Not a Shopify store, or it declined this shape. Try the next.
+      }
+    }
+  }
+
+  const page = await fetchPublicPage(input);
+  const price = extractPrice(page.html);
+  return {
+    via: price?.via ?? 'none',
+    title: extractTitle(page.html),
+    price: price?.amount ?? null,
+    currency: price?.currency ?? null,
+    // HTML rarely states this plainly enough to be worth guessing at, and a
+    // guessed stock level is worse than none: it is the number somebody would
+    // act on.
+    inStock: null,
+    variantsInStock: null,
+    variants: null,
+  };
+}

@@ -13,7 +13,7 @@
  * intents, and the caller puts each one through the evaluator.
  */
 
-import { fetchPublicPage, extractPrice, extractTitle } from './web.js';
+import { readProduct } from './web.js';
 
 /**
  * @returns {{
@@ -69,9 +69,9 @@ const RUNNERS = {
     const intents = [];
 
     for (const watch of watches) {
-      let page;
+      let product;
       try {
-        page = await fetchPublicPage(watch.url);
+        product = await readProduct(watch.url);
       } catch (err) {
         watch.lastError = err.message;
         watch.checkedAt = new Date().toISOString();
@@ -79,48 +79,61 @@ const RUNNERS = {
         continue;
       }
 
-      const price = extractPrice(page.html);
-      watch.title ??= extractTitle(page.html);
+      const was = { price: watch.price ?? null, inStock: watch.inStock ?? null };
+
+      watch.title ??= product.title;
+      watch.via = product.via;
       watch.checkedAt = new Date().toISOString();
       delete watch.lastError;
 
-      if (!price) {
+      if (product.price === null) {
         watch.readable = false;
-        observed.push(`${label(watch)}: fetched, but the page states no price this fetcher can find`);
+        observed.push(`${label(watch)}: fetched, but states no price this reader can find`);
         continue;
       }
 
       watch.readable = true;
-      const previous = watch.price ?? null;
-      watch.price = price.amount;
-      watch.via = price.via;
+      watch.price = product.price;
+      watch.inStock = product.inStock;
+      watch.variantsInStock = product.variantsInStock;
       watch.history = [...(watch.history ?? []).slice(-19),
-        { at: watch.checkedAt, price: price.amount }];
+        { at: watch.checkedAt, price: product.price, inStock: product.inStock }];
 
-      if (previous === null) {
-        observed.push(`${label(watch)}: ${price.amount} (first reading, via ${price.via})`);
+      const stock = product.inStock === null ? ''
+        : product.inStock ? `, ${product.variantsInStock}/${product.variants} in stock`
+        : ', sold out';
+
+      if (was.price === null) {
+        observed.push(`${label(watch)}: ${product.price}${stock} (first reading, via ${product.via})`);
         continue;
       }
 
-      if (previous === price.amount) {
-        observed.push(`${label(watch)}: ${price.amount}, unchanged`);
-        continue;
+      // Price and stock are separate facts and are reported separately. A shop
+      // that sells out is news even when the price never moved.
+      if (was.price !== product.price) {
+        const direction = product.price < was.price ? 'down' : 'up';
+        const percent = Math.round(Math.abs(product.price - was.price) / was.price * 1000) / 10;
+        observed.push(`${label(watch)}: ${was.price} -> ${product.price} (${direction} ${percent}%)${stock}`);
+        intents.push({
+          action: 'send_telegram_message',
+          parameters: {
+            text: `Price ${direction} ${percent}%\n${label(watch)}\n` +
+                  `${was.price} -> ${product.price}\n${watch.url}`,
+          },
+          why: `${label(watch)} moved ${direction} by ${percent}%`,
+        });
+      } else if (was.inStock !== null && was.inStock !== product.inStock) {
+        observed.push(`${label(watch)}: ${product.inStock ? 'back in stock' : 'sold out'} at ${product.price}`);
+        intents.push({
+          action: 'send_telegram_message',
+          parameters: {
+            text: `${product.inStock ? 'Back in stock' : 'Sold out'}\n${label(watch)}\n${watch.url}`,
+          },
+          why: `${label(watch)} went ${product.inStock ? 'back in stock' : 'out of stock'}`,
+        });
+      } else {
+        observed.push(`${label(watch)}: ${product.price}${stock}, unchanged`);
       }
-
-      const direction = price.amount < previous ? 'down' : 'up';
-      const percent = Math.round(Math.abs(price.amount - previous) / previous * 1000) / 10;
-      observed.push(`${label(watch)}: ${previous} -> ${price.amount} (${direction} ${percent}%)`);
-
-      // Something changed, so somebody should know. Whether they are told is
-      // not this agent's decision.
-      intents.push({
-        action: 'send_telegram_message',
-        parameters: {
-          text: `Price ${direction} ${percent}%: ${label(watch)}\n` +
-                `${previous} -> ${price.amount}\n${watch.url}`,
-        },
-        why: `${label(watch)} moved ${direction} by ${percent}%`,
-      });
     }
 
     return { observed, intents };

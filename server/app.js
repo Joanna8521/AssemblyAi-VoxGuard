@@ -32,6 +32,7 @@ import { load } from '../governance/registry.js';
 import { validateRules } from '../governance/validate.js';
 import { MemoryStore, KVStore, sessionIdFrom } from '../governance/store.js';
 import { perform, adapterStatus } from '../adapters/index.js';
+import { runAgent, implementedAgents } from '../runtime/run.js';
 import { toolsFor, systemPrompt, greeting, inputConfig } from '../voice/tools.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -172,6 +173,24 @@ function record(session, request, result, outcome) {
   return entry;
 }
 
+/**
+ * Decide, and if allowed, do.
+ *
+ * The single place where an action becomes a consequence. Both the console and
+ * the agent runtime come through here, and the invariant test counts on there
+ * being exactly one of these: two copies of evaluate-then-perform would drift,
+ * and the one that drifted would be the one nobody was reading.
+ */
+async function decide(session, request) {
+  const result = evaluate(request, session.policy, registry);
+
+  const outcome = result.verdict === 'ALLOW'
+    ? await perform(request.action, request.parameters, { registry })
+    : null;
+
+  return { ...result, outcome, audit: record(session, request, result, outcome) };
+}
+
 // ── routes ──────────────────────────────────────────────────────────────────
 
 const routes = {
@@ -297,19 +316,9 @@ const routes = {
       e.status = 400;
       throw e;
     }
-    const result = evaluate(request, session.policy, registry);
-
-    // The one place an adapter is ever called, and only past this line. The
-    // invariant the whole project rests on is that nothing consequential
-    // reaches the outside world except through the evaluator, and it is this
-    // ordering that makes it true rather than intended.
-    const outcome = result.verdict === 'ALLOW'
-      ? await perform(request.action, request.parameters, { registry })
-      : null;
-
-    const entry = record(session, request, result, outcome);
+    const decision = await decide(session, request);
     await save();
-    return { request, ...result, outcome, audit: entry };
+    return { request, ...decision };
   },
 
   /**
@@ -338,6 +347,90 @@ const routes = {
       };
     });
     return { policyVersion: session.policy?.version ?? null, results };
+  },
+
+  /**
+   * What this session is watching. A list of public URLs, nothing more.
+   *
+   * Validated on the way in rather than at fetch time, so a bad address is
+   * refused while somebody is still looking at the field they typed it into.
+   */
+  'POST /api/watch': async (body, { session, save }) => {
+    const raw = (body.url ?? '').trim();
+    let url;
+    try {
+      url = new URL(raw);
+    } catch {
+      const e = new Error(`"${raw}" is not a URL`);
+      e.status = 400;
+      throw e;
+    }
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      const e = new Error('only http and https addresses can be watched');
+      e.status = 400;
+      throw e;
+    }
+
+    session.pools ??= {};
+    session.pools.listings ??= [];
+    if (session.pools.listings.some((w) => w.url === url.toString())) {
+      return { watching: session.pools.listings, added: false };
+    }
+    if (session.pools.listings.length >= 12) {
+      const e = new Error('twelve is enough to prove the point');
+      e.status = 400;
+      throw e;
+    }
+
+    session.pools.listings.push({ url: url.toString(), addedAt: new Date().toISOString() });
+    await save();
+    return { watching: session.pools.listings, added: true };
+  },
+
+  'POST /api/watch/remove': async (body, { session, save }) => {
+    session.pools ??= {};
+    session.pools.listings = (session.pools.listings ?? []).filter((w) => w.url !== body.url);
+    await save();
+    return { watching: session.pools.listings };
+  },
+
+  'GET /api/pools': async (_body, { session }) => ({
+    pools: session.pools ?? {},
+    implemented: implementedAgents(),
+  }),
+
+  /**
+   * Run an agent for real.
+   *
+   * The agent does its own reading and thinking without asking anyone. What it
+   * cannot do is act: it returns intents, and each one goes through the
+   * evaluator here, in the same place and by the same rules as a request from
+   * anywhere else. An agent that could reach an adapter directly would make the
+   * rest of this decorative.
+   */
+  'POST /api/agents/run': async (body, { session, save }) => {
+    const run = await runAgent(body.agent, { session, workforce });
+
+    const decisions = [];
+    for (const intent of run.intents) {
+      const request = {
+        actionId: `A-${1000 + session.audit.length}`,
+        action: intent.action,
+        skill: body.agent,
+        parameters: intent.parameters ?? {},
+      };
+      const decision = await decide(session, request);
+      decisions.push({
+        why: intent.why,
+        action: request.action,
+        verdict: decision.verdict,
+        reason: decision.reason,
+        audit: decision.audit,
+      });
+    }
+
+    await save();
+    return { ...run, decisions };
   },
 
   'POST /api/reset': async (_body, { id }) => {

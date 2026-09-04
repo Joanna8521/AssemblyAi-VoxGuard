@@ -274,6 +274,27 @@ dialog::backdrop{background:rgba(16,26,23,.42)}
   .deps button{font-size:12px}
 }
 
+/* watching */
+.watch-add{display:flex;gap:7px;margin-bottom:11px}
+.watch-add input{flex:1;min-width:0;font:12px var(--mono);padding:9px 10px;border-radius:3px;
+  border:1px solid var(--line-strong);background:var(--surface);color:inherit}
+.watches{display:flex;flex-direction:column;gap:6px}
+.w{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;
+   padding:9px 10px;background:var(--surface-2);border-radius:3px}
+.w .t{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:500}
+.w .t small{display:block;font:10px var(--mono);color:var(--faint);font-weight:400;
+  overflow:hidden;text-overflow:ellipsis}
+.w .p{font:600 13px var(--mono);white-space:nowrap}
+.w .x{border:0;background:none;color:var(--faint);padding:2px 5px;cursor:pointer;font-size:15px}
+.w .x:hover{color:var(--deny)}
+.w .s{grid-column:1/-1;font:10.5px var(--mono);color:var(--faint)}
+.w.out{border-left:3px solid var(--deny)}
+.w.ok{border-left:3px solid var(--clear)}
+.ran{margin-top:11px;padding:10px 12px;border-radius:3px;background:var(--surface-2);
+  border:1px solid var(--line);font-size:12.5px;line-height:1.6;display:none}
+.ran.show{display:block}
+.ran b{color:var(--ink)}
+
 .foot{margin-top:18px;padding:12px 14px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);font-size:12.5px;line-height:1.6;color:var(--muted)}
 .foot code{font:11px var(--mono);background:var(--surface);padding:1px 4px;border-radius:2px;border:1px solid var(--line)}
 </style>
@@ -333,14 +354,27 @@ dialog::backdrop{background:rgba(16,26,23,.42)}
       </section>
 
       <section class="panel">
-        <div class="panel-hd"><span class="eyebrow">03</span><h2>Policy in force</h2></div>
+        <div class="panel-hd"><span class="eyebrow">03</span><h2>Price Watch</h2>
+          <button id="run-watch" style="margin-left:auto;padding:5px 11px;font-size:12px">Check now</button></div>
+        <div class="panel-bd">
+          <div class="watch-add">
+            <input id="watch-url" placeholder="https://a-competitor.com/products/..." spellcheck="false">
+            <button id="watch-add">Watch</button>
+          </div>
+          <div class="watches" id="watches"></div>
+          <div class="ran" id="ran"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-hd"><span class="eyebrow">04</span><h2>Policy in force</h2></div>
         <div class="panel-bd">
           <div class="rules" id="rules"></div>
         </div>
       </section>
 
       <section class="panel">
-        <div class="panel-hd"><span class="eyebrow">04</span><h2>Audit</h2>
+        <div class="panel-hd"><span class="eyebrow">05</span><h2>Audit</h2>
           <span class="chip" style="margin-left:auto" id="c-audit">0</span></div>
         <div class="panel-bd"><div class="log" id="log"></div></div>
       </section>
@@ -604,10 +638,45 @@ function renderAudit(entries) {
   box.scrollTop = box.scrollHeight;
 }
 
+// ── watching ────────────────────────────────────────────────────────────────
+function renderWatches(listings) {
+  const box = $('watches');
+  if (!listings?.length) {
+    box.innerHTML = '<p class="empty">Nothing watched yet.<br>' +
+      'Paste a competitor product page above. Shopify stores read cleanest, ' +
+      'because they publish the data rather than hiding it in the page.</p>';
+    return;
+  }
+  box.innerHTML = '';
+  for (const w of listings) {
+    const d = document.createElement('div');
+    d.className = `w ${w.inStock === false ? 'out' : w.inStock ? 'ok' : ''}`;
+    const host = new URL(w.url).hostname.replace(/^www\./, '');
+    const stock = w.inStock === false ? 'sold out'
+      : w.inStock ? `${w.variantsInStock}/${w.variants ?? '?'} in stock` : '';
+    const seen = w.checkedAt
+      ? `read ${new Date(w.checkedAt).toLocaleTimeString()} via ${w.via ?? '?'}`
+      : 'not read yet';
+    d.innerHTML =
+      `<span class="t">${w.title ?? host}<small>${host}</small></span>` +
+      `<span class="p">${w.price ?? '—'}</span>` +
+      `<button class="x" data-url="${w.url}" title="Stop watching">&times;</button>` +
+      `<span class="s">${w.lastError ? `could not be read: ${w.lastError}` : `${seen}${stock ? ` &middot; ${stock}` : ''}`}</span>`;
+    box.appendChild(d);
+  }
+  for (const b of box.querySelectorAll('.x')) {
+    b.onclick = async () => {
+      const { watching } = await api('/api/watch/remove', { url: b.dataset.url });
+      renderWatches(watching);
+    };
+  }
+}
+
 async function refresh() {
-  const s = await api('/api/state');
+  const [s, p] = await Promise.all([api('/api/state'), api('/api/pools')]);
   renderPolicy(s.policy, s.fingerprint);
   renderAudit(s.audit);
+  renderWatches(p.pools?.listings);
   passed = s.audit.filter((e) => e.verdict === 'ALLOW').length;
   held = s.audit.length - passed;
   if ($('g-pass')) { $('g-pass').textContent = passed; $('g-hold').textContent = held; }
@@ -762,6 +831,49 @@ async function talk() {
   $('detail').addEventListener('click', (e) => {
     if (e.target === $('detail')) $('detail').close();
   });
+
+  $('watch-add').onclick = async () => {
+    const url = $('watch-url').value.trim();
+    if (!url) return;
+    $('watch-add').disabled = true;
+    try {
+      const { watching } = await api('/api/watch', { url });
+      $('watch-url').value = '';
+      renderWatches(watching);
+    } catch (e) {
+      $('err').textContent = e.message;
+      $('err').classList.add('show');
+    }
+    $('watch-add').disabled = false;
+  };
+  $('watch-url').onkeydown = (e) => { if (e.key === 'Enter') $('watch-add').click(); };
+
+  $('run-watch').onclick = async () => {
+    const btn = $('run-watch');
+    btn.disabled = true;
+    btn.textContent = 'Checking…';
+    try {
+      const r = await api('/api/agents/run', { agent: 'A11' });
+      const note = $('ran');
+      const held = r.decisions.filter((d) => d.verdict !== 'ALLOW');
+      note.innerHTML =
+        `<b>Price Watch ran.</b><br>${r.observed.join('<br>')}` +
+        (r.decisions.length
+          ? `<br><br><b>It wanted to tell you about ${r.decisions.length} of them.</b> ` +
+            (held.length
+              ? `${held.length} did not go out: ${held.map((d) => d.reason).join('; ')}`
+              : 'All went out.')
+          : '<br><br>Nothing changed since the last check, so it had nothing to say.');
+      note.classList.add('show');
+      for (const d of r.decisions) signal(d.verdict, `${d.action}: ${d.reason}`);
+    } catch (e) {
+      $('err').textContent = e.message;
+      $('err').classList.add('show');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Check now';
+    await refresh();
+  };
 
   $('talk').onclick = talk;
   $('run').onclick = runMission;
