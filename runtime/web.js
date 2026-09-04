@@ -282,3 +282,36 @@ export async function readProduct(input) {
     variants: null,
   };
 }
+
+/**
+ * What a shop is currently selling.
+ *
+ * Shopify serves /products.json on every storefront, paged, without a key. It is
+ * how a shop tells the world its catalogue, so reading it is not going behind
+ * anybody's back, and it is the only reliable way to notice that a competitor
+ * has put something new out.
+ */
+export async function readCatalogue(input, { limit = 40 } = {}) {
+  const url = new URL(input);
+  const res = await fetchPublicPage(`${url.origin}/products.json?limit=${limit}`);
+
+  let body;
+  try {
+    body = JSON.parse(res.html);
+  } catch {
+    throw new Error(`${url.hostname} does not publish a catalogue this reader understands`);
+  }
+  if (!Array.isArray(body.products)) {
+    throw new Error(`${url.hostname} answered, but not with a catalogue`);
+  }
+
+  return body.products.map((p) => ({
+    handle: p.handle,
+    title: p.title,
+    publishedAt: p.published_at ?? p.created_at ?? null,
+    price: p.variants?.length
+      ? Math.min(...p.variants.map((v) => Number(v.price)).filter(Number.isFinite))
+      : null,
+    url: `${url.origin}/products/${p.handle}`,
+  }));
+}

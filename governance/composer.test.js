@@ -127,3 +127,22 @@ describe('the team holds together', () => {
     assert.match(r.why, /no action/);
   });
 });
+
+
+// ── what the agent is told it can do ────────────────────────────────────────
+describe('the voice agent is told the truth about its reach', () => {
+  test('the prompt names what is actually connected, and what is not', async () => {
+    const { systemPrompt } = await import('../voice/tools.js');
+    const prompt = systemPrompt({ skills: 110 });
+
+    // It offered to read somebody's Gmail once. Nothing of the sort exists, and
+    // they would have found out at the worst possible moment.
+    for (const claim of ['Gmail', 'Google Drive', 'Shopify admin', 'ad account']) {
+      assert.ok(prompt.includes(claim),
+        `the prompt should name "${claim}" as something it cannot do`);
+    }
+    assert.match(prompt, /cannot read/);
+    assert.match(prompt, /Telegram/);
+    assert.match(prompt, /not connected yet/);
+  });
+});

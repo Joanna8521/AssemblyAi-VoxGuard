@@ -356,6 +356,44 @@ const routes = {
    * Validated on the way in rather than at fetch time, so a bad address is
    * refused while somebody is still looking at the field they typed it into.
    */
+  /**
+   * Real shops, watched by default.
+   *
+   * The three worked examples on the front page composed a team and set
+   * boundaries and then ran into nothing, because the agents that do real work
+   * had nothing to look at. Offering somebody three things to try where two do
+   * nothing is worse than offering none.
+   *
+   * These are public storefronts that publish their own catalogue, chosen
+   * because they read cleanly rather than because they are anybody's rival.
+   * Anything here can be removed, and adding your own is the point.
+   */
+  'POST /api/watch/seed': async (_body, { session, save }) => {
+    session.pools ??= {};
+    session.pools.listings ??= [];
+    session.pools.shops ??= [];
+
+    const products = [
+      'https://www.tentree.com/products/parka-puffer-jacket-meteorite-black',
+      'https://www.marinelayer.com/products/lacey-slip-skirt',
+      'https://rothys.com/products/the-point-iii',
+    ];
+    const shops = ['https://www.tentree.com', 'https://www.marinelayer.com'];
+
+    for (const url of products) {
+      if (!session.pools.listings.some((w) => w.url === url)) {
+        session.pools.listings.push({ url, addedAt: new Date().toISOString(), seeded: true });
+      }
+    }
+    for (const url of shops) {
+      if (!session.pools.shops.some((w) => w.url === url)) {
+        session.pools.shops.push({ url, addedAt: new Date().toISOString(), seeded: true });
+      }
+    }
+    await save();
+    return { watching: session.pools.listings, shops: session.pools.shops };
+  },
+
   'POST /api/watch': async (body, { session, save }) => {
     const raw = (body.url ?? '').trim();
     let url;
@@ -399,6 +437,20 @@ const routes = {
     pools: session.pools ?? {},
     implemented: implementedAgents(),
   }),
+
+  /**
+   * Which agents on a team will actually do something, said before anybody
+   * presses run. A team half of which is a description should look like one.
+   */
+  'POST /api/missions/readiness': async (body, { session }) => {
+    const mission = (session.missions ?? []).find((m) => m.id === body.id) ?? (session.missions ?? [])[0];
+    if (!mission) return { runs: [], describes: [] };
+    const live = new Set(implementedAgents());
+    return {
+      runs: mission.team.filter((m) => live.has(m.id)).map((m) => m.name),
+      describes: mission.team.filter((m) => !live.has(m.id)).map((m) => m.name),
+    };
+  },
 
   /**
    * Run an agent for real.

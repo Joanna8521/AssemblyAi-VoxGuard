@@ -197,16 +197,18 @@
       "name": "Creative Review",
       "emoji": "🎨",
       "department": "ads",
-      "purpose": "Finds the creatives with dying click-through and briefs replacements.",
+      "purpose": "Watches rival storefronts for what they have put out that we have not seen, and briefs a response.",
       "schedule": "weekly Mon 09:00",
       "reads": [
         "metrics",
         "content"
       ],
       "writes": [
-        "signals"
+        "signals",
+        "content"
       ],
       "actions": [
+        "scrape_public_page",
         "read_metrics",
         "analyze_data",
         "draft_plan"

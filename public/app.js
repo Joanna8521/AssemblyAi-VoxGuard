@@ -325,6 +325,26 @@ async function talk() {
   }
 }
 
+/**
+ * Which of this team will actually do something. Said up front, because a page
+ * that lets somebody press run and then reports that four of five agents were
+ * only ever descriptions has wasted their time and their trust.
+ */
+async function showReadiness(missionId) {
+  try {
+    const r = await api('/api/missions/readiness', { id: missionId });
+    const note = document.createElement('p');
+    note.className = 'composition';
+    note.innerHTML = r.runs.length
+      ? `<b style="color:var(--clear)">${r.runs.join(', ')}</b> will really go and look. ` +
+        (r.describes.length
+          ? `${r.describes.length} others on this team are described but not yet built, and will say so.`
+          : '')
+      : `Nobody on this team is built yet. They will each say so rather than pretend.`;
+    $('m-composition').after(note);
+  } catch { /* the readiness note is a courtesy, not a requirement */ }
+}
+
 // ── the worked examples, for when nobody wants to talk to a laptop ──────────
 
 const EXAMPLES = {
@@ -341,15 +361,15 @@ const EXAMPLES = {
       { action: 'cancel_order', effect: 'DENY' },
     ],
   },
-  revenue: {
-    brief: "Revenue is down this week and I don't know why. Find out, and don't change any prices while you look.",
-    needs: ['read_metrics', 'read_orders', 'analyze_data', 'forecast', 'generate_report'],
+  launches: {
+    brief: 'Tell me when a competitor puts out something new, but never change our own prices to match.',
+    needs: ['scrape_public_page', 'analyze_data', 'draft_plan'],
     rules: [
-      { action: 'read_metrics', effect: 'ALLOW' },
-      { action: 'generate_report', effect: 'ALLOW' },
+      { action: 'scrape_public_page', effect: 'ALLOW' },
       { action: 'send_telegram_message', effect: 'ALLOW' },
+      { action: 'draft_plan', effect: 'ALLOW' },
       { action: 'update_price', effect: 'DENY' },
-      { action: 'change_ad_budget', effect: 'ASK' },
+      { action: 'apply_discount', effect: 'ASK' },
     ],
   },
   rivals: {
@@ -387,8 +407,12 @@ const EXAMPLES = {
     b.onclick = async () => {
       b.disabled = true;
       try {
+        // Give the watchers something to look at, or the example composes a
+        // team and then reports that there is nothing to see.
+        await api('/api/watch/seed', {});
         const r = await api('/api/missions', EXAMPLES[b.dataset.eg]);
         renderMission(r.mission, r.blueprint);
+        await showReadiness(r.mission.id);
         await refresh();
       } catch (e) { fail('hero-err', e.message); }
       b.disabled = false;

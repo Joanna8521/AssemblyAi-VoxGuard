@@ -10,26 +10,26 @@
 <style>
 
 :root{
-  --bg:#EAE4DC; --surface:#F5F1EA; --surface-2:#E3DCD2; --surface-3:#D8CFC3;
-  --ink:#302C26; --muted:#6B645A; --faint:#8B8276;
-  --line:#D3CABE; --line-strong:#BAB0A2; --rail:#C6BCAE;
-  --accent:#4B6364; --accent-soft:#DCE3E1;
-  --clear:#4D6340; --clear-soft:#E0E5D6;
-  --deny:#8D4A3F; --deny-soft:#F0DFDA;
-  --caution:#7A5B16; --caution-soft:#F0E6D0;
-  --on-accent:#F5F1EA;
+  --bg:#0A0D12; --surface:#111721; --surface-2:#171F2B; --surface-3:#1F2937;
+  --ink:#E9EEF6; --muted:#9AA9BC; --faint:#6B7B90;
+  --line:#1E2733; --line-strong:#33404F; --rail:#2A3542;
+  --accent:#5AB0FF; --accent-soft:#0F2438;
+  --clear:#3DDC97; --clear-soft:#0C2A20;
+  --deny:#FF7A8A; --deny-soft:#2E1219;
+  --caution:#F5C24C; --caution-soft:#2B2210;
+  --on-accent:#06121F;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
 }
-@media (prefers-color-scheme:dark){:root{
-  --bg:#23201C; --surface:#2C2823; --surface-2:#332E27; --surface-3:#3B352C;
-  --ink:#EBE4D9; --muted:#A9A093; --faint:#867D71;
-  --line:#3B352C; --line-strong:#4D453A; --rail:#443D33;
-  --accent:#93AAA8; --accent-soft:#2A3635;
-  --clear:#9CB183; --clear-soft:#28301F;
-  --deny:#CD9084; --deny-soft:#3A2823;
-  --caution:#D0AC66; --caution-soft:#372E1C;
-  --on-accent:#23201C;
+@media (prefers-color-scheme:light){:root{
+  --bg:#EEF1F6; --surface:#FFFFFF; --surface-2:#F4F6FA; --surface-3:#E6EAF1;
+  --ink:#0E1621; --muted:#516073; --faint:#6F7D8F;
+  --line:#DCE2EB; --line-strong:#BFC8D6; --rail:#CBD3DF;
+  --accent:#0B63C5; --accent-soft:#E2EEFC;
+  --clear:#0B7A55; --clear-soft:#DDF3E9;
+  --deny:#C0304B; --deny-soft:#FBE3E7;
+  --caution:#8A6206; --caution-soft:#FBEFD5;
+  --on-accent:#FFFFFF;
 }}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
@@ -360,12 +360,14 @@ h1{font-size:16px;letter-spacing:-.02em}
 .rail{display:flex;align-items:stretch;gap:0;min-width:min-content}
 .col{display:flex;flex-direction:column;justify-content:center;gap:7px;min-width:0}
 .col.agents{max-width:220px}
-.link{display:flex;align-items:center;padding:0 8px;flex-shrink:0}
-.link i{display:block;width:26px;height:2px;background:var(--rail);position:relative}
+.link{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;padding:0 6px;flex-shrink:0;min-width:82px}
+.link i{display:block;width:100%;height:2px;background:var(--rail);position:relative}
 .link i::after{content:"";position:absolute;right:-1px;top:50%;transform:translateY(-50%);
   border:4px solid transparent;border-left-color:var(--rail)}
-.link .lbl{font:9.5px var(--mono);color:var(--faint);white-space:nowrap;
-  position:absolute;transform:translateY(-15px)}
+/* In normal flow, inside a column that reserves room for it. Absolute
+   positioning here put the label on top of whatever stood beside it. */
+.link .lbl{font:9.5px var(--mono);color:var(--faint);white-space:nowrap;text-align:center}
 
 .stage{border:1px solid var(--line-strong);border-radius:4px;background:var(--surface);
   padding:7px 9px;display:flex;align-items:center;gap:8px;transition:border-color .25s,box-shadow .25s}
@@ -376,8 +378,8 @@ h1{font-size:16px;letter-spacing:-.02em}
 .stage.cleared{border-color:var(--clear)}
 .stage.held{border-color:var(--deny);background:var(--deny-soft)}
 .endcap{border:1px dashed var(--line-strong);border-radius:4px;background:var(--surface-3);
-  padding:8px 10px;font:10.5px var(--mono);color:var(--muted);text-align:center;
-  writing-mode:vertical-rl;text-orientation:mixed;max-height:200px}
+  padding:10px 8px;font:10px var(--mono);color:var(--muted);text-align:center;
+  max-width:86px;line-height:1.45;display:flex;align-items:center}
 
 .gate{border:1px solid var(--line-strong);border-radius:5px;background:var(--surface-2);
   padding:12px 14px;text-align:center;min-width:118px}
@@ -437,7 +439,7 @@ h1{font-size:16px;letter-spacing:-.02em}
   .link i{width:2px;height:22px}
   .link i::after{right:50%;top:auto;bottom:-1px;transform:translateX(50%);
     border-left-color:transparent;border-top-color:var(--rail)}
-  .endcap{writing-mode:horizontal-tb;max-height:none}
+  .endcap{max-width:none;justify-content:center}
   .col.agents{max-width:none;width:100%}
   .hero h2{font-size:21px}
   .examples button{max-width:none}
@@ -476,8 +478,8 @@ h1{font-size:16px;letter-spacing:-.02em}
         <span>or try one</span>
         <button data-eg="stock">A product just went out of stock. Handle it, but don&rsquo;t refund
           or cancel anything, and ask me before you tell customers.</button>
-        <button data-eg="revenue">Revenue is down this week and I don&rsquo;t know why. Find out,
-          and don&rsquo;t change any prices while you look.</button>
+        <button data-eg="launches">Tell me when a competitor puts out something new, but never
+          change our own prices to match.</button>
         <button data-eg="rivals">Watch what my competitors are charging and tell me when
           anything moves.</button>
       </div>

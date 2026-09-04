@@ -13,7 +13,7 @@
  * intents, and the caller puts each one through the evaluator.
  */
 
-import { readProduct } from './web.js';
+import { readProduct, readCatalogue } from './web.js';
 
 /**
  * @returns {{
@@ -59,15 +59,35 @@ const RUNNERS = {
    */
   async A01({ pools }) {
     const watches = pools.listings ?? [];
-    const readable = watches.filter((w) => w.inStock !== null && w.inStock !== undefined);
-
     if (!watches.length) {
       return { observed: ['Nothing is being watched, so there is no stock to watch.'], intents: [] };
     }
+
+    // It goes and looks itself. Depending on another agent having run first
+    // makes a watcher that is quietly blind whenever it happens to run alone,
+    // and a watcher nobody can tell is blind is worse than no watcher.
+    for (const w of watches) {
+      if (w.inStock !== undefined && w.checkedAt &&
+          Date.now() - Date.parse(w.checkedAt) < 60_000) continue;
+      try {
+        const product = await readProduct(w.url);
+        w.title ??= product.title;
+        w.price = product.price ?? w.price;
+        w.inStock = product.inStock;
+        w.variantsInStock = product.variantsInStock;
+        w.variants = product.variants;
+        w.via = product.via;
+        w.checkedAt = new Date().toISOString();
+        delete w.lastError;
+      } catch (err) {
+        w.lastError = err.message;
+      }
+    }
+
+    const readable = watches.filter((w) => w.inStock !== null && w.inStock !== undefined);
     if (!readable.length) {
       return {
-        observed: [`${watches.length} watched, none of which states availability. ` +
-                   'Run Price Watch first, or watch a shop that publishes stock.'],
+        observed: [`${watches.length} watched, none of which publishes availability.`],
         intents: [],
       };
     }
@@ -94,6 +114,69 @@ const RUNNERS = {
       });
     }
     for (const w of readable.filter((x) => x.inStock)) delete w.reportedOut;
+
+    return { observed, intents };
+  },
+
+  /**
+   * Creative Review, doing the job its name implies: noticing what rivals have
+   * put out that we have not seen before.
+   *
+   * The first look at a shop is not news, it is a baseline, and reporting it as
+   * forty new arrivals would train somebody to ignore the alerts. So the first
+   * read is recorded silently and only what appears afterwards is worth saying.
+   */
+  async A07({ pools }) {
+    const shops = pools.shops ?? [];
+    if (!shops.length) {
+      return {
+        observed: ['No shops to keep an eye on yet. Add a rival storefront to give it something to do.'],
+        intents: [],
+      };
+    }
+
+    const observed = [];
+    const intents = [];
+
+    for (const shop of shops) {
+      let catalogue;
+      try {
+        catalogue = await readCatalogue(shop.url);
+      } catch (err) {
+        shop.lastError = err.message;
+        observed.push(`${host(shop.url)}: ${err.message}`);
+        continue;
+      }
+
+      delete shop.lastError;
+      shop.checkedAt = new Date().toISOString();
+      const seen = new Set(shop.seen ?? []);
+      const fresh = catalogue.filter((p) => !seen.has(p.handle));
+      shop.seen = catalogue.map((p) => p.handle);
+
+      if (!shop.baselined) {
+        shop.baselined = true;
+        observed.push(`${host(shop.url)}: ${catalogue.length} products noted as the baseline.`);
+        continue;
+      }
+
+      if (!fresh.length) {
+        observed.push(`${host(shop.url)}: ${catalogue.length} products, nothing new.`);
+        continue;
+      }
+
+      observed.push(`${host(shop.url)}: ${fresh.length} new since last look — ` +
+        fresh.slice(0, 4).map((p) => `${p.title}${p.price ? ` at ${p.price}` : ''}`).join('; '));
+
+      intents.push({
+        action: 'send_telegram_message',
+        parameters: {
+          text: `${fresh.length} new at ${host(shop.url)}\n` +
+                fresh.slice(0, 5).map((p) => `${p.title}${p.price ? ` — ${p.price}` : ''}\n${p.url}`).join('\n'),
+        },
+        why: `${host(shop.url)} put out ${fresh.length} ${fresh.length === 1 ? 'product' : 'products'} we had not seen`,
+      });
+    }
 
     return { observed, intents };
   },
@@ -191,3 +274,4 @@ const RUNNERS = {
 };
 
 const label = (watch) => watch.title || new URL(watch.url).hostname;
+const host = (url) => new URL(url).hostname.replace(/^www\./, '');
