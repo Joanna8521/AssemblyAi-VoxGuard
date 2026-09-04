@@ -31,7 +31,7 @@ export function registerWebMCP(actionIds) {
   if (!ctx?.registerTool) return false;
 
   ctx.registerTool({
-    name: 'signalbox_policy',
+    name: 'standing_order_policy',
     description:
       'Read the policy currently in force over this commerce workforce: its version, every ' +
       'rule, and what has been held. Call this before trying anything, or to explain to a ' +
@@ -52,7 +52,7 @@ export function registerWebMCP(actionIds) {
   });
 
   ctx.registerTool({
-    name: 'signalbox_would_allow',
+    name: 'standing_order_would_allow',
     description:
       'Ask what would happen without it happening. Returns a verdict per action against the ' +
       'policy in force, and records nothing.',
@@ -70,7 +70,7 @@ export function registerWebMCP(actionIds) {
   });
 
   ctx.registerTool({
-    name: 'signalbox_perform',
+    name: 'standing_order_perform',
     description:
       'Attempt an action against the workforce. This does not perform it: it asks the policy, ' +
       'and the policy decides. A refusal is final, and you cannot grant yourself permission. ' +
@@ -90,7 +90,7 @@ export function registerWebMCP(actionIds) {
       const cleaned = Object.fromEntries(
         Object.entries(parameters).filter(([, v]) => v !== undefined && v !== null && v !== ''));
       const r = await api('/api/evaluate', { action, skill: 'WEBMCP', parameters: cleaned });
-      globalThis.dispatchEvent(new CustomEvent('signalbox:decision', { detail: r }));
+      globalThis.dispatchEvent(new CustomEvent('standingorder:decision', { detail: r }));
 
       if (r.verdict !== 'ALLOW') {
         return say(`${r.verdict}: ${action} was not performed.\n${r.reason}\n\n` +

@@ -10,7 +10,7 @@ import { handler, PORT, describeState, keyConfigured } from './app.js';
 import { adapterStatus } from '../adapters/index.js';
 
 createServer(handler).listen(PORT, () => {
-  console.log(`Signal Box  →  http://localhost:${PORT}`);
+  console.log(`Standing Order  →  http://localhost:${PORT}`);
   console.log(`  state: ${describeState()}`);
   for (const problem of adapterStatus().problems) console.log(`  ⚠ ${problem}`);
   if (!keyConfigured()) {

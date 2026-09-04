@@ -1,4 +1,4 @@
-# Signal Box
+# Standing Order
 
 **Voice-compiled policy for an AI commerce workforce.**
 
@@ -7,7 +7,7 @@
 Built for the [AssemblyAI Voice Agent Hackathon](https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon)
 (Sep 1-30, 2026).
 
-**Live:** https://signal-box-nu.vercel.app
+**Live:** https://standing-order-nu.vercel.app
 
 ---
 
@@ -199,13 +199,13 @@ evaluator, the adapters and the audit trail all run offline.
 
 ### As an MCP server
 
-Signal Box governs whatever speaks MCP. Point a client at `mcp/server.js` and the
+Standing Order governs whatever speaks MCP. Point a client at `mcp/server.js` and the
 workforce's consequential actions appear as tools, each one judged before it runs.
 
 ```json
-{ "mcpServers": { "signal-box": {
+{ "mcpServers": { "standing-order": {
     "command": "node", "args": ["mcp/server.js"],
-    "env": { "SIGNAL_BOX_URL": "http://localhost:8787" } } } }
+    "env": { "STANDING_ORDER_URL": "http://localhost:8787" } } } }
 ```
 
 Ask it to issue a refund. It will not, and it will tell you why, and it will tell

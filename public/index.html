@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Signal Box</title>
+<title>Standing Order</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -211,6 +211,69 @@ dialog::backdrop{background:rgba(16,26,23,.42)}
 .node.agent{cursor:pointer}
 .node.agent:hover{border-color:var(--accent)}
 
+/* ── the phone ──────────────────────────────────────────────────────────────
+   Not the desktop layout squeezed. On a phone somebody is out of the office and
+   wants to say something and see what happened; the whole floor plan is what
+   they look at when they get back. So voice and policy come first, the flow
+   goes underneath, and the things you touch are big enough to hit while
+   walking. */
+@media (max-width:719px){
+  .wrap{padding:12px 12px 44px}
+  .top{gap:8px;margin-bottom:10px}
+  h1{font-size:16px}
+  .sub{display:none}                    /* the tagline is for the desk */
+  .chips{width:100%;justify-content:flex-start}
+
+  .bar{position:sticky;top:0;z-index:5;margin:0 -12px 14px;border-radius:0;
+       border-left:0;border-right:0;padding:10px 12px;
+       backdrop-filter:blur(8px);background:color-mix(in srgb,var(--surface-2) 92%,transparent)}
+  .bar #talk{flex:1 1 auto;justify-content:center;padding:13px 16px;font-size:15px}
+  .bar #run,.bar #reset{padding:13px 14px}
+  .bar select,.bar #c-corpus{display:none}   /* settings, not controls */
+
+  /* Voice and policy first; the floor plan after. */
+  .grid{display:flex;flex-direction:column}
+  .side{order:1;display:flex;flex-direction:column;gap:12px}
+  .grid>div:first-child{order:2}
+
+  .said{font-size:16px}
+  .panel-hd{padding:11px 12px}
+  .panel-bd{padding:12px}
+
+  /* One department at a time is already the idea; make the strip feel swipeable
+     rather than looking like a row that got cut off. */
+  .deps{margin:0 -12px 10px;padding:0 12px 6px;scroll-snap-type:x proximity}
+  .deps button{scroll-snap-align:start;padding:9px 13px}
+
+  .flow{padding:12px 8px 16px}
+  .node{padding:11px 12px}
+  .node .nm{font-size:14px}
+  /* The edge is a two-pixel line, so its label cannot live inside it in normal
+     flow; it stays absolute and is centred on the line instead of sitting to
+     the right of it, where it ran off a narrow screen. The line grows to make
+     room underneath.
+
+     (The first attempt at this set the label to position:static, which put a
+     block of text inside a two-pixel-wide box. Worth remembering that a rule
+     which reads sensibly can still be nonsense against the element it lands
+     on.) */
+  .edge{height:46px}
+  .edge .lbl{left:50%;top:auto;bottom:2px;transform:translateX(-50%);
+             text-align:center;max-width:88vw;background:var(--surface);padding:0 6px}
+
+  /* Three pools abreast leaves about forty pixels for a word. */
+  .split{flex-wrap:wrap}
+  .split>*{flex:1 1 calc(50% - 5px);min-width:0}
+
+  .log{max-height:none}
+  .verdict-note{margin-left:0;margin-right:0}
+}
+
+@media (max-width:400px){
+  .split>*{flex:1 1 100%}
+  .deps button{font-size:12px}
+}
+
 .foot{margin-top:18px;padding:12px 14px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);font-size:12.5px;line-height:1.6;color:var(--muted)}
 .foot code{font:11px var(--mono);background:var(--surface);padding:1px 4px;border-radius:2px;border:1px solid var(--line)}
 </style>
@@ -222,7 +285,7 @@ dialog::backdrop{background:rgba(16,26,23,.42)}
     <div class="brand">
       <div class="lamps" id="lamps"><i></i><i></i><i></i></div>
       <div>
-        <h1>Signal Box</h1>
+        <h1>Standing Order</h1>
         <p class="sub">Your workforce, running. And where it stops.</p>
       </div>
     </div>
@@ -666,7 +729,7 @@ async function talk() {
 
   // An agent acting through WebMCP is not clicking anything, so the page would
   // otherwise sit still while decisions land. Keep it honest.
-  addEventListener('signalbox:decision', (e) => {
+  addEventListener('standingorder:decision', (e) => {
     signal(e.detail.verdict, `${e.detail.request.action}: ${e.detail.reason}`);
     refresh();
   });

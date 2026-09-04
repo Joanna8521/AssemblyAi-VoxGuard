@@ -1,4 +1,4 @@
-# PRD v2.0 — Signal Box
+# PRD v2.0 — Standing Order
 
 **Voice-compiled policy for an AI commerce workforce**
 
@@ -28,7 +28,7 @@ v1.0 是在只看過 skill 摘要、沒讀過賽制、也沒看過競品的情�
 
 ## 1. 一句話
 
-> **Voice Action Gate keeps the human _in_ the loop. Signal Box puts the human _on_ it.**
+> **Voice Action Gate keeps the human _in_ the loop. Standing Order puts the human _on_ it.**
 >
 > One sentence, spoken once, governs a workforce that keeps running after you stop talking.
 
@@ -53,13 +53,13 @@ Agent governance 目前有兩個極端：
 
 當人講完話、離開現場之後，那句話還算不算數？誰記得它？它能不能被修改？被誰？改完之後正在跑的任務要不要重新評估？
 
-**Signal Box 要解的是這個。**
+**Standing Order 要解的是這個。**
 
 ---
 
 ## 3. 與 Voice Action Gate 的差異（必須寫清楚，評審會同時看到兩件）
 
-| | Voice Action Gate | Signal Box |
+| | Voice Action Gate | Standing Order |
 |---|---|---|
 | 語音產生什麼 | **一個動作** | **一份政策** |
 | 執行時人在哪 | **在場**，正在對話 | **不在場**，workforce 非同步跑 |
@@ -377,7 +377,7 @@ P0 不變。Hackathon 期間 evaluator 前面掛的是 Voice Agent API 的 `tool
 
 | 必交項 | 我們的東西 |
 |---|---|
-| Project title / descriptions / tags | Signal Box |
+| Project title / descriptions / tags | Standing Order |
 | Cover image | 畫布的攔截瞬間 |
 | **Video presentation** | ≤5 分鐘：30 秒講清 on-the-loop，再跑 Hero Demo |
 | **Slide presentation** | PDF |
@@ -451,7 +451,7 @@ P0 不變。Hackathon 期間 evaluator 前面掛的是 Voice Agent API 的 `tool
 ## 14. 待決事項
 
 1. **韓文** — 拿 key 實測 Universal-3.5 Pro 是否支援。未實測前不對外宣稱。
-2. **產品名** — 目前 Signal Box（避開 gate）。需確認商標無衝突。
+2. **產品名** — 目前 Standing Order（避開 gate）。需確認商標無衝突。
 3. **英文 skill pack 的平台選擇** — Shopify / Amazon / Meta Ads / Klaviyo？需與 registry 的 action 命名對齊。
 4. **團隊** — 1–6 人。是否找人補影片剪輯與簡報。
 5. **舊 ZIP 差異** — 使用者曾提及 C 系列 13 支、D 系列 3 支；本機 v7 為 C 12、D 2。若另有版本需先合併再定 registry 範圍。

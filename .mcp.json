@@ -1,9 +1,9 @@
 {
   "mcpServers": {
-    "signal-box": {
+    "standing-order": {
       "command": "node",
       "args": ["mcp/server.js"],
-      "env": { "SIGNAL_BOX_URL": "http://localhost:8787" }
+      "env": { "STANDING_ORDER_URL": "http://localhost:8787" }
     }
   }
 }

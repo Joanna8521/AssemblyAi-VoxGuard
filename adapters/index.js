@@ -49,7 +49,7 @@ export async function perform(action, parameters, { registry }) {
 const HANDLERS = {
   send_telegram_message: {
     available: () => telegramConfigured('ops'),
-    run: (_a, p) => sendTelegram('ops', p.text ?? 'Signal Box: an operations alert.'),
+    run: (_a, p) => sendTelegram('ops', p.text ?? 'Standing Order: an operations alert.'),
   },
 
   /**
@@ -61,7 +61,7 @@ const HANDLERS = {
   notify_customer: {
     available: () => telegramConfigured('customer'),
     run: (_a, p) => sendTelegram('customer',
-      p.text ?? `Signal Box: a notice intended for ${p.customer_group ?? 'customers'}.`),
+      p.text ?? `Standing Order: a notice intended for ${p.customer_group ?? 'customers'}.`),
   },
 };
 

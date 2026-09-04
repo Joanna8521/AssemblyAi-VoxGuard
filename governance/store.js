@@ -61,7 +61,7 @@ export class MemoryStore {
  * ever stops being true, this needs a compare-and-set and the note should go.
  */
 export class KVStore {
-  constructor(kv, { prefix = 'signalbox:' } = {}) {
+  constructor(kv, { prefix = 'standingorder:' } = {}) {
     this.kv = kv;
     this.prefix = prefix;
   }
@@ -100,10 +100,10 @@ export function sessionIdFrom(req, res) {
   const cookies = Object.fromEntries((req.headers.cookie ?? '')
     .split(';').map((c) => c.trim().split('=')).filter((p) => p.length === 2));
 
-  if (cookies.sb_session && /^[a-f0-9]{32}$/.test(cookies.sb_session)) return cookies.sb_session;
+  if (cookies.so_session && /^[a-f0-9]{32}$/.test(cookies.so_session)) return cookies.so_session;
 
   const id = crypto.randomUUID().replace(/-/g, '');
   res.setHeader('set-cookie',
-    `sb_session=${id}; Path=/; Max-Age=${Math.floor(TTL_MS / 1000)}; SameSite=Lax; HttpOnly`);
+    `so_session=${id}; Path=/; Max-Age=${Math.floor(TTL_MS / 1000)}; SameSite=Lax; HttpOnly`);
   return id;
 }

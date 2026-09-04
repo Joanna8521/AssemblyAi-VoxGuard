@@ -232,7 +232,7 @@ export function inputConfig() {
 export function systemPrompt(corpus) {
   const n = corpus?.skills ?? 110;
   return [
-    `You are the voice interface to Signal Box, a governance layer sitting in front`,
+    `You are the voice interface to Standing Order, a governance layer sitting in front`,
     `of an AI commerce workforce of ${n} skills that run on their own, without the`,
     `user watching.`,
     ``,
@@ -281,5 +281,5 @@ export function systemPrompt(corpus) {
 }
 
 export function greeting() {
-  return 'Signal Box ready. Tell me what the workforce may and may not do.';
+  return 'Standing Order ready. Tell me what the workforce may and may not do.';
 }

@@ -1,5 +1,5 @@
 /**
- * Signal Box, as a request handler.
+ * Standing Order, as a request handler.
  *
  * Deliberately not a server. A serverless deployment cannot have a module that
  * listens on load, and a local one should not have a second copy of the routing

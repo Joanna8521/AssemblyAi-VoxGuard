@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Signal Box as an MCP server.
+ * Standing Order as an MCP server.
  *
  * This is the interception point the architecture actually rests on. Every
  * agent framework worth governing reaches its tools through MCP now, so putting
@@ -16,9 +16,9 @@
  *
  * Configure a client to run this over stdio:
  *
- *   { "mcpServers": { "signal-box": { "command": "node",
+ *   { "mcpServers": { "standing-order": { "command": "node",
  *       "args": ["<repo>/mcp/server.js"],
- *       "env": { "SIGNAL_BOX_URL": "http://localhost:8787" } } } }
+ *       "env": { "STANDING_ORDER_URL": "http://localhost:8787" } } } }
  *
  * No dependencies. MCP is JSON-RPC 2.0 over a pair of pipes, and the whole of
  * what a tools-only server needs is below.
@@ -26,7 +26,7 @@
 
 import { createInterface } from 'node:readline';
 
-const BASE = (process.env.SIGNAL_BOX_URL ?? 'http://localhost:8787').replace(/\/+$/, '');
+const BASE = (process.env.STANDING_ORDER_URL ?? 'http://localhost:8787').replace(/\/+$/, '');
 const PROTOCOL = '2025-06-18';
 
 const api = async (path, body) => {
@@ -88,7 +88,7 @@ async function buildTools() {
   });
 
   tools.push({
-    name: 'signalbox_policy',
+    name: 'standing_order_policy',
     description:
       'Read the policy currently in force: its version, every rule, and what has been ' +
       'held so far. Call this when you want to know what you are allowed to do before ' +
@@ -97,7 +97,7 @@ async function buildTools() {
   });
 
   tools.push({
-    name: 'signalbox_would_allow',
+    name: 'standing_order_would_allow',
     description:
       'Ask what would happen without it happening. Returns the verdict for each action ' +
       'named, judged against the current policy, and records nothing.',
@@ -118,7 +118,7 @@ async function buildTools() {
 const text = (s, isError = false) => ({ content: [{ type: 'text', text: s }], isError });
 
 async function callTool(name, args = {}) {
-  if (name === 'signalbox_policy') {
+  if (name === 'standing_order_policy') {
     const s = await api('/api/state');
     if (!s.policy) return text('No policy has been compiled. Nothing consequential is authorised.');
     const rules = s.policy.rules
@@ -132,7 +132,7 @@ async function callTool(name, args = {}) {
       `${s.audit.length} decisions so far, ${held.length} of them held.`);
   }
 
-  if (name === 'signalbox_would_allow') {
+  if (name === 'standing_order_would_allow') {
     const { results } = await api('/api/preview', { actions: args.actions ?? [] });
     return text(results.map((r) => `${r.action}: ${r.verdict} (${r.reason})`).join('\n'));
   }
@@ -178,7 +178,7 @@ async function handle(msg) {
         return ok(id, {
           protocolVersion: params?.protocolVersion === PROTOCOL ? PROTOCOL : PROTOCOL,
           capabilities: { tools: { listChanged: false } },
-          serverInfo: { name: 'signal-box', title: 'Signal Box', version: '0.1.0' },
+          serverInfo: { name: 'standing-order', title: 'Standing Order', version: '0.1.0' },
           instructions:
             'Every tool here is an action against a real commerce workforce, and every call ' +
             'is judged against a policy a person spoke aloud. A refusal is final: you cannot ' +
@@ -203,7 +203,7 @@ async function handle(msg) {
     }
   } catch (err) {
     // A server that cannot reach the policy must not answer as though it could.
-    return fail(id, -32603, `${err.message} (is Signal Box running at ${BASE}?)`);
+    return fail(id, -32603, `${err.message} (is Standing Order running at ${BASE}?)`);
   }
 }
 
