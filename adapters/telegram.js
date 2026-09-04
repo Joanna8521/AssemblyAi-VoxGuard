@@ -20,6 +20,39 @@ export function telegramConfigured(channel) {
 }
 
 /**
+ * What is obviously wrong with the configuration, before anything is sent.
+ *
+ * Group chat ids are negative, and the minus is the easiest character in the
+ * world to lose between a terminal and a text editor. Without it the id points
+ * at a user who does not exist and Telegram says "chat not found", which sounds
+ * like a permissions problem and sends you looking in the wrong place. It cost
+ * an afternoon once; it should cost a startup warning from now on.
+ */
+export function telegramProblems() {
+  const problems = [];
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+
+  if (token && !/^\d+:[\w-]{30,}$/.test(token.trim())) {
+    problems.push('TELEGRAM_BOT_TOKEN does not look like a bot token (digits, a colon, then a long key)');
+  }
+
+  for (const [channel, read] of Object.entries(CHATS)) {
+    const raw = read();
+    if (!raw) continue;
+    const value = raw.trim();
+    const name = `TELEGRAM_${channel.toUpperCase()}_CHAT_ID`;
+
+    if (!/^-?\d+$/.test(value)) {
+      problems.push(`${name} is "${value}", which is not a chat id. It is a number, not a group name.`);
+    } else if (!value.startsWith('-') && value.length >= 8) {
+      problems.push(`${name} is ${value} with no minus sign. Group ids are negative; this one is probably -${value}.`);
+    }
+  }
+
+  return problems;
+}
+
+/**
  * @param {'ops'|'customer'} channel
  * @param {string} text
  * @returns {Promise<string>} what to show in the audit trail

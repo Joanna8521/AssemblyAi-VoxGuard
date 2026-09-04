@@ -15,7 +15,7 @@
  *      claims to be about.
  */
 
-import { sendTelegram, telegramConfigured } from './telegram.js';
+import { sendTelegram, telegramConfigured, telegramProblems } from './telegram.js';
 
 /**
  * @returns {{performed: boolean, mode: 'real'|'sandbox', detail: string}}
@@ -69,5 +69,6 @@ export function adapterStatus() {
   return {
     telegram_ops: telegramConfigured('ops'),
     telegram_customer: telegramConfigured('customer'),
+    problems: telegramProblems(),
   };
 }

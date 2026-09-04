@@ -25,11 +25,19 @@ const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 describe('nothing reaches an adapter except through the evaluator', () => {
   const server = read('server/app.js');
 
-  test('the adapter is called from exactly one place', () => {
-    // `perform(` with a preceding word character would be a different symbol.
-    const calls = server.match(/(?<![\w.])perform\(/g) ?? [];
-    assert.equal(calls.length, 1,
-      `perform() is called ${calls.length} times in server/app.js. ` +
+  test('the adapter is called from exactly one place, anywhere', () => {
+    // Counting only inside app.js would miss a second call site added beside
+    // it, which is exactly how this guarantee would be lost.
+    let calls = 0;
+    const seen = [];
+    for (const file of readdirSync(join(ROOT, 'server'))) {
+      if (!file.endsWith('.js')) continue;
+      const found = (read(join('server', file)).match(/(?<![\w.])perform\(/g) ?? []).length;
+      if (found) seen.push(`server/${file} (${found})`);
+      calls += found;
+    }
+    assert.equal(calls, 1,
+      `perform() is called ${calls} times across server/: ${seen.join(', ')}. ` +
       'A second call site is a second way for something to reach the world.');
   });
 
@@ -56,7 +64,12 @@ describe('nothing reaches an adapter except through the evaluator', () => {
     // somebody adds a directory, which is exactly the mistake this exists to
     // catch. It has already happened once: web/ became public/ and the check
     // silently pointed at nothing.
-    const skip = new Set(['node_modules', '.git', 'adapters', 'server', '電商Skills+Subagents']);
+    // Only two files may touch an adapter: app.js, which calls it behind the
+    // evaluator, and index.js, which reads its configuration to warn at startup.
+    // Skipping all of server/ would have been easier and would have let a new
+    // file in there bypass everything above without failing anything.
+    const allowed = new Set(['server/app.js', 'server/index.js']);
+    const skip = new Set(['node_modules', '.git', 'adapters', '電商Skills+Subagents']);
     const offenders = [];
 
     (function walk(dir) {
@@ -65,6 +78,7 @@ describe('nothing reaches an adapter except through the evaluator', () => {
         const rel = dir ? `${dir}/${name}` : name;
         if (statSync(join(ROOT, rel)).isDirectory()) { walk(rel); continue; }
         if (!name.endsWith('.js')) continue;
+        if (allowed.has(rel)) continue;
         if (/from\s+['"][^'"]*adapters\//.test(read(rel))) offenders.push(rel);
       }
     })('');
