@@ -1,5 +1,5 @@
 {
-  "$comment": "Canonical action catalog for Signal Box. Risk belongs to the ACTION, never to the skill — one skill routinely spans L1 reads and L4 financial writes. adapter is what a real deployment would need; 'sandbox' means the v7 corpus holds no credential that could perform it (see registry/README.md).",
+  "$comment": "Canonical action catalog for Signal Box. Risk belongs to the ACTION, never to the skill, since one skill routinely spans L1 reads and L4 financial writes. adapter is what a real deployment would need; 'sandbox' means the v7 corpus holds no credential that could perform it (see registry/README.md).",
   "version": 1,
   "risk_levels": {
     "L0": {"name": "Reason", "default": "AUTO"},

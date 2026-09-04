@@ -77,7 +77,7 @@ describe('conditions', () => {
     assert.equal(r.verdict, ALLOW);
   });
 
-  test('at the boundary, it goes -- lte means lte', () => {
+  test('at the boundary, it goes: lte means lte', () => {
     const r = evaluate(req('change_ad_budget', { increase_percent: 20, daily_total: 5000 }), budget(), registry);
     assert.equal(r.verdict, ALLOW);
   });

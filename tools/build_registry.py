@@ -6,7 +6,7 @@
 Every skill -> action edge carries the evidence that produced it and a
 confidence band. Nothing is asserted without a quotable trigger in the source
 skill, because a registry that invents capabilities would let the evaluator
-authorize something the workforce cannot actually do -- and, worse, would let
+authorize something the workforce cannot actually do, and worse would let
 it silently miss something the workforce *can*.
 
 Confidence bands
@@ -157,7 +157,7 @@ def edges_for(sid, desc, body, deps, is_subagent):
             "evidence": (prev["evidence"] if prev else []) + [{"kind": kind, "trigger": trigger}],
         }
 
-    # 1. declared connector dependencies -- the strongest signal available
+    # 1. declared connector dependencies, the strongest signal available
     for d in deps:
         for action in CONNECTOR.get(d, []):
             add(action, "high", "declared_dependency", d)

@@ -68,7 +68,7 @@ export function load({
     /**
      * Whether a given skill can actually emit this action.
      *
-     * Not consulted by the evaluator -- a forged request is refused on the
+     * Not consulted by the evaluator, since a forged request is refused on the
      * policy alone, and refusing it for the *wrong* reason would teach an
      * attacker which claims are believed. This exists so the console can label
      * a request as coming from outside the known workforce.

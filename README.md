@@ -5,7 +5,7 @@
 > One sentence, spoken once, governs a workforce that keeps running after you stop talking.
 
 Built for the [AssemblyAI Voice Agent Hackathon](https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon)
-(Sep 1–30, 2026).
+(Sep 1-30, 2026).
 
 ---
 
@@ -13,15 +13,15 @@ Built for the [AssemblyAI Voice Agent Hackathon](https://lablab.ai/ai-hackathons
 
 Agent governance has two shapes today, and both fail.
 
-**Full autonomy** — the agent decides, the agent executes. Fast, and one day it delists the
+**Full autonomy.** The agent decides, the agent executes. Fast, and one day it delists the
 wrong product, messages your entire customer list, or burns a day's ad budget before anyone
 notices.
 
-**Approve every step** — the agent proposes, a human clicks yes, forever. Safe, and it
+**Approve every step.** The agent proposes, a human clicks yes, forever. Safe, and it
 throws away the reason you hired the agent.
 
 The third shape is *authority with a lifetime*: a human states the boundaries out loud, and
-agents operate autonomously inside them — **after the human has left the room**.
+agents operate autonomously inside them, **after the human has left the room**.
 
 That last clause is the whole problem. When you stop talking, what happens to what you said?
 
@@ -29,7 +29,7 @@ That last clause is the whole problem. When you stop talking, what happens to wh
 
 ## What this is
 
-You speak. The speech does not become an *action* — it becomes a **policy**: a structured,
+You speak. The speech does not become an *action*. It becomes a **policy**: a structured,
 versioned artifact with a scope and a lifetime.
 
 Some time later, agents you are not talking to emit actions. Every consequential one is
@@ -56,7 +56,7 @@ Then you amend the policy by voice, mid-flight, and the workforce resumes under 
 
 ## Why not just gate the action?
 
-Because the interesting failure is not *"did you really say five hundred?"* — it is
+The interesting failure is not *"did you really say five hundred?"* It is
 *"you said five hundred, we transcribed it perfectly, and it is still not allowed, because
 this morning you said nothing over five thousand today."*
 
@@ -72,10 +72,11 @@ Early. What exists today:
 | | |
 |---|---|
 | **Capability registry** | ✅ 110 skills → 723 typed edges, derived from a real corpus |
-| **Action catalog** | ✅ 36 canonical actions, risk levels L0–L4 plus `L4-meta` |
+| **Action catalog** | ✅ 38 canonical actions, risk levels L0-L4 plus `L4-meta` |
 | **Governance canvas** | ✅ interactive prototype (`prototype/`) |
-| **Policy evaluator** | ⏳ next |
-| **Voice → policy compiler** | ⏳ next |
+| **Policy evaluator** | ✅ deterministic, 24 tests |
+| **Voice → policy compiler** | ✅ tool schema generated from the registry |
+| **Live voice console** | ✅ `npm start`, then talk to it |
 | **End-to-end with a real microphone** | ⏳ the milestone that matters |
 
 ---
@@ -99,10 +100,10 @@ Building the registry against it produced a result that changed the product:
 | everything else | **0** |
 
 **The largest real risk is not what the workforce can do. It is what it can schedule.**
-Scheduling causes no effect itself — it manufactures the capacity to act later, unattended,
+Scheduling causes no effect itself. It manufactures the capacity to act later, unattended,
 after the human who set the policy has gone home. A governance layer that only evaluates
 direct actions is bypassed completely by *"run this at 8am tomorrow."* Hence `L4-meta`, a
-band a plain L0–L4 scale would have missed.
+band a plain L0-L4 scale would have missed.
 
 Details and method: [`registry/README.md`](registry/README.md).
 
@@ -131,8 +132,8 @@ has failed at the thing it claims to be about.
 ## Not in this repository
 
 The OpenClaw v7 skill corpus itself is paid course material and is **not** included. Only
-derived metadata about it — skill ids, action names, risk levels, dependency edges, and the
-trigger phrase behind each edge — which is what the registry needs and all it needs.
+derived metadata about it: skill ids, action names, risk levels, dependency edges, and the
+trigger phrase behind each edge. That is what the registry needs, and all it needs.
 
 ---
 

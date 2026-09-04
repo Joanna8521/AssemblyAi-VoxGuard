@@ -16,7 +16,7 @@ let seq = 0;
 /**
  * Compile a fresh policy.
  *
- * `rules` arrive already structured — from a `compile_policy` tool call, whose
+ * `rules` arrive already structured, from a `compile_policy` tool call whose
  * JSON Schema is what guarantees the shape. Nothing here parses language.
  */
 export function compile({ missionId, scope = 'mission', rules = [], spokenIn = null, at = null }) {
@@ -40,7 +40,7 @@ export function compile({ missionId, scope = 'mission', rules = [], spokenIn = n
  * Amend an existing policy rather than replacing it.
  *
  * This is the difference the whole product turns on. "Notify those 14 paid
- * customers" is an edit to a standing authorization, not a new mission — so the
+ * customers" is an edit to a standing authorization, not a new mission, so the
  * version increments, the audit trail stays attached, and anything already
  * evaluated under v1 keeps its recorded verdict.
  */
@@ -71,7 +71,7 @@ export function amend(policy, changes = [], { at = null } = {}) {
 
 /**
  * A stable fingerprint of what the policy *authorizes*, ignoring everything
- * about how it was produced — id, version, timestamps, and the language it was
+ * about how it was produced: id, version, timestamps, and the language it was
  * spoken in.
  *
  * Two people stating the same boundaries in Mandarin, English and Japanese

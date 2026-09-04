@@ -22,7 +22,7 @@ directions at once.
 **2 · Advisory is not executive.** Most mentions of a high-risk action in this corpus are
 *advisory*: the skill prints "pause the ads" onto a checklist for a human. Only a skill wired
 to a connector that actually holds a credential is *executive*. Conflating the two hands the
-evaluator a registry full of powers the workforce does not have — and, worse, hides the ones
+evaluator a registry full of powers the workforce does not have, and worse, hides the ones
 it does.
 
 An edge is `executive` when the action's adapter is reachable **and** the skill declares the
@@ -40,7 +40,7 @@ connector for it. Everything else is `advisory`.
 
 Every **executive** edge at L3/L4/L4-meta below `high` lands in `review_queue` and must be
 confirmed by a person before it governs anything. Currently 9 entries, all `send_email`
-inferred from the word "EDM" in the body — the open question being whether the skill sends
+inferred from the word "EDM" in the body. The open question is whether the skill sends
 the newsletter or merely drafts it.
 
 ---
@@ -87,14 +87,14 @@ at the far end is simulated, and the UI says so.
 Two things follow, and both shaped the product:
 
 **Scheduling is the escape hatch.** 47 of 110 skills can register a cron entry through C10.
-Scheduling causes no effect itself — it manufactures the capacity to act later, unattended,
+Scheduling causes no effect itself. It manufactures the capacity to act later, unattended,
 after the human who set the policy has gone home. A governance layer that only evaluates
 direct actions is bypassed completely by *"run this at 8am tomorrow."* This is why the risk
-scale carries an `L4-meta` band that a plain L0–L4 scale would have missed.
+scale carries an `L4-meta` band that a plain L0-L4 scale would have missed.
 
 **Everything else the workforce can really do is talk to your customers.** Thirty-four
 executive edges, all of them customer contact, none of them reversible. It cannot pause an ad
-or issue a refund — but it can message your entire customer list, and that is the capability
+or issue a refund, but it can message your entire customer list, and that is the capability
 the Hero Demo blocks. The demo's blocked action is the workforce's most dangerous *real*
 power, not a dramatic hypothetical.
 
@@ -106,7 +106,7 @@ power, not a dramatic hypothetical.
   advisory/executive split removes the systematic error; individual edges can still be wrong,
   which is what `review_queue` and the evidence trail are for.
 - **`cancel_order` has zero edges.** Nothing in the corpus can cancel an order. A policy may
-  still *deny* it — people deny things pre-emptively — but no action request for it should
+  still *deny* it, since people deny things pre-emptively, but no action request for it should
   ever appear in a demo, because no skill would emit one.
 - **Corpus version.** Built against v7 (2026-04): 92 E, 12 C, 2 D, 4 SA. An earlier count of
   13 C / 3 D was mentioned during planning and does not match this tree; if another version

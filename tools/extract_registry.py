@@ -4,7 +4,7 @@
 Input : a directory of <skill-id>/SKILL.md files
 Output: registry JSON on stdout
 
-This reads the legacy Chinese corpus purely as *evidence* — it extracts the
+This reads the legacy Chinese corpus purely as *evidence*: it extracts the
 declared dependency graph and connector usage so we can see which skills can
 actually reach the outside world, and through what.
 """

@@ -6,7 +6,7 @@
  *   1. Mints short-lived AssemblyAI tokens so the API key never leaves this
  *      process. The browser streams audio straight to AssemblyAI; audio never
  *      touches us, which means we cannot store anyone's voice even by accident.
- *   2. Holds the policy — the artifact the voice layer compiles, and the only
+ *   2. Holds the policy, the artifact the voice layer compiles and the only
  *      thing the evaluator consults.
  *   3. Evaluates action requests and appends every verdict to an audit trail.
  *
@@ -22,6 +22,7 @@ import { dirname, join, extname, normalize } from 'node:path';
 import { evaluate } from '../governance/evaluator.js';
 import { compile, amend, fingerprint } from '../governance/policy.js';
 import { load } from '../governance/registry.js';
+import { toolsFor, systemPrompt, greeting } from '../voice/tools.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WEB = join(HERE, '..', 'web');
@@ -46,7 +47,7 @@ const state = {
  */
 async function mintToken() {
   if (!API_KEY) {
-    const e = new Error('ASSEMBLYAI_API_KEY is not set — copy .env.example to .env and fill it in');
+    const e = new Error('ASSEMBLYAI_API_KEY is not set. Copy .env.example to .env and fill it in');
     e.status = 503;
     throw e;
   }
@@ -80,8 +81,8 @@ function record(request, result) {
     risk: result.risk,
     adapter: registry.adapterOf(request.action),
     real: registry.isReal(request.action),
-    // Whether the emitting skill is even capable of this. Not used to decide —
-    // a forged call is refused on the policy alone — but worth recording.
+    // Whether the emitting skill is even capable of this. Not used to decide,
+    // since a forged call is refused on the policy alone, but worth recording.
     knownEmitter: request.skill ? registry.canPerform(request.skill, request.action) : null,
     policyId: state.policy?.policyId ?? null,
     policyVersion: state.policy?.version ?? null,
@@ -100,6 +101,17 @@ const routes = {
   }),
 
   'GET /api/token': async () => mintToken(),
+
+  /**
+   * The session config the browser sends verbatim as `session.update`.
+   * Built here, from the registry, so the action enum the model is allowed to
+   * emit can never drift from the actions the workforce actually has.
+   */
+  'GET /api/session-config': async () => ({
+    system_prompt: systemPrompt(registry.corpus),
+    greeting: greeting(),
+    tools: toolsFor(registry),
+  }),
 
   'GET /api/state': async () => ({
     policy: state.policy,
@@ -130,7 +142,7 @@ const routes = {
 
   /**
    * The chokepoint. Every consequential action arrives here, whatever emitted
-   * it — a workforce skill, an MCP client, or a request forged by hand from the
+   * it: a workforce skill, an MCP client, or a request forged by hand from the
    * console. The evaluator does not care which, and that is the point.
    */
   'POST /api/evaluate': async (body) => {
@@ -227,7 +239,7 @@ server.listen(PORT, () => {
   console.log(`Signal Box  →  http://localhost:${PORT}`);
   if (!API_KEY) {
     console.log('\n  ASSEMBLYAI_API_KEY is not set. Everything except the voice');
-    console.log('  connection still works — policy, evaluator and audit run offline.');
+    console.log('  connection still works. Policy, evaluator and audit run offline.');
     console.log('  To enable voice:  cp .env.example .env  and fill in the key.\n');
   }
 });

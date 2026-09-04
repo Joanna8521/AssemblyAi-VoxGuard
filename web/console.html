@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signal Box · console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+TC:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#EDF0EE; --surface:#FFF; --surface-2:#F5F7F5;
+  --ink:#101A17; --muted:#5A6864; --faint:#8A9793;
+  --line:#D3DAD6; --line-strong:#B9C3BE;
+  --accent:#1C6C8C; --accent-soft:#E2EEF3;
+  --clear:#1E7F52; --clear-soft:#E1F0E8;
+  --deny:#B23A32; --deny-soft:#F7E4E2;
+  --caution:#9C6B10; --caution-soft:#F7EDDA;
+  --on-accent:#FFF;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --sans:"IBM Plex Sans","IBM Plex Sans TC",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0F1715; --surface:#17211E; --surface-2:#1D2825;
+  --ink:#E4EBE7; --muted:#8B9A95; --faint:#6E7E79;
+  --line:#26332F; --line-strong:#35443F;
+  --accent:#57A8C8; --accent-soft:#16303B;
+  --clear:#4FB287; --clear-soft:#122C22;
+  --deny:#E0665C; --deny-soft:#331A18;
+  --caution:#DFAA3C; --caution-soft:#2E2413;
+  --on-accent:#0B1418;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+h1{font-size:18px;margin:0;letter-spacing:-.02em}
+h2{font-size:13px;margin:0;letter-spacing:.01em}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 64px}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.sub{font-size:12.5px;color:var(--muted)}
+.chip{font:500 11px var(--mono);padding:4px 9px;border-radius:3px;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);white-space:nowrap}
+.chip b{color:var(--ink)}
+.chip.on{border-color:var(--clear);color:var(--clear);background:var(--clear-soft)}
+.chip.off{border-color:var(--deny);color:var(--deny);background:var(--deny-soft)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px;margin-bottom:16px;background:var(--surface-2);border:1px solid var(--line);border-radius:4px}
+button{font:500 13px var(--sans);color:inherit;cursor:pointer;padding:8px 15px;border-radius:3px;border:1px solid var(--line-strong);background:var(--surface);transition:border-color .15s}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+button.stop{background:var(--deny);border-color:var(--deny);color:#fff}
+select{font:12.5px var(--sans);padding:7px 9px;border-radius:3px;border:1px solid var(--line-strong);background:var(--surface);color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:980px){.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.plate{background:var(--surface);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.plate-hd{display:flex;align-items:center;gap:9px;padding:10px 13px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.eyebrow{font:600 10px var(--mono);letter-spacing:.13em;text-transform:uppercase;color:var(--faint)}
+.plate-bd{padding:13px}
+.wave{display:flex;gap:2px;align-items:center;height:30px;margin-bottom:11px}
+.wave i{flex:1;background:var(--line-strong);height:10%;border-radius:1px;transition:height .1s}
+.wave.hot i{background:var(--accent)}
+.said{font-size:16px;line-height:1.7;min-height:4.5em}
+.said .partial{color:var(--muted)}
+.agent{margin-top:11px;padding-top:11px;border-top:1px dashed var(--line);font-size:14px;color:var(--muted)}
+.agent b{color:var(--accent);font:600 10px var(--mono);letter-spacing:.1em;display:block;margin-bottom:3px}
+.rules{font:12px var(--mono);display:flex;flex-direction:column;gap:1px}
+.rule{display:flex;gap:9px;align-items:center;padding:6px 7px;background:var(--surface-2);border-radius:2px}
+.rule .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rule .cond{font-size:10.5px;color:var(--faint)}
+.v{font:600 10px var(--mono);letter-spacing:.08em;padding:2px 6px;border-radius:2px}
+.ALLOW{background:var(--clear-soft);color:var(--clear)}
+.DENY{background:var(--deny-soft);color:var(--deny)}
+.ASK{background:var(--caution-soft);color:var(--caution)}
+.empty{font:11.5px var(--mono);color:var(--faint);text-align:center;padding:16px 4px;line-height:1.7}
+.meta{font:11px var(--mono);color:var(--muted);display:flex;gap:9px;flex-wrap:wrap;padding-bottom:9px;margin-bottom:9px;border-bottom:1px dashed var(--line)}
+.meta b{color:var(--accent)}
+.log{max-height:270px;overflow-y:auto;font:11.5px var(--mono)}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:baseline;padding:6px 3px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .ts{color:var(--faint);font-size:10px}
+.row .ac{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .why{grid-column:1/-1;color:var(--faint);font:11px var(--sans);line-height:1.45}
+.tag{font:600 9px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:1px 5px;border-radius:2px;border:1px solid var(--line-strong);color:var(--faint)}
+.tag.real{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.fire{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:11px}
+.note{margin-top:18px;padding:12px 14px;border-radius:4px;background:var(--surface-2);border:1px solid var(--line);font-size:12.5px;line-height:1.6;color:var(--muted)}
+.note code{font:11.5px var(--mono);background:var(--surface);padding:1px 5px;border-radius:2px;border:1px solid var(--line)}
+.err{margin-top:11px;padding:9px 11px;border-radius:3px;background:var(--deny-soft);border:1px solid var(--deny);font-size:12.5px;display:none}
+.err.show{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Signal Box</h1>
+      <p class="sub">Speak the boundaries. A deterministic evaluator holds them.</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="chip" id="c-conn">disconnected</span>
+      <span class="chip" id="c-pol">no policy</span>
+      <span class="chip" id="c-fp">none</span>
+    </div>
+  </header>
+
+  <div class="bar">
+    <button class="primary" id="talk">Start talking</button>
+    <button id="reset">Reset mission</button>
+    <span class="chip" id="c-corpus">loading</span>
+  </div>
+
+  <div class="grid">
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <section class="plate">
+        <div class="plate-hd"><span class="eyebrow">01</span><h2>Voice</h2>
+          <span class="chip" style="margin-left:auto">Voice Agent API</span></div>
+        <div class="plate-bd">
+          <div class="wave" id="wave"></div>
+          <p class="said" id="said"><span class="empty" style="padding:0">Press start, allow the microphone, then say what the workforce may and may not do.</span></p>
+          <div class="agent" id="agent" hidden><b>AGENT</b><span id="agent-text"></span></div>
+          <div class="err" id="err"></div>
+        </div>
+      </section>
+
+      <section class="plate">
+        <div class="plate-hd"><span class="eyebrow">02</span><h2>Compiled policy</h2></div>
+        <div class="plate-bd">
+          <div class="meta" id="pol-meta" hidden></div>
+          <div class="rules" id="rules"><p class="empty">No policy compiled yet<br>Default: nothing consequential is assumed</p></div>
+        </div>
+      </section>
+
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px">
+
+      <section class="plate">
+        <div class="plate-hd"><span class="eyebrow">03</span><h2>Fire an action at the evaluator</h2></div>
+        <div class="plate-bd">
+          <div class="fire">
+            <select id="act"></select>
+            <input id="params" placeholder='{"customer_group":"all"}' style="flex:1;min-width:150px;font:11.5px var(--mono);padding:7px 9px;border-radius:3px;border:1px solid var(--line-strong);background:var(--surface);color:inherit">
+            <button id="fire">Evaluate</button>
+          </div>
+          <p class="sub" style="font-size:12px">Nothing here proves it came from the workforce. That is the point. A forged
+            request is refused on the policy alone.</p>
+        </div>
+      </section>
+
+      <section class="plate">
+        <div class="plate-hd"><span class="eyebrow">04</span><h2>Audit trail</h2>
+          <span class="chip" style="margin-left:auto" id="c-audit">0</span></div>
+        <div class="plate-bd">
+          <div class="log" id="log"><p class="empty">No governance decisions yet</p></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="note" id="note"></div>
+</div>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const api = (p, body) => fetch(p, body
+  ? { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }
+  : undefined).then(async (r) => {
+    const d = await r.json().catch(() => ({ error: `${r.status} ${r.statusText}` }));
+    if (!r.ok) throw new Error(d.error ?? `${r.status}`);
+    return d;
+  });
+
+// ── waveform ────────────────────────────────────────────────────────────────
+const wave = $('wave'), bars = [];
+for (let i = 0; i < 44; i++) { const b = document.createElement('i'); wave.appendChild(b); bars.push(b); }
+function level(rms) {
+  wave.classList.toggle('hot', rms > 0.004);
+  for (const b of bars) b.style.height = `${Math.min(100, 10 + rms * 900 * (0.5 + Math.random()))}%`;
+}
+function waveOff() { wave.classList.remove('hot'); for (const b of bars) b.style.height = '10%'; }
+
+function fail(msg) { const e = $('err'); e.textContent = msg; e.classList.add('show'); }
+function clearFail() { $('err').classList.remove('show'); }
+
+// ── policy + audit rendering ────────────────────────────────────────────────
+function renderPolicy(policy, fp) {
+  const box = $('rules'), meta = $('pol-meta');
+  if (!policy) {
+    box.innerHTML = '<p class="empty">No policy compiled yet<br>Default: nothing consequential is assumed</p>';
+    meta.hidden = true;
+    $('c-pol').textContent = 'no policy';
+    $('c-fp').textContent = 'none';
+    return;
+  }
+  meta.hidden = false;
+  meta.innerHTML = `<span>${policy.policyId}</span><span>scope: ${policy.scope}</span>` +
+    `<span>version <b>${policy.version}</b></span>` +
+    (policy.spokenIn ? `<span>spoken in ${policy.spokenIn}</span>` : '');
+  box.innerHTML = '';
+  for (const r of policy.rules) {
+    const d = document.createElement('div');
+    d.className = 'rule';
+    d.innerHTML = `<span class="nm">${r.action}</span>` +
+      (r.conditions ? `<span class="cond">${Object.entries(r.conditions)
+        .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : v}`).join(' ')}</span>` : '') +
+      `<span class="v ${r.effect}">${r.effect}</span>`;
+    box.appendChild(d);
+  }
+  $('c-pol').textContent = `${policy.policyId} v${policy.version}`;
+  $('c-fp').textContent = fp ?? 'none';
+}
+
+function renderAudit(entries) {
+  const box = $('log');
+  $('c-audit').textContent = entries.length;
+  if (!entries.length) { box.innerHTML = '<p class="empty">No governance decisions yet</p>'; return; }
+  box.innerHTML = '';
+  for (const e of entries) {
+    const d = document.createElement('div');
+    d.className = 'row';
+    d.innerHTML =
+      `<span class="ts">${e.at.slice(11, 19)}</span>` +
+      `<span class="ac">${e.action}</span>` +
+      `<span><span class="tag ${e.real ? 'real' : ''}">${e.real ? 'real' : 'sandbox'}</span> ` +
+      `<span class="v ${e.verdict}">${e.verdict}</span></span>` +
+      `<span class="why">${e.reason} · ${e.risk ?? 'unregistered'}${e.policyVersion ? ` · policy v${e.policyVersion}` : ''}</span>`;
+    box.appendChild(d);
+  }
+  box.scrollTop = box.scrollHeight;
+}
+
+async function refresh() {
+  const s = await api('/api/state');
+  renderPolicy(s.policy, s.fingerprint);
+  renderAudit(s.audit);
+}
+
+// ── the tools the agent can call ────────────────────────────────────────────
+// Each returns a plain object. Whatever comes back is what the agent reads out,
+// so it must never say an action ran, only what the evaluator decided.
+const TOOLS = {
+  async compile_policy(args) {
+    const { policy, fingerprint } = await api('/api/policy/compile', {
+      rules: args.rules ?? [], scope: args.scope ?? 'mission', spokenIn: spokenIn,
+    });
+    renderPolicy(policy, fingerprint);
+    return {
+      policy_id: policy.policyId, version: policy.version,
+      rules_recorded: policy.rules.length,
+      note: 'Policy compiled. Nothing has run yet.',
+    };
+  },
+  async amend_policy(args) {
+    const { policy, fingerprint } = await api('/api/policy/amend', { changes: args.changes ?? [] });
+    renderPolicy(policy, fingerprint);
+    return {
+      policy_id: policy.policyId, version: policy.version,
+      changed: (args.changes ?? []).map((c) => `${c.action}->${c.effect}`),
+    };
+  },
+  async report_status() {
+    const s = await api('/api/state');
+    const held = s.audit.filter((e) => e.verdict !== 'ALLOW');
+    return {
+      policy_version: s.policy?.version ?? null,
+      decisions: s.audit.length,
+      held: held.map((e) => ({ action: e.action, verdict: e.verdict, reason: e.reason })),
+    };
+  },
+};
+
+// ── the voice connection ────────────────────────────────────────────────────
+let ws = null, audioCtx = null, node = null, stream = null, playAt = 0;
+let spokenIn = null;
+
+async function start() {
+  clearFail();
+  $('talk').disabled = true;
+
+  let token, config;
+  try {
+    [{ token }, config] = await Promise.all([api('/api/token'), api('/api/session-config')]);
+  } catch (e) {
+    fail(`Could not reach AssemblyAI: ${e.message}`);
+    $('talk').disabled = false;
+    return;
+  }
+
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: false },
+    });
+  } catch {
+    fail('Microphone permission is required. Allow it and press start again.');
+    $('talk').disabled = false;
+    return;
+  }
+
+  ws = new WebSocket(`wss://agents.assemblyai.com/v1/ws?token=${encodeURIComponent(token)}`);
+  ws.onopen = () => {
+    setConn('connecting', false);
+    ws.send(JSON.stringify({ type: 'session.update', session: config }));
+  };
+  ws.onerror = () => fail('WebSocket error. Check the browser console.');
+  ws.onclose = () => teardown();
+  ws.onmessage = (ev) => handle(JSON.parse(ev.data));
+
+  $('talk').textContent = 'Stop';
+  $('talk').className = 'stop';
+  $('talk').disabled = false;
+}
+
+async function beginCapture() {
+  // 24 kHz PCM16 is what the API wants; asking the AudioContext for that rate
+  // avoids resampling by hand and the drift that comes with it.
+  audioCtx = new AudioContext({ sampleRate: 24000 });
+  await audioCtx.audioWorklet.addModule(URL.createObjectURL(new Blob([`
+    class Cap extends AudioWorkletProcessor {
+      process(inputs) {
+        const ch = inputs[0][0];
+        if (ch) this.port.postMessage(new Float32Array(ch));
+        return true;
+      }
+    }
+    registerProcessor('cap', Cap);
+  `], { type: 'application/javascript' })));
+
+  node = new AudioWorkletNode(audioCtx, 'cap');
+  node.port.onmessage = ({ data }) => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    let sum = 0;
+    const pcm = new Int16Array(data.length);
+    for (let i = 0; i < data.length; i++) {
+      const s = Math.max(-1, Math.min(1, data[i]));
+      pcm[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+      sum += s * s;
+    }
+    level(Math.sqrt(sum / data.length));
+    ws.send(JSON.stringify({ type: 'input.audio', audio: b64(pcm.buffer) }));
+  };
+  audioCtx.createMediaStreamSource(stream).connect(node);
+}
+
+function b64(buf) {
+  const b = new Uint8Array(buf);
+  let s = '';
+  for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
+function play(base64) {
+  if (!audioCtx) return;
+  const raw = atob(base64);
+  const pcm = new Int16Array(raw.length / 2);
+  for (let i = 0; i < pcm.length; i++) pcm[i] = (raw.charCodeAt(i * 2 + 1) << 8) | raw.charCodeAt(i * 2);
+  const buf = audioCtx.createBuffer(1, pcm.length, 24000);
+  const ch = buf.getChannelData(0);
+  for (let i = 0; i < pcm.length; i++) ch[i] = pcm[i] / 32768;
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  src.connect(audioCtx.destination);
+  playAt = Math.max(playAt, audioCtx.currentTime);
+  src.start(playAt);
+  playAt += buf.duration;
+}
+
+async function handle(msg) {
+  switch (msg.type) {
+    case 'session.ready':
+      setConn('live', true);
+      await beginCapture();
+      break;
+
+    case 'transcript.user.delta':
+      $('said').innerHTML = `<span class="partial">${escapeHtml(msg.text ?? '')}</span>`;
+      break;
+
+    case 'transcript.user':
+      $('said').textContent = msg.text ?? '';
+      break;
+
+    case 'transcript.agent':
+      $('agent').hidden = false;
+      $('agent-text').textContent = msg.text ?? '';
+      break;
+
+    case 'reply.audio':
+      play(msg.data ?? msg.audio);
+      break;
+
+    case 'tool.call': {
+      // The two published shapes for this event disagree: one nests under
+      // `tool`, the other is flat. Accept both rather than betting on one, and
+      // log what actually arrived so the ambiguity gets settled by evidence.
+      const t = msg.tool ?? msg;
+      const name = t.name;
+      const callId = t.call_id ?? msg.call_id;
+      const args = t.arguments ?? t.parameters ?? {};
+      console.log('[tool.call shape]', JSON.stringify(msg).slice(0, 400));
+
+      let result, isError = false;
+      try {
+        if (!TOOLS[name]) throw new Error(`no such tool: ${name}`);
+        result = await TOOLS[name](args);
+      } catch (e) {
+        result = { error: e.message };
+        isError = true;
+        fail(`Tool ${name} failed: ${e.message}`);
+      }
+      ws.send(JSON.stringify({
+        type: 'tool.result', call_id: callId, result: JSON.stringify(result), is_error: isError,
+      }));
+      await refresh();
+      break;
+    }
+
+    case 'session.error':
+      fail(`${msg.code}: ${msg.message}`);
+      break;
+
+    case 'session.ended':
+      teardown();
+      break;
+  }
+}
+
+function setConn(text, ok) {
+  const c = $('c-conn');
+  c.textContent = text;
+  c.className = `chip ${ok ? 'on' : ''}`;
+}
+
+function stop() {
+  // Send session.end and let the server close. A bare ws.close() leaves the
+  // session inside a 30-second resume window, and that window is billable.
+  if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'session.end' }));
+  else teardown();
+}
+
+function teardown() {
+  node?.port && (node.port.onmessage = null);
+  node?.disconnect();
+  audioCtx?.close();
+  stream?.getTracks().forEach((t) => t.stop());
+  ws = null; node = null; audioCtx = null; stream = null; playAt = 0;
+  waveOff();
+  setConn('disconnected', false);
+  $('talk').textContent = 'Start talking';
+  $('talk').className = 'primary';
+  $('talk').disabled = false;
+}
+
+const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) =>
+  ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// ── wiring ──────────────────────────────────────────────────────────────────
+$('talk').onclick = () => (ws ? stop() : start());
+
+$('reset').onclick = async () => {
+  await api('/api/reset', {});
+  $('said').textContent = '';
+  $('agent').hidden = true;
+  await refresh();
+};
+
+$('fire').onclick = async () => {
+  let parameters = {};
+  const raw = $('params').value.trim();
+  if (raw) {
+    try { parameters = JSON.parse(raw); }
+    catch { return fail('Parameters must be JSON, e.g. {"customer_group":"all"}'); }
+  }
+  clearFail();
+  await api('/api/evaluate', { action: $('act').value, skill: 'CONSOLE', parameters });
+  await refresh();
+};
+
+(async () => {
+  const [health, config] = await Promise.all([api('/api/health'), api('/api/session-config')]);
+  const c = health.corpus;
+  $('c-corpus').innerHTML = c
+    ? `corpus <b>${c.skills}</b> skills · <b>${c.executive_high_risk_edges}</b> executive high-risk edges`
+    : 'corpus not built';
+  if (!health.keyConfigured) {
+    $('c-conn').textContent = 'no API key';
+    $('c-conn').className = 'chip off';
+    $('talk').disabled = true;
+    fail('ASSEMBLYAI_API_KEY is not set. Everything below still works offline.');
+  }
+
+  const actions = config.tools[0].parameters.properties.rules.items.properties.action.enum;
+  $('act').innerHTML = actions.map((a) => `<option>${a}</option>`).join('');
+  $('act').value = actions.includes('notify_customer') ? 'notify_customer' : actions[0];
+
+  $('note').innerHTML =
+    `The action list above is the tool schema the model is given: an <code>enum</code> ` +
+    `generated from the registry. A model that hallucinates a capability the workforce ` +
+    `does not have cannot express it here, because the schema has no member for it. ` +
+    `Actions marked <code>sandbox</code> have no credential anywhere in the corpus and are ` +
+    `simulated; <code>real</code> ones are not. The evaluator is real either way.`;
+
+  await refresh();
+})();
+</script>
+</body>
+</html>

@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "test": "node --test \"governance/*.test.js\"",
-    "registry": "python3 tools/build_registry.py"
+    "registry": "python3 tools/build_registry.py",
+    "start": "node --env-file=.env server/index.js"
   }
 }

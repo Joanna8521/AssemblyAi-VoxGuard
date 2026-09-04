@@ -67,7 +67,7 @@ export function evaluate(request, policy, registry) {
         `allowed, conditions satisfied: ${describe(rule.conditions)}`, rule, risk);
     }
     // Conditions exist and are not met. `otherwise` defaults to ASK in
-    // policy.js -- an unmet condition is an open question, not a refusal, and
+    // policy.js. An unmet condition is an open question, not a refusal, and
     // certainly not a pass.
     return verdict(rule.otherwise ?? ASK, 'conditions_unmet',
       `outside the authorized range: ${failed.join('; ')}`, rule, risk);
