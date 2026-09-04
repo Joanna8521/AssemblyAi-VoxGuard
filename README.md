@@ -7,7 +7,7 @@
 Built for the [AssemblyAI Voice Agent Hackathon](https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon)
 (Sep 1-30, 2026).
 
-**Live:** https://signal-7bw4nwte4-joanna8521s-projects.vercel.app
+**Live:** https://signal-box-nu.vercel.app
 
 ---
 
