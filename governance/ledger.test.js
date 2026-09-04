@@ -181,3 +181,40 @@ test('opening a mission keeps the rules already in force', async () => {
   assert.equal(byAction.get('update_price'), 'ASK', 'and the one restated now wins');
   assert.equal(merged.length, 2, 'without leaving a duplicate behind');
 });
+
+test('whoever fetches the numbers runs before whoever analyses them', async () => {
+  // Ad Performance both reads and writes `metrics`, and so does Daily Revenue,
+  // which makes a cycle out of what is really a queue. Broken the wrong way,
+  // the analyst ran first and reported, truthfully, that the pool it needed was
+  // empty - while the agent that fills it was still waiting its turn.
+  const { blueprint } = await import('./mission.js');
+  const { readFileSync } = await import('node:fs');
+  const workforce = JSON.parse(
+    readFileSync(new URL('../agents/workforce.json', import.meta.url)));
+
+  const team = ['A06', 'A08', 'A33', 'A30', 'A25'];
+  const order = blueprint({ team: team.map((id) => ({ id })), policy: { rules: [] } },
+    workforce.agents).stages.map((s) => s.id);
+
+  assert.equal(order.length, team.length, 'a cycle must not drop anybody');
+  for (const analyst of ['A06', 'A08', 'A33']) {
+    assert.ok(order.indexOf('A30') < order.indexOf(analyst),
+      `Daily Revenue fetches the sheet, so it must run before ${analyst}`);
+  }
+});
+
+test('the agent that reports on a run goes last', async () => {
+  // Ops Alerts reads signals and writes nothing: it gathers what a run raised
+  // into one message. Placed anywhere but last it gathers a partial run, and
+  // the one alert that gets sent is the one nobody needed.
+  const { blueprint } = await import('./mission.js');
+  const { readFileSync } = await import('node:fs');
+  const workforce = JSON.parse(
+    readFileSync(new URL('../agents/workforce.json', import.meta.url)));
+
+  const team = ['A25', 'A06', 'A30', 'A21', 'A31'];
+  const order = blueprint({ team: team.map((id) => ({ id })), policy: { rules: [] } },
+    workforce.agents).stages.map((s) => s.id);
+
+  assert.equal(order.at(-1), 'A25', `Ops Alerts should be last, got ${order.join(' → ')}`);
+});

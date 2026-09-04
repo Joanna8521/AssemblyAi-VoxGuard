@@ -102,7 +102,6 @@
         "signals"
       ],
       "actions": [
-        "read_inventory",
         "forecast",
         "analyze_data"
       ]
@@ -641,7 +640,9 @@
         "metrics"
       ],
       "writes": [
-        "metrics"
+        "metrics",
+        "orders",
+        "signals"
       ],
       "actions": [
         "read_sheet",

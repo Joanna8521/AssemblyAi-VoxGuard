@@ -115,6 +115,34 @@ const RUNNERS = {
         continue;
       }
 
+      // Published where the rest of the workforce already says it reads from.
+      // Nine agents declare `metrics` and nobody was writing it, so the graph
+      // described a business whose numbers never arrived anywhere.
+      const col = (names) => findColumn(data.headers, names);
+      const cols = {
+        date: dateCol,
+        revenue: moneyCol,
+        spend: col(['ad spend', 'adspend', 'spend', 'ad cost', '廣告花費']),
+        orders: col(['orders', 'order count', '訂單數', '訂單']),
+        units: col(['units sold', 'units', 'quantity', 'qty', '件數']),
+        returns: col(['returns', 'refunds', 'returned', '退貨']),
+      };
+
+      const daily = data.rows.map((r) => ({
+        day: cols.date ? r[cols.date] : null,
+        revenue: toNumber(r[cols.revenue]),
+        spend: cols.spend ? toNumber(r[cols.spend]) : null,
+        orders: cols.orders ? toNumber(r[cols.orders]) : null,
+        units: cols.units ? toNumber(r[cols.units]) : null,
+        returns: cols.returns ? toNumber(r[cols.returns]) : null,
+        source: sheet.name ?? 'sheet',
+      })).filter((d) => d.revenue !== null);
+
+      pools.metrics = daily;
+      pools.orders = daily;
+      observed.push(`Columns found: ${Object.entries(cols)
+        .filter(([, v]) => v).map(([k, v]) => `${k}="${v}"`).join(', ')}.`);
+
       const total = values.reduce((s2, v) => s2 + v.value, 0);
       const latest = values.at(-1);
       const earlier = values.slice(0, -1);
@@ -296,6 +324,308 @@ const RUNNERS = {
   },
 
   /**
+   * The analysts.
+   *
+   * None of these fetches anything. Daily Revenue publishes the rows it read
+   * into `metrics`, and these read them from there, which is what the workforce
+   * graph has claimed all along and what nobody was doing. It also means one
+   * fetch serves the whole team instead of six agents pulling the same sheet.
+   *
+   * Each says what it cannot see rather than working around it: a shop whose
+   * sheet has no ad spend column gets told that, not a made-up ROAS.
+   */
+
+  /** Ad Performance: what the spending bought, by the only measure available. */
+  async A06({ pools }) {
+    const rows = withBoth(pools, 'spend');
+    if (!rows.length) return missing('metrics', 'an ad spend column');
+
+    const roas = (r) => r.spend > 0 ? r.revenue / r.spend : null;
+    const recent = rows.slice(-7);
+    const earlier = rows.slice(0, -7);
+    const avg = (list) => {
+      const vals = list.map(roas).filter((v) => v !== null);
+      return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    };
+
+    const now = avg(recent), before = avg(earlier);
+    const observed = [`Return on ad spend over the last ${recent.length} days: ` +
+      `${now === null ? 'not calculable' : now.toFixed(2)}x` +
+      `${before === null ? '' : `, against ${before.toFixed(2)}x before that`}.`];
+
+    const intents = [];
+    if (now !== null && before !== null && now < before * 0.7) {
+      const drop = Math.round((1 - now / before) * 100);
+      pools.signals = [...(pools.signals ?? []), {
+        kind: 'roas_drop', percent: drop, at: new Date().toISOString(),
+      }];
+      observed.push(`That is ${drop}% worse, which is a real change rather than a quiet week.`);
+      intents.push({
+        action: 'pause_ad',
+        parameters: { platform: 'meta' },
+        why: `return on ad spend fell ${drop}%, from ${before.toFixed(2)}x to ${now.toFixed(2)}x`,
+      });
+    }
+    return { observed, intents };
+  },
+
+  /** Budget Pacing: whether the month's spending is on course or ahead of it. */
+  async A08({ pools }) {
+    const rows = withBoth(pools, 'spend');
+    if (!rows.length) return missing('metrics', 'an ad spend column');
+
+    const perDay = rows.reduce((a, r) => a + r.spend, 0) / rows.length;
+    const last = rows.at(-1).spend;
+    const projected = perDay * 30;
+    const observed = [
+      `Spending averages ${Math.round(perDay)} a day over ${rows.length} days, ` +
+      `which is ${Math.round(projected)} across a month.`,
+    ];
+
+    const intents = [];
+    if (last > perDay * 1.5) {
+      observed.push(`The latest day is ${Math.round(last)}, well above that pace.`);
+      intents.push({
+        action: 'change_ad_budget',
+        parameters: { platform: 'meta', daily_total: Math.round(perDay) },
+        why: `the last day spent ${Math.round(last)} against an average of ${Math.round(perDay)}`,
+      });
+    }
+    return { observed, intents };
+  },
+
+  /** Returns Analysis: how much of what was sold came back. */
+  async A21({ pools }) {
+    const rows = (pools.orders ?? []).filter(
+      (r) => r.returns !== null && r.orders !== null && r.orders > 0);
+    if (!rows.length) return missing('orders', 'a returns column and an order count');
+
+    const rate = (list) => {
+      const o = list.reduce((a, r) => a + r.orders, 0);
+      return o ? list.reduce((a, r) => a + r.returns, 0) / o : 0;
+    };
+    const recent = rate(rows.slice(-7));
+    const before = rate(rows.slice(0, -7));
+
+    const observed = [`Returns are running at ${(recent * 100).toFixed(1)}% of orders` +
+      `${rows.length > 7 ? `, against ${(before * 100).toFixed(1)}% before` : ''}.`];
+
+    if (recent > 0.1 && recent > before * 1.5) {
+      pools.signals = [...(pools.signals ?? []), {
+        kind: 'returns_spike', rate: recent, at: new Date().toISOString(),
+      }];
+      observed.push('That is high enough and sudden enough to be worth a look.');
+    }
+    return { observed, intents: [] };
+  },
+
+  /**
+   * Anomaly Watch: days that do not belong with the others.
+   *
+   * Three standard deviations from the mean, on each column that exists. Not
+   * clever, and deliberately so: a threshold somebody can check beats a score
+   * they have to trust.
+   */
+  async A31({ pools }) {
+    const rows = pools.metrics ?? [];
+    if (rows.length < 8) return missing('metrics', 'at least eight days to compare');
+
+    const observed = [];
+    const found = [];
+    for (const field of ['revenue', 'spend', 'orders', 'returns']) {
+      const vals = rows.map((r) => r[field]).filter((v) => v !== null && v !== undefined);
+      if (vals.length < 8) continue;
+
+      const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+      const sd = Math.sqrt(vals.reduce((a, b) => a + (b - mean) ** 2, 0) / vals.length);
+      if (sd === 0) continue;
+
+      for (const r of rows) {
+        const v = r[field];
+        if (v === null || v === undefined) continue;
+        const z = (v - mean) / sd;
+        if (Math.abs(z) >= 3) {
+          found.push({ field, day: r.day, value: v, z: Math.round(z * 10) / 10 });
+        }
+      }
+    }
+
+    if (!found.length) {
+      observed.push(`Nothing unusual across ${rows.length} days: every figure sits ` +
+        'within three standard deviations of its own average.');
+    } else {
+      for (const f of found) {
+        observed.push(`${f.day ?? 'a day'}: ${f.field} ${Math.round(f.value)} is ` +
+          `${Math.abs(f.z)} standard deviations ${f.z > 0 ? 'above' : 'below'} normal.`);
+      }
+      pools.signals = [...(pools.signals ?? []),
+        ...found.map((f) => ({ kind: 'anomaly', ...f, at: new Date().toISOString() }))];
+    }
+    return { observed, intents: [] };
+  },
+
+  /** Unit Economics: what is left per order once the advertising is paid for. */
+  async A33({ pools }) {
+    const rows = (pools.metrics ?? []).filter(
+      (r) => r.orders !== null && r.orders > 0 && r.spend !== null);
+    if (!rows.length) return missing('metrics', 'order counts and ad spend');
+
+    const per = rows.map((r) => ({ day: r.day, value: (r.revenue - r.spend) / r.orders }));
+    const mean = per.reduce((a, b) => a + b.value, 0) / per.length;
+    const latest = per.at(-1);
+
+    const observed = [
+      `After advertising, each order leaves ${Math.round(mean)} on average across ` +
+      `${per.length} days.`,
+      `The latest day is ${Math.round(latest.value)}${latest.day ? ` (${latest.day})` : ''}.`,
+    ];
+    if (latest.value < mean * 0.6) {
+      observed.push('Well below the average, so the last day cost more to sell than it usually does.');
+    }
+    return { observed, intents: [] };
+  },
+
+  /** Stock Forecast: how long what is on the shelf lasts at the current rate. */
+  async A02({ pools }) {
+    const rows = (pools.orders ?? []).filter((r) => r.units !== null);
+    const listings = (pools.listings ?? []).filter((w) => w.variantsInStock != null);
+
+    if (!rows.length) return missing('orders', 'a units sold column');
+    const perDay = rows.slice(-14).reduce((a, r) => a + r.units, 0) /
+      Math.min(14, rows.length);
+
+    const observed = [`Selling ${perDay.toFixed(1)} units a day over the last ` +
+      `${Math.min(14, rows.length)} days.`];
+
+    if (!listings.length) {
+      observed.push('No stock figure is being read, so days of cover cannot be worked out.');
+      return { observed, intents: [] };
+    }
+
+    for (const w of listings) {
+      // Variants in stock is not a unit count, and saying otherwise would be
+      // inventing a number. What it does support is the ratio between shops.
+      observed.push(`${label(w)}: ${w.variantsInStock} variants still available.`);
+    }
+    return { observed, intents: [] };
+  },
+
+  /** Keyword Research: the words the shops being watched actually use. */
+  async A26({ pools }) {
+    const titles = (pools.listings ?? []).map((w) => w.title).filter(Boolean);
+    if (titles.length < 2) {
+      return { observed: ['Fewer than two listings are being watched, so there is ' +
+        'nothing to find a pattern in.'], intents: [] };
+    }
+
+    const stop = new Set(['the', 'and', 'for', 'with', 'a', 'in', 'of', 'to', 's']);
+    const counts = new Map();
+    for (const t of titles) {
+      for (const word of t.toLowerCase().split(/[^a-z0-9\u4e00-\u9fff]+/)) {
+        if (word.length < 3 || stop.has(word)) continue;
+        counts.set(word, (counts.get(word) ?? 0) + 1);
+      }
+    }
+    const top = [...counts].filter(([, n]) => n > 1).sort((a, b) => b[1] - a[1]).slice(0, 8);
+
+    return {
+      observed: top.length
+        ? [`Across ${titles.length} listings, the words that repeat are ` +
+           `${top.map(([w, n]) => `${w} (${n})`).join(', ')}.`]
+        : [`Across ${titles.length} listings no word repeats, so there is no ` +
+           'shared vocabulary to report.'],
+      intents: [],
+    };
+  },
+
+  /** Listing Audit: what the pages being watched are missing. */
+  async A13({ pools }) {
+    const listings = pools.listings ?? [];
+    if (!listings.length) return missing('listings', 'a product page to look at');
+
+    const observed = [];
+    const faults = [];
+    for (const w of listings) {
+      const problems = [];
+      if (!w.title) problems.push('no readable title');
+      else if (w.title.length < 15) problems.push(`a ${w.title.length}-character title`);
+      if (w.price == null) problems.push('no price the page publishes');
+      if (w.inStock === null || w.inStock === undefined) problems.push('no stock state');
+      if (w.lastError) problems.push(w.lastError);
+
+      if (problems.length) {
+        faults.push({ url: w.url, problems });
+        observed.push(`${label(w)}: ${problems.join('; ')}.`);
+      }
+    }
+    if (!faults.length) {
+      observed.push(`All ${listings.length} pages publish a title, a price and a stock state.`);
+    } else {
+      pools.content = [...(pools.content ?? []),
+        ...faults.map((f) => ({ kind: 'listing_fault', ...f, at: new Date().toISOString() }))];
+    }
+    return { observed, intents: [] };
+  },
+
+  /** Repricer: where this shop sits against the ones being watched. */
+  async A12({ pools }) {
+    const priced = (pools.listings ?? []).filter((w) => typeof w.price === 'number');
+    if (priced.length < 2) {
+      return missing('listings', 'at least two pages publishing a price');
+    }
+
+    const sorted = [...priced].sort((a, b) => a.price - b.price);
+    const mid = sorted[Math.floor(sorted.length / 2)].price;
+    const observed = [
+      `Across ${priced.length} watched products the middle price is ${mid}, ` +
+      `from ${sorted[0].price} (${label(sorted[0])}) to ` +
+      `${sorted.at(-1).price} (${label(sorted.at(-1))}).`,
+    ];
+
+    const intents = [];
+    const dear = sorted.at(-1);
+    if (dear.price > mid * 1.4) {
+      observed.push(`${label(dear)} sits well above the rest.`);
+      intents.push({
+        action: 'update_price',
+        parameters: { platform: 'website', decrease_percent: 10 },
+        why: `${label(dear)} is priced ${Math.round((dear.price / mid - 1) * 100)}% above the middle of the market`,
+      });
+    }
+    return { observed, intents };
+  },
+
+  /**
+   * Ops Alerts: one message instead of six.
+   *
+   * Everything raised during a run, gathered and sent once. Six agents each
+   * messaging separately is how a useful alert becomes something people mute.
+   */
+  async A25({ pools }) {
+    const signals = pools.signals ?? [];
+    if (!signals.length) {
+      return { observed: ['Nothing was raised this run, so there is nothing to send.'], intents: [] };
+    }
+
+    const lines = signals.map((s) => {
+      if (s.kind === 'out_of_stock') return `Sold out: ${s.product}`;
+      if (s.kind === 'roas_drop') return `Return on ad spend down ${s.percent}%`;
+      if (s.kind === 'returns_spike') return `Returns at ${(s.rate * 100).toFixed(1)}% of orders`;
+      if (s.kind === 'anomaly') return `${s.day ?? 'A day'}: ${s.field} ${Math.round(s.value)} (${s.z} sd)`;
+      return s.kind;
+    });
+
+    return {
+      observed: [`${signals.length} raised this run, gathered into one message.`],
+      intents: [{
+        action: 'send_telegram_message',
+        parameters: { text: `${signals.length} things worth knowing\n${lines.join('\n')}` },
+        why: `${signals.length} signals were raised and nobody has been told`,
+      }],
+    };
+  },
+
+  /**
    * Emergency Response, picking up what Inventory Watch put down.
    *
    * Everything it wants comes from a signal somebody else raised about a real
@@ -468,6 +798,23 @@ const RUNNERS = {
     return { observed, intents };
   },
 };
+
+/** Rows that carry both revenue and the named field, since a ratio needs both. */
+function withBoth(pools, field) {
+  return (pools.metrics ?? []).filter(
+    (r) => r.revenue !== null && r[field] !== null && r[field] !== undefined);
+}
+
+/**
+ * Said plainly when the numbers are not there.
+ *
+ * An agent that cannot see what it needs should say which pool and which column,
+ * not return nothing and let the page imply it looked and found peace.
+ */
+const missing = (pool, what) => ({
+  observed: [`Nothing in ${pool} has ${what}, so there is nothing to work out.`],
+  intents: [],
+});
 
 const label = (watch) => watch.title || new URL(watch.url).hostname;
 const host = (url) => new URL(url).hostname.replace(/^www\./, '');

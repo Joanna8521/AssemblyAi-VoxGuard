@@ -124,6 +124,27 @@ export function blueprint(mission, agents) {
  * are real in a workforce (two agents can feed each other) so this breaks them
  * by taking whoever is left rather than refusing to answer.
  */
+/**
+ * Actions that go and get something from outside this system.
+ *
+ * The distinction the ordering turns on. Several agents both read and write the
+ * same pool, which makes a genuine cycle out of what is really a queue: one of
+ * them fetches the numbers and the rest analyse them. Whoever fetches goes
+ * first, or the analysts run against an empty pool and truthfully report that
+ * there is nothing there.
+ */
+const FETCHES = new Set(['read_sheet', 'scrape_public_page', 'read_inventory']);
+const isSource = (agent) => (agent.actions ?? []).some((a) => FETCHES.has(a));
+
+/**
+ * An agent that reads a pool and fills none is the end of the line.
+ *
+ * Ops Alerts gathers everything raised during a run into one message. Run in
+ * the middle it gathers half a run, says so honestly, and the alert nobody
+ * needed is the only one sent.
+ */
+const isSink = (agent) => (agent.reads ?? []).length > 0 && (agent.writes ?? []).length === 0;
+
 function dependencyOrder(members) {
   const writers = new Map();
   for (const agent of members) {
@@ -144,11 +165,21 @@ function dependencyOrder(members) {
     return [agent.id, upstream];
   }));
 
+  // Whoever only reports is held back until everything that could give it
+  // something to report has run. Ordering it among the others meant it became
+  // ready early and summarised half a run.
+  const reporters = members.filter(isSink);
+  const workers = members.filter((m) => !isSink(m));
+
   const done = new Set();
   const out = [];
-  while (out.length < members.length) {
-    const ready = members.filter((m) =>
-      !done.has(m.id) && [...needs.get(m.id)].every((id) => done.has(id)));
+  while (out.length < workers.length) {
+    const ready = workers
+      .filter((m) => !done.has(m.id) && [...needs.get(m.id)].every((id) => done.has(id)))
+      // Whoever fetches first, whoever only reports last.
+      .sort((a, b) =>
+        Number(isSource(b)) - Number(isSource(a)) ||
+        Number(isSink(a)) - Number(isSink(b)));
     // Nothing ready means a cycle, and it has to be broken somewhere. Break it
     // at a node others are still waiting on, never at a leaf: the agent with
     // the fewest unmet dependencies is usually the one at the end of the queue,
@@ -156,20 +187,27 @@ function dependencyOrder(members) {
     // the thing it reads. Among those, prefer whoever unblocks the most.
     let batch = ready;
     if (!batch.length) {
-      const left = members.filter((m) => !done.has(m.id));
+      const left = workers.filter((m) => !done.has(m.id));
       const unmet = (m) => [...needs.get(m.id)].filter((id) => !done.has(id));
       const dependents = (m) => left.filter((o) => needs.get(o.id).has(m.id)).length;
-      batch = [left
-        .filter((m) => dependents(m) > 0)
-        .concat(left)                                   // if every one is a leaf, any will do
+      // Only fall back to the leaves when there is nothing else left. Sorting
+      // one concatenated list let a leaf win on having fewest dependencies,
+      // which is exactly what a leaf always has, and put the agent that reports
+      // on the run ahead of the agents whose findings it reports.
+      const waited = left.filter((m) => dependents(m) > 0);
+      batch = [(waited.length ? waited : left)
         .sort((a, b) =>
+          // A cycle between an agent that fetches and agents that analyse is
+          // broken at the one that fetches, every time.
+          Number(isSource(b)) - Number(isSource(a)) ||
+          Number(isSink(a)) - Number(isSink(b)) ||
           unmet(a).length - unmet(b).length ||
           dependents(b) - dependents(a) ||
           a.id.localeCompare(b.id))[0]];
     }
     for (const m of batch) { done.add(m.id); out.push(m); }
   }
-  return out;
+  return [...out, ...reporters];
 }
 
 /** A one-line state of play, for a list where only the shape needs to read. */
