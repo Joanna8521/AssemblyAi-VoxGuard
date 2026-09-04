@@ -31,6 +31,7 @@ import { compile, amend, fingerprint } from '../governance/policy.js';
 import { load } from '../governance/registry.js';
 import { validateRules } from '../governance/validate.js';
 import { MemoryStore, KVStore, sessionIdFrom } from '../governance/store.js';
+import { MemoryLedger, KVLedger, entryFrom, report } from '../governance/ledger.js';
 import { perform, adapterStatus } from '../adapters/index.js';
 import { runAgent, implementedAgents } from '../runtime/run.js';
 import { open as openMission, blueprint, digest } from '../governance/mission.js';
@@ -97,22 +98,41 @@ const workforce = (() => {
 export const keyConfigured = () => Boolean(API_KEY);
 export const describeState = () => (process.env.KV_REST_API_URL ? 'shared KV' : 'in this process only');
 
-const store = process.env.KV_REST_API_URL
-  ? new KVStore(await makeKV())
-  : new MemoryStore();
+const kv = process.env.KV_REST_API_URL ? makeKV() : null;
+const store = kv ? new KVStore(kv) : new MemoryStore();
 
-async function makeKV() {
+/**
+ * What has been decided, kept apart from the session that decided it.
+ *
+ * Separate store, separate lifetime. A session is a conversation and may end;
+ * the record of what was authorised is the thing a business comes back for.
+ */
+const ledger = kv ? new KVLedger(kv) : new MemoryLedger();
+
+function makeKV() {
   const url = process.env.KV_REST_API_URL.replace(/\/+$/, '');
   const token = process.env.KV_REST_API_TOKEN;
+
+  // Commands go in the body, not the path. Putting them in the path meant a
+  // whole session JSON travelled as a URL segment, which works until a policy
+  // gets long enough to hit a URL limit and then fails as an opaque 4xx.
   const call = async (cmd) => {
-    const res = await fetch(`${url}/${cmd.map(encodeURIComponent).join('/')}`,
-      { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error(`kv ${res.status}`);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify(cmd.map(String)),
+    });
+    if (!res.ok) throw new Error(`kv ${res.status} on ${cmd[0]}`);
     return (await res.json()).result;
   };
+
   return {
-    get: (k) => call(['get', k]),
-    set: (k, v, o) => call(o?.ex ? ['set', k, v, 'EX', String(o.ex)] : ['set', k, v]),
+    get: (k) => call(['GET', k]),
+    set: (k, v, o) => call(o?.ex ? ['SET', k, v, 'EX', o.ex] : ['SET', k, v]),
+    rpush: (k, values) => call(['RPUSH', k, ...values]),
+    ltrim: (k, start, stop) => call(['LTRIM', k, start, stop]),
+    expire: (k, seconds) => call(['EXPIRE', k, seconds]),
+    lrange: (k, start, stop) => call(['LRANGE', k, start, stop]),
   };
 }
 
@@ -182,14 +202,31 @@ function record(session, request, result, outcome) {
  * being exactly one of these: two copies of evaluate-then-perform would drift,
  * and the one that drifted would be the one nobody was reading.
  */
-async function decide(session, request) {
+async function decide(session, request, context = {}) {
   const result = evaluate(request, session.policy, registry);
 
   const outcome = result.verdict === 'ALLOW'
     ? await perform(request.action, request.parameters, { registry })
     : null;
 
-  return { ...result, outcome, audit: record(session, request, result, outcome) };
+  const audit = record(session, request, result, outcome);
+
+  // Kept for good, and awaited rather than fired off. A serverless invocation
+  // ends when the response does, so an un-awaited append is an append that
+  // sometimes does not happen. A ledger with sometimes in it is not a ledger.
+  //
+  // A failure here must not turn a decision into a 500: the decision was made
+  // correctly and telling the caller otherwise would be the worse lie. It is
+  // reported to the log and the response says the entry was not kept.
+  let recorded = true;
+  try {
+    await ledger.append(session.tenant, [entryFrom(audit, context)]);
+  } catch (err) {
+    recorded = false;
+    console.error('ledger append failed:', err.message);
+  }
+
+  return { ...result, outcome, audit, recorded };
 }
 
 // ── routes ──────────────────────────────────────────────────────────────────
@@ -231,6 +268,31 @@ const routes = {
   /** The action catalogue, so the MCP server can build its tool list from it. */
   'GET /api/actions': async () => JSON.parse(
     readFileSync(join(HERE, '..', 'registry', 'actions.json'), 'utf8')),
+
+  /**
+   * What this workforce has done over time, counted.
+   *
+   * The point of keeping a ledger rather than a screen of recent lines: an
+   * operator can ask what their agents attempted last month, how often somebody
+   * had to step in, and how much of it left the building. Every figure is a
+   * count over rows that can be fetched from /api/ledger and checked.
+   */
+  'GET /api/report': async (_body, { session }) => {
+    const entries = await ledger.read(session.tenant);
+    return {
+      tenant: 'this browser',
+      kept: describeState() === 'shared KV' ? 'shared store, 90 days' : 'this process only',
+      entries: entries.length,
+      report: report(entries, { days: 30 }),
+      allTime: report(entries, { days: 36500 }),
+    };
+  },
+
+  /** The rows themselves, newest last, so a figure in the report can be traced. */
+  'GET /api/ledger': async (_body, { session }) => {
+    const entries = await ledger.read(session.tenant);
+    return { entries: entries.length, rows: entries.slice(-200) };
+  },
 
   'GET /api/workforce': async () => ({
     platforms: workforce.platforms,
@@ -368,6 +430,44 @@ const routes = {
    * because they read cleanly rather than because they are anybody's rival.
    * Anything here can be removed, and adding your own is the point.
    */
+  /**
+   * Connect a spreadsheet the operator already keeps.
+   *
+   * Link-shared only, and said plainly at the point of connecting: anybody with
+   * the link can read it, which is fine for a tab of totals and wrong for
+   * anything with a customer's name in it.
+   */
+  'POST /api/sheets': async (body, { session, save }) => {
+    const url = (body.url ?? '').trim();
+    let parsed;
+    try {
+      const { parseSheetUrl } = await import('../runtime/sheets.js');
+      parsed = parseSheetUrl(url);
+    } catch (err) {
+      const e = new Error(err.message);
+      e.status = 400;
+      throw e;
+    }
+
+    session.pools ??= {};
+    session.pools.sheets ??= [];
+    if (!session.pools.sheets.some((s2) => s2.url === url)) {
+      session.pools.sheets.push({
+        url, id: parsed.id, name: body.name ?? 'spreadsheet',
+        addedAt: new Date().toISOString(),
+      });
+    }
+    await save();
+    return { sheets: session.pools.sheets };
+  },
+
+  'POST /api/sheets/remove': async (body, { session, save }) => {
+    session.pools ??= {};
+    session.pools.sheets = (session.pools.sheets ?? []).filter((s2) => s2.url !== body.url);
+    await save();
+    return { sheets: session.pools.sheets };
+  },
+
   'POST /api/watch/seed': async (_body, { session, save }) => {
     session.pools ??= {};
     session.pools.listings ??= [];
@@ -550,7 +650,17 @@ const routes = {
 
     const observed = [];
     const decisions = [];
-    for (const member of mission.team) {
+
+    // In the order the work actually flows, not the order the composer ranked
+    // them. Emergency Response reads what Inventory Watch writes, so running it
+    // first finds an empty signal pool and reports, quite correctly, that
+    // nothing has happened. The blueprint already sorts upstream first; the run
+    // was simply not using it.
+    const order = blueprint(mission, workforce.agents).stages.map((s2) => s2.id);
+    const team = [...mission.team].sort(
+      (a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+
+    for (const member of team) {
       const run = await runAgent(member.id, { session, workforce });
       observed.push(...run.observed.map((o) => `${member.name}: ${o}`));
       for (const intent of run.intents) {
@@ -560,7 +670,8 @@ const routes = {
           skill: member.id,
           parameters: intent.parameters ?? {},
         };
-        const decision = await decide(session, request);
+        const decision = await decide(session, request,
+          { missionId: mission.id, brief: mission.brief, agent: member.name });
         decisions.push({
           agent: member.name, why: intent.why, action: request.action,
           verdict: decision.verdict, reason: decision.reason, audit: decision.audit,
@@ -631,6 +742,7 @@ export async function handler(req, res) {
       if (req.method !== 'GET') body = await readBody(req);
       const id = sessionIdFrom(req, res);
       const session = await store.get(id);
+      session.tenant = id;   // whose ledger this decision belongs in
       const ctx = { id, session, save: () => store.put(id, session) };
       send(res, 200, await routes[key](body, ctx));
     } catch (err) {

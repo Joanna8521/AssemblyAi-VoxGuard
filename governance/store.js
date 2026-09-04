@@ -12,7 +12,12 @@
  * store the processes share, and `KVStore` is the shape that takes.
  */
 
-const TTL_MS = 1000 * 60 * 60 * 6;
+// Six hours was the wrong number for both halves of this. A policy is a
+// standing authorisation and expiring it overnight makes the tool amnesiac; the
+// browser holding it should be recognised for longer still, or a returning
+// operator arrives as a stranger with an empty ledger.
+const TTL_MS = 1000 * 60 * 60 * 24 * 30;
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 90;
 
 const blank = () => ({ policy: null, audit: [], missionId: 'M-100', touched: Date.now() });
 
@@ -104,6 +109,6 @@ export function sessionIdFrom(req, res) {
 
   const id = crypto.randomUUID().replace(/-/g, '');
   res.setHeader('set-cookie',
-    `so_session=${id}; Path=/; Max-Age=${Math.floor(TTL_MS / 1000)}; SameSite=Lax; HttpOnly`);
+    `so_session=${id}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax; HttpOnly`);
   return id;
 }
