@@ -15,6 +15,7 @@ import assert from 'node:assert/strict';
 import { evaluate, ALLOW, DENY, ASK } from './evaluator.js';
 import { compile, amend, fingerprint } from './policy.js';
 import { load } from './registry.js';
+import { toolsFor } from '../voice/tools.js';
 
 const registry = load();
 
@@ -235,5 +236,46 @@ describe('policy is language-neutral', () => {
       rules: [{ action: 'pause_ad', effect: 'ALLOW' }, { action: 'notify_customer', effect: 'ALLOW' }],
     });
     assert.notEqual(fingerprint(a), fingerprint(b));
+  });
+});
+
+
+// ── the model's output space is bounded by the registry, structurally ───────
+describe('what the model is allowed to say', () => {
+  const tools = toolsFor(registry);
+  const compile = tools.find((t) => t.name === 'compile_policy');
+  const rule = compile.parameters.properties.rules.items;
+
+  test('every tool declares type function, which the API requires', () => {
+    for (const t of tools) assert.equal(t.type, 'function', `${t.name} needs type: function`);
+  });
+
+  test('actions are an enum of the registry, so a hallucinated one cannot be expressed', () => {
+    assert.deepEqual([...rule.properties.action.enum].sort(), [...registry.actionIds].sort());
+  });
+
+  test('effects are exactly the three verdicts', () => {
+    assert.deepEqual([...rule.properties.effect.enum].sort(), [ALLOW, ASK, DENY].sort());
+  });
+
+  test('string-valued conditions are enumerated too, not free text', () => {
+    // The action enum stops an invented capability. This stops an invented
+    // value for a real one: a policy saying "paid" while the workforce asks
+    // about "paid_affected" is a refusal nobody can account for.
+    const conditions = rule.properties.conditions.properties;
+    const vocabulary = registry.conditionVocabulary;
+
+    for (const [field, spec] of Object.entries(vocabulary)) {
+      const declared = conditions[field];
+      assert.ok(declared, `${field} is missing from the tool schema`);
+      if (spec.enum) {
+        const [literal] = declared.oneOf;
+        assert.deepEqual(literal.enum, spec.enum, `${field} must offer only its declared values`);
+      }
+    }
+  });
+
+  test('a condition field the vocabulary does not declare has no way in', () => {
+    assert.equal(rule.properties.conditions.properties.whatever_i_like, undefined);
   });
 });

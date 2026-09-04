@@ -25,12 +25,33 @@ const EFFECTS = ['ALLOW', 'DENY', 'ASK'];
 const FUNCTION_TOOL = 'function';
 
 const CONDITION_HINT =
-  'Optional. Only include a condition the user actually stated out loud, e.g. ' +
-  '"up to 20 percent" -> {"increase_percent": {"lte": 20}}, or "only the paid ' +
-  'customers" -> {"customer_group": "paid_affected"}. Comparators: lte, lt, ' +
-  'gte, gt, eq, ne, in. If the user stated no condition, omit this entirely.';
+  'Optional. Only include a condition the user actually stated out loud. A bare ' +
+  'value means it must equal that exactly ("only the paid customers" -> ' +
+  '{"customer_group": "paid_affected"}). For a range, use a comparator object ' +
+  '("up to 20 percent" -> {"increase_percent": {"lte": 20}}). Comparators: lte, ' +
+  'lt, gte, gt, eq, ne, in. If the user stated no condition, omit this entirely.';
 
-function ruleSchema(actionIds) {
+/**
+ * Condition values come from a declared vocabulary, not from free text.
+ *
+ * The action enum stops the model inventing a capability. This stops it
+ * inventing a value for one. Left open, the model writes "paid" where the
+ * workforce asks about "paid_affected"; the evaluator refuses, correctly, and
+ * the person sees a refusal with no cause they can see. Matching those two
+ * loosely would be worse: a normalizer generous enough to reconcile them is
+ * generous enough to reconcile things a person never authorized.
+ */
+function conditionSchema(vocabulary) {
+  const properties = {};
+  for (const [field, spec] of Object.entries(vocabulary)) {
+    properties[field] = spec.enum
+      ? { oneOf: [{ type: 'string', enum: spec.enum }, { type: 'object' }] }
+      : { oneOf: [{ type: spec.type }, { type: 'object' }] };
+  }
+  return { type: 'object', description: CONDITION_HINT, properties };
+}
+
+function ruleSchema(actionIds, vocabulary) {
   return {
     type: 'object',
     properties: {
@@ -46,7 +67,7 @@ function ruleSchema(actionIds) {
           'ALLOW if the user permitted it, DENY if they forbade it, ASK if they ' +
           'said they want to be consulted before it happens.',
       },
-      conditions: { type: 'object', description: CONDITION_HINT },
+      conditions: conditionSchema(vocabulary),
     },
     required: ['action', 'effect'],
   };
@@ -54,6 +75,7 @@ function ruleSchema(actionIds) {
 
 export function toolsFor(registry) {
   const actionIds = registry.actionIds;
+  const vocabulary = registry.conditionVocabulary;
 
   return [
     {
@@ -72,7 +94,7 @@ export function toolsFor(registry) {
           rules: {
             type: 'array',
             description: 'One entry per permission or prohibition the user stated.',
-            items: ruleSchema(actionIds),
+            items: ruleSchema(actionIds, vocabulary),
           },
           scope: {
             type: 'string',
@@ -102,7 +124,7 @@ export function toolsFor(registry) {
           changes: {
             type: 'array',
             description: 'Only the rules whose effect or conditions the user just changed.',
-            items: ruleSchema(actionIds),
+            items: ruleSchema(actionIds, vocabulary),
           },
         },
         required: ['changes'],

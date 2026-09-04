@@ -81,6 +81,23 @@ export function load({
       return [...actions.keys()];
     },
 
+    /**
+     * Declared vocabulary for condition values.
+     *
+     * The action enum stops the model inventing a capability. This stops it
+     * inventing a *value*: without it a policy can authorize "paid" while the
+     * workforce asks about "paid_affected", the evaluator correctly refuses,
+     * and the person sees a refusal they cannot account for.
+     *
+     * Enumerated for strings, open for numbers, because a person can say any
+     * number but only ever means one of a few groups.
+     */
+    get conditionVocabulary() {
+      const v = { ...(catalog.condition_vocabulary ?? {}) };
+      delete v.$comment;
+      return v;
+    },
+
     get corpus() {
       return capabilities?.summary ?? null;
     },
