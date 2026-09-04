@@ -166,4 +166,46 @@ describe('the voice agent is told the truth about its reach', () => {
     assert.match(prompt, /Telegram/);
     assert.match(prompt, /not connected yet/);
   });
+
+  test('the prompt does not deny a reach the system has since gained', async () => {
+    // It used to say plainly that it could not read spreadsheets, which was
+    // true when written. Once a sheet reader existed, that sentence kept the
+    // agent refusing work it could do: somebody asked it to watch their daily
+    // takings and it said it had no way to. An honest denial that goes stale
+    // reads exactly like a working feature that is switched off.
+    const { systemPrompt } = await import('../voice/tools.js');
+    const prompt = systemPrompt({ skills: 110 });
+
+    assert.doesNotMatch(prompt, /cannot read[^.]*spreadsheet/i,
+      'the prompt must not deny reading spreadsheets while a sheet reader exists');
+    assert.match(prompt, /Google Sheet/,
+      'the prompt should say a sheet can be read');
+    assert.match(prompt, /read_sheet/,
+      'and name the action, or the model has to guess which one covers takings');
+
+    // The words people actually use for it. "Revenue" is the column heading;
+    // nobody says it out loud.
+    for (const word of ['takings', 'revenue', 'sales']) {
+      assert.ok(prompt.includes(word), `the prompt should recognise "${word}"`);
+    }
+  });
+
+  test('an agent exists for every reach the prompt claims', async () => {
+    // The prompt naming read_sheet is worth nothing if no agent holds it: the
+    // composer would answer "nothing in this workforce can read_sheet" after
+    // the agent had just promised otherwise.
+    const { readFileSync } = await import('node:fs');
+    const workforce = JSON.parse(
+      readFileSync(new URL('../agents/workforce.json', import.meta.url)));
+
+    const holders = workforce.agents.filter((a) => a.actions.includes('read_sheet'));
+    assert.ok(holders.length > 0, 'somebody must be able to read_sheet');
+
+    // And it has to be one that will really go and do it, not one that only
+    // describes the work.
+    const { implementedAgents } = await import('../runtime/run.js');
+    const live = new Set(implementedAgents());
+    assert.ok(holders.some((a) => live.has(a.id)),
+      'the agent that reads a sheet must be built, not described');
+  });
 });

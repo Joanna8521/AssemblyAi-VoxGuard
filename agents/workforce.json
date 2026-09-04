@@ -644,10 +644,9 @@
         "metrics"
       ],
       "actions": [
-        "read_orders",
+        "read_sheet",
         "read_metrics",
-        "generate_report",
-        "write_sheet"
+        "analyze_data"
       ]
     },
     {
