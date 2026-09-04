@@ -242,22 +242,29 @@ async function refresh() {
 // so it must never say an action ran, only what the evaluator decided.
 const TOOLS = {
   async compile_policy(args) {
-    const { policy, fingerprint } = await api('/api/policy/compile', {
-      rules: args.rules ?? [], scope: args.scope ?? 'mission', spokenIn: spokenIn,
+    const r = await api('/api/policy/compile', {
+      rules: args.rules ?? [], scope: args.scope ?? 'mission', spokenIn,
     });
-    renderPolicy(policy, fingerprint);
+    renderPolicy(r.policy, r.fingerprint);
+    // Hand back the full rule list, not just a count. The agent has to be able
+    // to say what is in force without inferring it from what it thinks it sent.
     return {
-      policy_id: policy.policyId, version: policy.version,
-      rules_recorded: policy.rules.length,
-      note: 'Policy compiled. Nothing has run yet.',
+      policy_id: r.policy.policyId,
+      version: r.policy.version,
+      merged_into_existing: r.merged === true,
+      rules_in_force: r.policy.rules.map((x) => `${x.action}: ${x.effect}`),
+      total_rules: r.policy.rules.length,
+      note: 'Recorded. Nothing has run yet.',
     };
   },
   async amend_policy(args) {
-    const { policy, fingerprint } = await api('/api/policy/amend', { changes: args.changes ?? [] });
-    renderPolicy(policy, fingerprint);
+    const r = await api('/api/policy/amend', { changes: args.changes ?? [] });
+    renderPolicy(r.policy, r.fingerprint);
     return {
-      policy_id: policy.policyId, version: policy.version,
-      changed: (args.changes ?? []).map((c) => `${c.action}->${c.effect}`),
+      policy_id: r.policy.policyId,
+      version: r.policy.version,
+      changed: (args.changes ?? []).map((c) => `${c.action} -> ${c.effect}`),
+      rules_in_force: r.policy.rules.map((x) => `${x.action}: ${x.effect}`),
     };
   },
   async report_status() {

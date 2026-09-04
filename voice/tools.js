@@ -152,6 +152,30 @@ export function inputConfig() {
       'flash sale', 'promo code', 'fulfilment', 'shipment', 'inventory',
     ],
 
+    /**
+     * Someone dictating a policy is not having a conversation. They list
+     * permissions, stop to think, then list prohibitions, and the pause in the
+     * middle is not the end of their turn.
+     *
+     * The defaults are min_silence 1000 / max_silence 3000, read back from the
+     * server rather than from the docs, which say otherwise. At 1000 ms the
+     * agent cut in halfway through the first real dictation and answered the
+     * half it had heard.
+     *
+     * Barge-in stays on: interrupting a wrong readback should always work.
+     *
+     * Note for anyone editing this: unknown keys here are silently dropped, not
+     * rejected. A typo does nothing and reports success. The values the server
+     * actually applied come back in `session.ready`.`config.input.turn_detection`,
+     * which is the only place worth reading them from.
+     */
+    turn_detection: {
+      vad_threshold: 0.5,
+      min_silence: 1800,
+      max_silence: 5000,
+      interrupt_response: true,
+    },
+
     // Max 1750 characters. Describes the situation, not the desired output.
     transcription_prompt: [
       'This is an ecommerce operations conversation. A store owner is telling an',
@@ -196,6 +220,17 @@ export function systemPrompt(corpus) {
     `- You do not decide what is allowed. A deterministic evaluator does. Never tell`,
     `  the user an action is safe, permitted, or done. You do not know, and the tool`,
     `  result will tell you.`,
+    `- Never say you have recorded a rule unless a tool call returned successfully`,
+    `  and that rule is in the result. If you heard three prohibitions and recorded`,
+    `  none, say so and record them now. Saying "I have recorded those rules" when`,
+    `  you have not is the worst thing you can do here: the person walks away`,
+    `  believing refunds are blocked when nothing is blocking them.`,
+    `- People dictate a policy in pieces, with pauses. When they add more rules`,
+    `  after you have already saved some, call compile_policy again with the new`,
+    `  ones. It merges; earlier rules are kept. Do not wait for them to finish, and`,
+    `  do not assume one call covered everything they meant to say.`,
+    `- After each save, say back how many rules are now in force. The tool result`,
+    `  carries the count, so this costs you nothing and lets them catch a miss.`,
     `- Capture only what they said. If they permitted two things and forbade one,`,
     `  that is three rules, not four. Do not round their intent up or down.`,
     `- If you did not catch something, or a phrase could mean two different rules,`,
