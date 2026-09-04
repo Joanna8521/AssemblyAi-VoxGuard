@@ -56,6 +56,21 @@ describe('the workforce lines up with the registry', () => {
     }
   });
 
+  test('a trigger names an agent that plausibly triggers', () => {
+    // A stale id from an earlier numbering survived a renumber and had a social
+    // copywriter waking the emergency desk. It read as sensible in the file and
+    // as nonsense the moment anything drew it. Upstream agents must at least
+    // write to a pool the downstream one reads.
+    for (const agent of workforce.agents) {
+      for (const upstreamId of agent.triggered_by ?? []) {
+        const upstream = workforce.agents.find((a) => a.id === upstreamId);
+        const shared = upstream.writes.filter((p) => agent.reads.includes(p));
+        assert.ok(shared.length > 0,
+          `${upstream.name} triggers ${agent.name}, but writes nothing ${agent.name} reads`);
+      }
+    }
+  });
+
   test('agent ids are unique', () => {
     assert.equal(ids.size, workforce.agents.length);
   });

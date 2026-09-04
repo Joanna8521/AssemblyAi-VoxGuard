@@ -116,7 +116,7 @@
       "triggered_by": [
         "A01",
         "A02",
-        "A15"
+        "A31"
       ],
       "reads": [
         "signals",
