@@ -184,6 +184,27 @@ export function toolsFor(registry) {
 
     {
       type: FUNCTION_TOOL,
+      name: 'set_alert_threshold',
+      description:
+        'How far the latest daily figure must fall below the recent average before ' +
+        'Daily Revenue raises it. Defaults to 20 percent. Call this only when the ' +
+        'user names a different number; it changes what gets raised, not what is ' +
+        'permitted, so it is not a policy rule and does not go through the gate.',
+      parameters: {
+        type: 'object',
+        properties: {
+          drop_percent: {
+            type: 'number',
+            description: 'A positive number of percent, for example 30 for "a third off".',
+          },
+        },
+        required: ['drop_percent'],
+      },
+      execution_mode: 'interactive',
+    },
+
+    {
+      type: FUNCTION_TOOL,
       name: 'report_status',
       description:
         'Call this when the user asks what has happened, what was blocked, what is ' +
@@ -289,6 +310,20 @@ export function systemPrompt(corpus) {
     `and carries one prohibition. Miss the work and nothing happens; miss the`,
     `boundary and the wrong thing happens.`,
     ``,
+    `Asking to be told is itself a permission, and the most commonly missed one.`,
+    `"Tell me when takings drop", "let me know if a rival moves", "alert me the`,
+    `moment it sells out" all grant send_telegram_message, and it belongs in the`,
+    `rules as ALLOW alongside whatever they prohibited in the same breath. Record`,
+    `only the prohibitions and you have assembled a team to watch something and`,
+    `forbidden it from reporting back, which is the one outcome nobody asked for.`,
+    `Sending a message to the operator is also the only outward action connected,`,
+    `so it is the cheapest thing to be right about.`,
+    ``,
+    `Say nothing about what will happen in future until a tool call has returned.`,
+    `"I will notify you as soon as takings drop" before start_mission has run is a`,
+    `promise made by nobody: there is no mission, no rule, and nothing watching.`,
+    `Open the mission first, then say what is now in force.`,
+    ``,
     `When they are only adding or changing rules on work already under way, call`,
     `compile_policy or amend_policy instead.`,
     ``,
@@ -315,6 +350,10 @@ export function systemPrompt(corpus) {
     ``,
     `  So "watch my daily takings", "tell me when sales drop" and "keep an eye on`,
     `  revenue" are all real work here, and read_sheet is the action for them.`,
+    `  A drop is raised when the latest figure is more than 20% below the average`,
+    `  of the ones before it. If they want a different number, say it is 20% now`,
+    `  and call set_alert_threshold; do not ask them to pick one before opening`,
+    `  the mission, and never ask for a number you have no way to apply.`,
     `  Daily Revenue is the only agent that can do it. You cannot connect a sheet`,
     `  yourself: a link has to be pasted into the interface. If none has been, say`,
     `  that and say where the box is, rather than saying it cannot be done.`,

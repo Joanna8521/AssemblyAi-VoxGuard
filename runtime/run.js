@@ -40,7 +40,8 @@ export async function runAgent(agentId, { session, workforce }) {
   }
 
   session.pools ??= {};
-  const result = await runner({ agent, pools: session.pools });
+  session.settings ??= {};
+  const result = await runner({ agent, pools: session.pools, settings: session.settings });
   return { ran: true, agent: agentId, at: new Date().toISOString(), ...result };
 }
 
@@ -61,7 +62,13 @@ const RUNNERS = {
    * and reports a number is worse than one that reports nothing, because the
    * number is what somebody acts on.
    */
-  async A30({ pools }) {
+  async A30({ pools, settings = {} }) {
+    // What counts as a fall worth waking somebody for. Somebody asked to be
+    // told when takings fell off a cliff and was reasonably asked what a cliff
+    // was; the number was hardcoded, so the answer had nowhere to go. Asking a
+    // question the system cannot act on is worse than not asking.
+    const drop = Number(settings.revenueDropPercent);
+    const threshold = Number.isFinite(drop) && drop > 0 ? -Math.abs(drop) : -20;
     const sheets = pools.sheets ?? [];
     if (!sheets.length) {
       return {
@@ -125,10 +132,10 @@ const RUNNERS = {
       observed.push(
         `Latest ${latest.when ? `(${latest.when}) ` : ''}${Math.round(latest.value)} ` +
         `against an average of ${Math.round(average)}, ${change >= 0 ? 'up' : 'down'} ` +
-        `${Math.abs(change)}%.`);
+        `${Math.abs(change)}%. Worth raising below ${Math.abs(threshold)}%.`);
 
       // A quiet day is not news. A drop somebody would want to know about is.
-      if (change <= -20) {
+      if (change <= threshold) {
         intents.push({
           action: 'send_telegram_message',
           parameters: {

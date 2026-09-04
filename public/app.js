@@ -230,11 +230,29 @@ function renderAttention(decisions) {
   const box = $('m-attention');
   if (!held.length) { box.hidden = true; return; }
   box.hidden = false;
-  box.innerHTML = `<h4>Waiting on you</h4>` + held.map((d) =>
-    `<div class="item"><b>${d.action}</b> &mdash; ${d.agent} wanted to, because ${d.why}.<br>` +
-    `<span style="color:var(--muted)">${d.reason}</span></div>`).join('') +
-    `<p class="ask" style="margin-top:8px;font-size:12px;color:var(--muted)">` +
+
+  // A refusal is not a request. Both were headed "Waiting on you", which put a
+  // decision that has already been made under a heading that says somebody
+  // still has to make it. They read differently and should look different.
+  const asked = held.filter((d) => d.verdict === 'ASK');
+  const refused = held.filter((d) => d.verdict === 'DENY');
+
+  const item = (d) =>
+    `<div class="item"><b>${esc(d.action)}</b> &mdash; ${esc(d.agent)} wanted to, ` +
+    `because ${esc(d.why)}.<br>` +
+    `<span style="color:var(--muted)">${esc(d.reason)}</span></div>`;
+
+  let html = '';
+  if (asked.length) {
+    html += `<h4>Waiting on you</h4>${asked.map(item).join('')}`;
+  }
+  if (refused.length) {
+    html += `<h4${asked.length ? ' style="margin-top:11px"' : ''}>Refused</h4>` +
+      refused.map(item).join('');
+  }
+  html += `<p class="ask" style="margin-top:8px;font-size:12px;color:var(--muted)">` +
     `Say what you want done about it and the orders change.</p>`;
+  box.innerHTML = html;
 }
 
 // ── watching ────────────────────────────────────────────────────────────────

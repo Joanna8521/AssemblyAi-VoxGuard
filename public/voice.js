@@ -127,6 +127,15 @@ export async function connect(h = {}) {
       };
     }
 
+    if (name === 'set_alert_threshold') {
+      const r = await api('/api/settings', { dropPercent: args.drop_percent });
+      return {
+        drop_percent_now: r.settings.revenueDropPercent,
+        applies_to: 'Daily Revenue, when it next reads the sheet',
+        note: 'This is not a permission. Nothing about what is allowed has changed.',
+      };
+    }
+
     if (name === 'compile_policy') {
       const r = await api('/api/policy/compile', {
         rules: args.rules ?? [], scope: args.scope ?? 'mission',

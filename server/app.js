@@ -547,6 +547,24 @@ const routes = {
     return { watching: session.pools.listings };
   },
 
+  /**
+   * What counts as worth raising. Not a permission, so it does not go through
+   * the evaluator: it changes what an agent bothers to ask about, never what it
+   * is allowed to do once it asks.
+   */
+  'POST /api/settings': async (body, { session, save }) => {
+    session.settings ??= {};
+    const n = Number(body.dropPercent);
+    if (!Number.isFinite(n) || n <= 0 || n >= 100) {
+      const e = new Error('a drop threshold has to be a percentage between 0 and 100');
+      e.status = 400;
+      throw e;
+    }
+    session.settings.revenueDropPercent = n;
+    await save();
+    return { settings: session.settings };
+  },
+
   'GET /api/pools': async (_body, { session }) => ({
     pools: session.pools ?? {},
     implemented: implementedAgents(),
