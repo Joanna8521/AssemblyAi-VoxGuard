@@ -7,7 +7,7 @@
 Built for the [AssemblyAI Voice Agent Hackathon](https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon)
 (Sep 1-30, 2026).
 
-**Live:** https://standing-order-nu.vercel.app
+**Live:** https://standing-order-joanna8521s-projects.vercel.app
 
 ---
 
