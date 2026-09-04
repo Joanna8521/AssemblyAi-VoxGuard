@@ -209,3 +209,23 @@ describe('the voice agent is told the truth about its reach', () => {
       'the agent that reads a sheet must be built, not described');
   });
 });
+
+describe('the prompt stays short enough to be followed', () => {
+  test('it is nowhere near the length at which the model stopped calling tools', async () => {
+    // Measured, not guessed. At 7,124 characters the model returned completed
+    // but empty replies, one after another, and called no tool at all; the same
+    // sentence spoken against a three-line prompt produced a tool call
+    // immediately. The tools were identical in both runs.
+    //
+    // The ceiling here is not the failure point, it is well below it. This
+    // failed by accretion, a true paragraph at a time, with no single commit
+    // that looked wrong.
+    const { systemPrompt } = await import('../voice/tools.js');
+    const prompt = systemPrompt({ skills: 110 });
+
+    assert.ok(prompt.length < 3500,
+      `the prompt is ${prompt.length} characters. Past about 3,500 it starts ` +
+      `competing with the conversation for the model's attention, and at 7,000 ` +
+      `it stopped calling tools entirely. Explain a rule in a comment, not here.`);
+  });
+});
