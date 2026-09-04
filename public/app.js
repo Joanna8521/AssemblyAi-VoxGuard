@@ -175,6 +175,39 @@ async function fly(fromEl, toEl, text, tone, ms = 620) {
 
 // ── the mission ─────────────────────────────────────────────────────────────
 
+/**
+ * Show the working board, mission or no mission.
+ *
+ * Pressing the microphone used to leave somebody on the opening screen until a
+ * mission happened to be created, so the moment they most needed to see what
+ * was going on was the moment the least was on show. The board is where the
+ * transcript, the orders and the audit live, so it opens as soon as there is
+ * anything to watch.
+ */
+function showBoard() {
+  if (!$('board').hidden) return;
+  $('hero-panel').hidden = true;
+  $('board').hidden = false;
+
+  // Every panel says what it is waiting for. A board of empty boxes reads as
+  // broken; a board that says what it is listening for reads as ready.
+  //
+  // The prompt does not go in the brief: that block is headed "You said", and
+  // putting the page's own words there attributes them to the person.
+  $('m-brief').hidden = true;
+  $('m-team').innerHTML =
+    '<p class="empty">Say what needs handling, and how far they may go.<br>' +
+    'Whoever is needed appears here.</p>';
+  $('m-composition').textContent = '';
+  $('flow').innerHTML = '<p class="empty">The shape of the work appears once there is some.</p>';
+  $('run-mission').disabled = true;
+
+  // The three bands with nothing in them. Each already knows how to say that
+  // nothing was stated, which is the honest reading of an empty policy and
+  // better than three blank boxes.
+  renderBands({ rules: [] });
+}
+
 function renderMission(mission, bp) {
   MISSION = mission;
   BLUEPRINT = bp;
@@ -182,6 +215,8 @@ function renderMission(mission, bp) {
   $('hero-panel').hidden = true;
   $('board').hidden = false;
 
+  $('run-mission').disabled = false;
+  $('m-brief').hidden = false;
   $('m-id').textContent = mission.id;
   $('m-brief').querySelector('span').textContent = mission.brief;
   $('c-mission').textContent = `${mission.id} v${mission.policy.version}`;
@@ -521,6 +556,7 @@ function wantVoice(on) {
 async function talk() {
   if (VOICE) { VOICE.stop(); return; }
   clearFail();
+  showBoard();
   try {
     VOICE = await connect({
       onStatus: (s) => { setConn(s, s === 'live'); if (s === 'offline') VOICE = null; },
