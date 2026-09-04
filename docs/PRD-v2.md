@@ -219,6 +219,50 @@ Agent 可自主：Read／Search／Analyze／Reason／Draft／Recommend／Plan
 
 ---
 
+## 7.5 攔截點：MCP，不是框架（2026-09-04 決定）
+
+### 事實
+
+- `openclaw/openclaw` **388,800 stars**，GitHub 史上成長最快的開源專案；Discord 18 萬、subreddit 45 萬
+- **Hermes Agent**（Nous Research，2026-02 釋出）與 OpenClaw 並列兩大主流，其餘被拉開
+- OpenClaw **自 2026-02 起原生支援 MCP**（`@modelcontextprotocol/sdk`）
+- MCP 生態：**19,831+ 個 server**、SDK 月下載 **9,700 萬**，Anthropic／OpenAI／Google／Microsoft 共同支持
+- `VoltAgent/awesome-openclaw-skills` 收錄 **5,400+ 個 skill**（52K stars）
+
+### 決定
+
+**Action Interceptor 實作在 MCP 層。**
+
+理由不是趕流行，是**不變式的可證明性**。SDD 的不變式是「沒有任何有後果的呼叫能繞過 evaluator」。綁在框架上，這句話的範圍就是那個框架；放在 MCP 上，**協定本身就是那個咽喉**——agent 要碰外部工具就得經過它，不管它是 OpenClaw、Hermes 還是 Claude Code。
+
+連帶三個好處：
+
+1. **框架中立**。registry 格式不含任何框架專屬欄位，evaluator 不知道呼叫從哪個 runtime 來，也不該知道
+2. **工作量更小**。MCP 是規格明確的協定且有 SDK，比逐一整合框架便宜
+3. **TAM 差一個量級**。不是「Joanna 那 110 支的治理層」，是「一個 38 萬星生態系的治理層」——而那個生態系目前沒有這一層
+
+### 會不會撞題
+
+MCP gateway 已有人做，均為基礎設施性質：
+
+| 專案 | Stars | 做什麼 |
+|---|---|---|
+| `agentgateway/agentgateway` | 4,710 | agent／MCP 代理 |
+| `IBM/mcp-context-forge` | 4,417 | AI gateway、registry、proxy |
+| `ThinkWatchProject/ThinkWatch` | 813 | 企業 AI 堡壘機，統一政策 |
+| `NVIDIA/NemoClaw` | 22,363 | 讓 Hermes／OpenClaw 跑得更安全 |
+| `prompt-security/clawsec` | 1,097 | OpenClaw／Hermes 安全 skill 套件 |
+
+它們解的是**路由、認證、限流、沙箱隔離**。社群目前的安全重心是**執行環境隔離**（Docker／E2B／Firecracker），不是**授權**。
+
+隔離回答「這段程式碼能碰到什麼」；授權回答「**這個人今天允許它做什麼**」。**沒有一個現有專案的授權來源是語音，也沒有一個的政策有生命週期。**
+
+### 對範圍的影響
+
+P0 不變。Hackathon 期間 evaluator 前面掛的是 Voice Agent API 的 `tool.call`；**MCP facade 是同一個 evaluator 的第二個入口**，若時間允許列入 P1，否則 P2。無論如何，evaluator 與 registry 從第一天起就不得含有任何框架專屬假設——這一點已落實在 `governance/registry.js`。
+
+---
+
 ## 8. 介面
 
 ### 8.1 Application URL：Governance Canvas（P0，交件必需）
