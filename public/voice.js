@@ -68,10 +68,13 @@ export async function connect(h = {}) {
   ws.onclose = (ev) => {
     const wanted = stopping;
     teardown();
-    if (wanted) return;
+    // Deliberate or not, both are worth recording. Only the unasked-for kind
+    // belongs over the agent's last words; overwriting them because somebody
+    // pressed stop throws away the thing they had just been told.
+    if (wanted) { say('onEnded', 'you stopped it', true); return; }
     say('onEnded', ev.code === 1000 || ev.code === 1005
       ? 'The voice session reached its time limit and closed. Press to carry on; nothing was lost.'
-      : `The voice connection dropped (${ev.code}). Press to reconnect.`);
+      : `The voice connection dropped (${ev.code}). Press to reconnect.`, false);
   };
 
   ws.onmessage = async (ev) => {

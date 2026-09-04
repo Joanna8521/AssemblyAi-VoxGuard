@@ -490,9 +490,19 @@ async function refresh() {
   renderAudit(state.audit);
   if (!$('report').hidden) renderReport();
   renderSources(pools.pools);
-  if (MISSION && state.policy) {
-    MISSION.policy = state.policy;
-    $('c-mission').textContent = `${MISSION.id} v${state.policy.version}`;
+
+  // Orders are drawn whenever there are orders, mission or no mission.
+  //
+  // This was guarded on a mission existing, so somebody who opened by stating
+  // two prohibitions had them recorded on the server, confirmed in the tool
+  // result, and shown nowhere: the panel went on saying nothing was stated
+  // while two rules were in force. Of every way to be wrong, a governance tool
+  // under-reporting what it is enforcing is close to the worst.
+  if (state.policy) {
+    if (MISSION) MISSION.policy = state.policy;
+    $('c-mission').textContent = MISSION
+      ? `${MISSION.id} v${state.policy.version}`
+      : `standing v${state.policy.version}`;
     $('c-fp').textContent = state.fingerprint ?? '—';
     renderBands(state.policy);
   }
@@ -622,9 +632,10 @@ async function talk() {
       // An ending nobody asked for gets said out loud, in the panel somebody is
       // already looking at, rather than being left to be inferred from a status
       // chip going quiet.
-      onEnded: (why) => {
+      onEnded: (why, deliberate) => {
         VOICE = null;
         note(why);
+        if (deliberate) return;
         $('agent').hidden = false;
         $('agent-text').textContent = why;
       },
