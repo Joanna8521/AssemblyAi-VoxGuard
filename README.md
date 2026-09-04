@@ -77,7 +77,46 @@ Early. What exists today:
 | **Policy evaluator** | ✅ deterministic, 24 tests |
 | **Voice → policy compiler** | ✅ tool schema generated from the registry |
 | **Live voice console** | ✅ `npm start`, then talk to it |
-| **End-to-end with a real microphone** | ⏳ the milestone that matters |
+| **End-to-end with a real microphone** | ✅ run 2026-09-04, see below |
+
+---
+
+## The run that mattered
+
+2026-09-04, one microphone, one browser, one policy spoken aloud in three
+sentences with pauses between them.
+
+```
+"Pause all the Meta and Google ads."
+"You can delist on Shopee and mark the website out of stock."
+"But don't notify customers, don't cancel any orders, and don't issue refunds."
+                                                    -> P-0001 v2, six rules
+
+  notify_customer   DENY   L3       real      explicitly denied by human authorization
+  issue_refund      DENY   L4       sandbox   explicitly denied by human authorization
+  create_schedule   ASK    L4-meta  real      L4-meta is never assumed
+
+"Actually, you can notify the 14 paid customers, but still no cancellations
+ and no refunds."                                   -> P-0001 v3
+
+  notify_customer {customer_group: paid}      ALLOW  conditions satisfied
+  notify_customer {customer_group: all}       ASK    outside the authorized range
+  notify_customer {customer_group: everyone}  ASK    outside the authorized range
+  issue_refund                                DENY   unchanged by the amendment
+```
+
+The same action, the same policy, a different verdict, because a person said one
+more sentence. And permission for fourteen people stayed permission for fourteen
+people.
+
+Three faults surfaced in that session and are fixed. Turn detection ended the
+turn after 1000 ms of silence, which is shorter than the pause between clauses
+when someone dictates a list. A second compile replaced the first instead of
+merging, so a rule spoken in the opening sentence disappeared. And, having heard
+only half, the agent said it had recorded rules that were not in the policy. The
+last one is the one worth naming: nothing had executed, because unmatched L4
+resolves to ASK, but the sentence was false when it was said, and a governance
+system that misreports its own state has failed at its only job.
 
 ---
 
