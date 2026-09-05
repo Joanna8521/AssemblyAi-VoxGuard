@@ -69,17 +69,25 @@ authority layer.
 
 ## Status
 
-Early. What exists today:
+What exists today, and what each thing actually touches:
 
 | | |
 |---|---|
-| **Capability registry** | ✅ 110 skills → 723 typed edges, derived from a real corpus |
-| **Action catalog** | ✅ 38 canonical actions, risk levels L0-L4 plus `L4-meta` |
-| **Governance canvas** | ✅ interactive prototype (`prototype/`) |
-| **Policy evaluator** | ✅ deterministic, 24 tests |
-| **Voice → policy compiler** | ✅ tool schema generated from the registry |
-| **Live voice console** | ✅ `npm start`, then talk to it |
-| **End-to-end with a real microphone** | ✅ run 2026-09-04, see below |
+| **Action catalogue** | 38 canonical actions, risk L0-L4 plus `L4-meta` |
+| **Capability registry** | 110 skills → 723 typed edges, executive vs advisory separated |
+| **Policy evaluator** | deterministic; every default points away from ALLOW |
+| **Voice → policy** | tool schemas generated from the registry, validated server-side |
+| **Workforce** | 36 agents across 10 departments, **18 of them built and running** |
+| **Real sources** | a shared Google Sheet, public storefront pages, Telegram out |
+| **Cross-source diagnosis** | lines a fall in the takings up against stock and rival prices |
+| **Ledger** | append-only, per workspace, 90 days, separate from the session |
+| **Plans and usage** | four meters that genuinely refuse when an allowance runs out |
+| **MCP server** | 22 tools, dependency-free, stdio |
+| **Tests** | 118, no dependencies |
+
+Built and described are drawn differently everywhere, including in the interface.
+Eighteen agents will really go and look; the other eighteen say they are
+descriptions rather than pretending otherwise.
 
 ---
 
@@ -167,6 +175,18 @@ has failed at the thing it claims to be about.
   confirms them.
 - **No unmeasured numbers.** Where a figure has not been measured, this repository says so
   rather than printing a plausible one.
+- **Nothing is charged.** There are plans and there are four meters, and the
+  meters genuinely refuse: over the source allowance and the next one is
+  declined with the number and the reset date. But no payment is taken anywhere,
+  the plan is chosen rather than bought, and the page says so. What the meters
+  are for is the claim that this could be a service, made with counts rather
+  than a pricing page.
+- **One thing never degrades.** An allowance can stop an agent going out and can
+  stop a message leaving. It can never stop a request being judged or written
+  down, and a test holds that by reading the source: `decide()` reaches a verdict
+  and records it before anything is metered, and does not consult an allowance at
+  all. A refusal that failed to happen because of billing is the one failure this
+  must not have.
 - **A retraction.** An earlier version of this file said a model cannot express a capability
   the workforce does not have, because the tool schema has no member for it. That was an
   assumption and it is false. The API stores whatever JSON Schema it is sent, including
@@ -178,11 +198,53 @@ has failed at the thing it claims to be about.
 
 ---
 
+## Measured, not assumed
+
+Three things about the Voice Agent API that are not in its documentation and
+that cost a day each to find. Written down here because the next person should
+not have to.
+
+**A tool with three parameters is never called.** Not refused - never called.
+The reply completes, empty, and the agent carries on talking as though it had
+acted. There is no error, no `session.error`, nothing in the transcript. The
+API takes no text input, so establishing this meant synthesising the same
+sentence and streaming it in as audio about eighty times:
+
+```
+{ brief }                    called   3 of 3
+{ brief, needs }             called   5 of 5
+{ brief, needs, anything }   called   0 of 11
+```
+
+So a rule here is not an object of action, effect and conditions. The effect is
+the name of the tool: `forbid`, `ask_first`, `permit`, each taking one list.
+
+**A free-form parameter changes behaviour, not just output.** Given a parameter
+with no enum, the agent stops and asks the user what to put in it - "which
+product?", "what percentage?" - instead of calling anything. Constrained ones it
+simply fills. Every parameter here is an enum except the brief.
+
+**The schema is advice.** The API stores whatever JSON Schema it is sent,
+including keywords it does not implement, and a live run produced a condition
+value from outside a six-member enum without complaint. `governance/validate.js`
+is what actually holds; the enum only shapes what the model tends to say.
+
+A fourth, cheaper: `type: "function"` is mandatory on every tool and its absence
+is reported as `invalid_value` with a null `param`. And `turn_detection` silently
+drops keys it does not know, so a mis-spelled option looks like it applied.
+
+---
+
 ## Not in this repository
 
-The OpenClaw v7 skill corpus itself is paid course material and is **not** included. Only
-derived metadata about it: skill ids, action names, risk levels, dependency edges, and the
-trigger phrase behind each edge. That is what the registry needs, and all it needs.
+The skill packs themselves are not here. What is here is derived metadata about
+them: ids, groups, action names, risk levels, dependency edges, and which
+connectors each one asks for. That is the shape of the graph, which is what a
+registry needs.
+
+Descriptions used to be included and were taken back out. A skill's description
+is its trigger phrasing - the sentences somebody says to invoke it - which is
+the material itself in miniature, and nothing in this project ever read them.
 
 ---
 
@@ -191,7 +253,7 @@ trigger phrase behind each edge. That is what the registry needs, and all it nee
 ```sh
 cp .env.example .env      # then fill in the AssemblyAI key
 npm start                 # http://localhost:8787
-npm test                  # 53 tests, no dependencies
+npm test                  # 118 tests, no dependencies
 ```
 
 Everything except the voice connection works without a key: the policy, the
