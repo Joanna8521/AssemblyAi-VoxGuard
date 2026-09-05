@@ -4,7 +4,6 @@
       "id": "C00",
       "slug": "c00-memory",
       "name": "c00-memory",
-      "description": "管理龍蝦的長期記憶檔案 MEMORY.md。學員說「記得...」、「忘記...」、「更新我的...」、「你記得什麼」、「清空記憶」時一律呼叫此技能。",
       "emoji": "🧠",
       "user_invocable": true,
       "always_on": false,
@@ -22,7 +21,6 @@
       "id": "C01",
       "slug": "c01-oracle-deploy",
       "name": "c01-oracle-deploy",
-      "description": "幫助用戶在 Oracle Cloud 上部署、管理和維護龍蝦環境，包括主機狀態檢查、重啟、日誌查看和基本故障排除",
       "emoji": "☁️",
       "user_invocable": true,
       "always_on": false,
@@ -38,7 +36,6 @@
       "id": "C02",
       "slug": "c02-google-connect",
       "name": "c02-google-connect",
-      "description": "連接並操作用戶的 Gmail、Google Drive、Google Sheets、Google Calendar，執行讀取、寫入、搜尋、整理等任務",
       "emoji": "🔗",
       "user_invocable": true,
       "always_on": false,
@@ -57,7 +54,6 @@
       "id": "C02",
       "slug": "c02-ga4-connect",
       "name": "c02-ga4-connect",
-      "description": "引導學員完成 Google Analytics 4 Data API 串接。學員說「/ga4 連接」「連接 GA4」「設定 GA4」「GA4 授權」「/ga4 重新授權」「/ga4 測試」「/ga4 狀態」時呼叫此技能。負責 OAuth 2.0 流程、Property ID 驗證、token 儲存，是所有 GA4 相關 skill 的前置作業。",
       "emoji": "🔌",
       "user_invocable": true,
       "always_on": false,
@@ -84,7 +80,6 @@
       "id": "C03",
       "slug": "c03-telegram-bot",
       "name": "c03-telegram-bot",
-      "description": "設定 Telegram Bot、管理配對、傳送訊息、處理圖片截圖分析，以及排除 Telegram 連線問題。LINE 為主要推薦頻道（見 C04），Telegram 為可選替代頻道。",
       "emoji": "✈️",
       "user_invocable": true,
       "always_on": false,
@@ -104,7 +99,6 @@
       "id": "C04",
       "slug": "c04-line-bot",
       "name": "c04-line-bot",
-      "description": "設定 LINE Messaging API Bot（主要推薦頻道）、處理 webhook 設定、完成配對、傳送訊息、截圖分析，以及排除 LINE 連線問題。",
       "emoji": "💚",
       "user_invocable": true,
       "always_on": false,
@@ -120,7 +114,6 @@
       "id": "C05",
       "slug": "c05-sandbox-browser",
       "name": "c05-sandbox-browser",
-      "description": "讓龍蝦用專屬瀏覽器瀏覽網頁、擷取截圖、抓取網頁內容、分析競品頁面，以及填寫表單等自動化操作",
       "emoji": "🌐",
       "user_invocable": true,
       "always_on": false,
@@ -144,7 +137,6 @@
       "id": "C06",
       "slug": "c06-web-scraper",
       "name": "c06-web-scraper",
-      "description": "抓取靜態網頁資料、RSS 訂閱、公開 API 資料、新聞內容，快速輕量不需要瀏覽器，適合定期自動抓取固定格式的公開資料",
       "emoji": "🕷️",
       "user_invocable": true,
       "always_on": false,
@@ -169,7 +161,6 @@
       "id": "C07",
       "slug": "c07-sheets-database",
       "name": "c07-sheets-database",
-      "description": "用 Google Sheets 當龍蝦的記憶體和資料庫，儲存爬蟲結果、追蹤數據變化、建立自動更新的報表，讓資料可以在手機上隨時查看",
       "emoji": "📊",
       "user_invocable": true,
       "always_on": false,
@@ -195,7 +186,6 @@
       "id": "C08",
       "slug": "c08-drive-manager",
       "name": "c08-drive-manager",
-      "description": "自動整理 Google Drive，建立資料夾結構、歸檔舊檔案、搜尋檔案、搬移整理，讓電商工作所需的素材和文件保持有序",
       "emoji": "📁",
       "user_invocable": true,
       "always_on": false,
@@ -222,7 +212,6 @@
       "id": "C09",
       "slug": "c09-daily-report",
       "name": "c09-daily-report",
-      "description": "每天自動在指定時間整合營收、競品異動、負評、待辦事項，推送摘要到 LINE（主要）或 Telegram，讓學員不用主動查詢就能掌握店況",
       "emoji": "📋",
       "user_invocable": true,
       "always_on": false,
@@ -246,7 +235,6 @@
       "id": "C10",
       "slug": "c10-scheduler",
       "name": "c10-scheduler",
-      "description": "設定定時自動任務，讓龍蝦在指定時間自動執行競品監控、每日報告、關鍵字追蹤等工作，不需要學員手動觸發",
       "emoji": "⏰",
       "user_invocable": true,
       "always_on": false,
@@ -264,7 +252,6 @@
       "id": "D01",
       "slug": "d01-ecom-init",
       "name": "d01-ecom-init",
-      "description": "電商班初始化診斷。引導學員填寫品牌基本資料並存入龍蝦記憶，再根據目前經營狀況診斷所在階段，給出個人化的 Skill 使用路徑建議。第一次使用龍蝦時必做。",
       "emoji": "🦞",
       "user_invocable": true,
       "always_on": true,
@@ -282,7 +269,6 @@
       "id": "D02",
       "slug": "d02-brand-manager",
       "name": "d02-brand-manager",
-      "description": "多品牌檔案管理中心。管理 MEMORY.md 的「我的店」區塊，支援多品牌建檔、切換、驗證與摘要。學員說「新增品牌、切換品牌、品牌列表、編輯品牌、刪除品牌、我要設定品牌」「/brand」「/品牌」時呼叫此技能。",
       "emoji": "🏷️",
       "user_invocable": true,
       "always_on": false,
@@ -301,7 +287,6 @@
       "id": "E01",
       "slug": "e01-competitor-price",
       "name": "e01-competitor-price",
-      "description": "監控競品商品頁面價格，偵測到變動時主動通知，並將歷史記錄存入 Google Sheets。支援網址、截圖、純文字三種輸入方式。",
       "emoji": "🔍",
       "user_invocable": true,
       "always_on": false,
@@ -312,18 +297,15 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "抓取動態頁面"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存監控清單與歷史記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "設定定時自動執行"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -337,7 +319,6 @@
       "id": "E02",
       "slug": "e02-review-monitor",
       "name": "e02-review-monitor",
-      "description": "監控商品評價頁面，新評價出現時通知，負評自動生成專業回覆草稿。支援網址、截圖、純文字三種輸入方式。",
       "emoji": "⭐",
       "user_invocable": true,
       "always_on": false,
@@ -348,18 +329,15 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "抓取動態評價頁面"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存評價記錄與監控清單"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "設定定時自動執行"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -373,7 +351,6 @@
       "id": "E03",
       "slug": "e03-inventory-alert",
       "name": "e03-inventory-alert",
-      "description": "監控多平台商品庫存數量，低於門檻時主動通知並建議補貨數量。支援截圖、手動輸入，以及蝦皮/Momo/官網 API 自動同步（選配）。",
       "emoji": "📦",
       "user_invocable": true,
       "always_on": false,
@@ -384,18 +361,15 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "非登入頁面的庫存資訊（如官網前台）"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存庫存記錄與監控清單"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "設定定時自動執行"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -409,7 +383,6 @@
       "id": "E04",
       "slug": "e04-order-anomaly",
       "name": "e04-order-anomaly",
-      "description": "分析訂單資料，偵測退貨率偏高、異常訂單、可疑買家等問題，主動通知並給出處理建議。支援截圖、手動輸入，以及平台 API 自動同步（選配）。",
       "emoji": "🚨",
       "user_invocable": true,
       "always_on": false,
@@ -420,13 +393,11 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存訂單記錄與異常標記"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "設定定時自動執行"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -439,7 +410,6 @@
       "id": "E05",
       "slug": "e05-title-optimizer",
       "name": "e05-title-optimizer",
-      "description": "分析現有商品標題，從 SEO、點擊率、平台規則三個角度給出優化建議，產出可直接使用的新標題版本。支援網址、截圖、純文字三種輸入方式。",
       "emoji": "✏️",
       "user_invocable": true,
       "always_on": false,
@@ -450,13 +420,11 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "從商品頁擷取現有標題"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "批量優化結果存檔"
+          "name": "Sheets 資料庫"
         }
       ],
       "mentions": [
@@ -469,7 +437,6 @@
       "id": "E06",
       "slug": "e06-negative-reply",
       "name": "e06-negative-reply",
-      "description": "輸入負評內容，根據問題類型自動生成專業回覆草稿，語氣親切、長度符合平台限制，可直接複製使用。支援網址、截圖、純文字三種輸入方式。",
       "emoji": "💬",
       "user_invocable": true,
       "always_on": false,
@@ -480,13 +447,11 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "從評價頁擷取負評內容"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存回覆範本庫"
+          "name": "Sheets 資料庫"
         }
       ],
       "mentions": [
@@ -500,7 +465,6 @@
       "id": "E07",
       "slug": "e07-product-description",
       "name": "e07-product-description",
-      "description": "輸入商品資訊，生成符合各平台格式的賣場文案，包含商品描述、規格說明、賣點整理。支援網址、截圖、純文字三種輸入方式，也可參考競品描述改寫。",
       "emoji": "📝",
       "user_invocable": true,
       "always_on": false,
@@ -511,13 +475,11 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "擷取現有描述或競品描述"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "批量描述結果存檔"
+          "name": "Sheets 資料庫"
         }
       ],
       "mentions": [
@@ -530,7 +492,6 @@
       "id": "E08",
       "slug": "e08-promotion-planner",
       "name": "e08-promotion-planner",
-      "description": "輸入節日、目標或商品資訊，生成完整促銷方案，包含折扣策略、時間規劃、文案建議、各平台設定要點。支援截圖、純文字兩種輸入方式。",
       "emoji": "🎯",
       "user_invocable": true,
       "always_on": false,
@@ -541,13 +502,11 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "存放活動方案與歷史復盤記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "設定活動期間自動推播提醒"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -560,7 +519,6 @@
       "id": "E09",
       "slug": "e09-bestseller-tracker",
       "name": "e09-bestseller-tracker",
-      "description": "定時抓取各平台暢銷榜，追蹤自家商品排名變化，並分析榜單趨勢找出新商機。支援網址、截圖兩種輸入方式。",
       "emoji": "🏆",
       "user_invocable": true,
       "always_on": false,
@@ -571,18 +529,15 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "擷取動態榜單頁面"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存榜單歷史記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "定時自動執行（建議在 C09 每日報告前跑完）"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -598,7 +553,6 @@
       "id": "E10",
       "slug": "e10-ad-monitor",
       "name": "e10-ad-monitor",
-      "description": "監控廣告投放成效，ROI 低於門檻時主動通知，定時彙整廣告數據存入 Sheets，幫學員掌握廣告花費是否值得。支援截圖、手動輸入，以及平台 API 自動同步（選配）。",
       "emoji": "📢",
       "user_invocable": true,
       "always_on": false,
@@ -609,13 +563,11 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存廣告數據與歷史記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每天 22:00 自動執行"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -628,7 +580,6 @@
       "id": "E11",
       "slug": "e11-cross-platform-price",
       "name": "e11-cross-platform-price",
-      "description": "比較同一商品在蝦皮、Momo、官網等平台的售價，找出定價落差，幫學員決定各平台的最佳定價策略。支援網址、截圖、純文字三種輸入方式。",
       "emoji": "⚖️",
       "user_invocable": true,
       "always_on": false,
@@ -639,23 +590,19 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "擷取各平台商品頁價格"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存比價記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "定期比價執行"
+          "name": "定時排程"
         },
         {
           "ref": "E01",
-          "name": "競品價格監控",
-          "why": "定期比價可整合到 E01 一起執行"
+          "name": "競品價格監控"
         }
       ],
       "mentions": [
@@ -670,7 +617,6 @@
       "id": "E12",
       "slug": "e12-listing-checker",
       "name": "e12-listing-checker",
-      "description": "上架前檢查商品頁的標題、圖片、描述、規格、價格是否完整合規，找出缺漏並給出修改建議，避免因資料不完整影響搜尋排名或買家信任。支援網址、截圖、純文字三種輸入方式。",
       "emoji": "✅",
       "user_invocable": true,
       "always_on": false,
@@ -681,18 +627,15 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "擷取商品頁完整內容"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "E05",
-          "name": "標題優化",
-          "why": "標題有問題時可直接呼叫修正"
+          "name": "標題優化"
         },
         {
           "ref": "E07",
-          "name": "商品描述生成",
-          "why": "描述不足時可直接呼叫補充"
+          "name": "商品描述生成"
         }
       ],
       "mentions": [
@@ -706,7 +649,6 @@
       "id": "E13",
       "slug": "e13-return-analysis",
       "name": "e13-return-analysis",
-      "description": "彙整退貨備註與原因，找出主要退貨問題和改善方向。比 E04 更深入，專注在「退貨原因的根本分析」而非異常偵測。支援截圖、手動輸入、純文字三種輸入方式。",
       "emoji": "📦",
       "user_invocable": true,
       "always_on": false,
@@ -717,23 +659,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存退貨記錄與分析結果"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "定期自動分析"
+          "name": "定時排程"
         },
         {
           "ref": "E04",
-          "name": "訂單異常偵測",
-          "why": "上游偵測，觸發深入分析"
+          "name": "訂單異常偵測"
         },
         {
           "ref": "E07",
-          "name": "商品描述生成",
-          "why": "描述問題是退貨主因時可直接呼叫改善"
+          "name": "商品描述生成"
         }
       ],
       "mentions": [
@@ -748,7 +686,6 @@
       "id": "E14",
       "slug": "e14-faq-bot",
       "name": "e14-faq-bot",
-      "description": "建立店家專屬 FAQ 知識庫，自動回答買家常見客服問題。學員輸入問題後龍蝦從知識庫找到最適合的回答，並可持續更新擴充。支援截圖、純文字輸入建立知識庫。",
       "emoji": "🤖",
       "user_invocable": true,
       "always_on": false,
@@ -759,13 +696,11 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存 FAQ 知識庫"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E06",
-          "name": "負評回覆生成",
-          "why": "涉及退換貨糾紛時可呼叫 E06 處理"
+          "name": "負評回覆生成"
         }
       ],
       "mentions": [
@@ -778,7 +713,6 @@
       "id": "E15",
       "slug": "e15-logistics-alert",
       "name": "e15-logistics-alert",
-      "description": "監控訂單物流狀態，偵測異常（超時未出貨、長時間未更新、疑似遺失）時主動通知，並生成給買家的說明訊息草稿。支援截圖、手動輸入，以及平台 API 自動同步（選配）。",
       "emoji": "🚚",
       "user_invocable": true,
       "always_on": false,
@@ -789,18 +723,15 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存訂單物流記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "定時自動執行"
+          "name": "定時排程"
         },
         {
           "ref": "E04",
-          "name": "訂單異常偵測",
-          "why": "退件異常可連動 E04 標記"
+          "name": "訂單異常偵測"
         }
       ],
       "mentions": [
@@ -814,7 +745,6 @@
       "id": "E16",
       "slug": "e16-cross-border-tax",
       "name": "e16-cross-border-tax",
-      "description": "試算跨境電商出口的關稅、VAT/GST、平台手續費等成本，幫學員在定價前就算清楚各目的地市場的實際利潤。支援截圖、純文字輸入。",
       "emoji": "🌏",
       "user_invocable": true,
       "always_on": false,
@@ -825,8 +755,7 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存試算記錄"
+          "name": "Sheets 資料庫"
         }
       ],
       "mentions": [
@@ -838,7 +767,6 @@
       "id": "E17",
       "slug": "e17-profit-calculator",
       "name": "e17-profit-calculator",
-      "description": "計算單品或整體店鋪的實際利潤，扣除平台手續費、運費、廣告費、退貨損失後，算出真正賺到手的金額。支援截圖、純文字輸入。",
       "emoji": "💰",
       "user_invocable": true,
       "always_on": false,
@@ -849,18 +777,15 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存計算記錄與月度報表"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E10",
-          "name": "廣告成效監控",
-          "why": "廣告費數據來源"
+          "name": "廣告成效監控"
         },
         {
           "ref": "E49",
-          "name": "每日營收報告",
-          "why": "營收數據來源"
+          "name": "每日營收報告"
         }
       ],
       "mentions": [
@@ -874,7 +799,6 @@
       "id": "E18",
       "slug": "e18-procurement-manager",
       "name": "e18-procurement-manager",
-      "description": "管理採購流程，包含供應商資料、下單記錄、交期追蹤、到貨確認。E03 負責偵測庫存低，E18 負責後續的採購執行與追蹤。支援截圖、純文字輸入。",
       "emoji": "🏭",
       "user_invocable": true,
       "always_on": false,
@@ -885,18 +809,15 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存供應商名單與採購記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "到貨前 3 天提醒"
+          "name": "定時排程"
         },
         {
           "ref": "E03",
-          "name": "庫存預警",
-          "why": "觸發採購需求的上游 skill"
+          "name": "庫存預警"
         }
       ],
       "mentions": [
@@ -910,7 +831,6 @@
       "id": "E19",
       "slug": "e19-ad-copy-generator",
       "name": "e19-ad-copy-generator",
-      "description": "根據商品特性和目標受眾，生成各平台廣告文案，包含蝦皮廣告、Meta（FB/IG）、Google 搜尋廣告。每個平台格式不同，自動符合字數和格式限制。支援網址、截圖、純文字三種輸入方式。",
       "emoji": "📣",
       "user_invocable": true,
       "always_on": false,
@@ -921,18 +841,15 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "從商品頁擷取素材"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "批量文案存檔"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E24",
-          "name": "A/B 測試分析",
-          "why": "文案上線後追蹤哪個版本效果更好"
+          "name": "A/B 測試分析"
         }
       ],
       "mentions": [
@@ -946,7 +863,6 @@
       "id": "E20",
       "slug": "e20-marketing-calendar",
       "name": "e20-marketing-calendar",
-      "description": "規劃全年電商行銷行事曆，自動標記重要節日和促銷節點，提前提醒準備時間，讓學員不再因為節日到了才手忙腳亂。支援截圖、純文字輸入。",
       "emoji": "📅",
       "user_invocable": true,
       "always_on": false,
@@ -957,33 +873,27 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存行事曆與準備清單"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "節日前自動提醒"
+          "name": "定時排程"
         },
         {
           "ref": "E01",
-          "name": "競品監控",
-          "why": "競品活動偵測"
+          "name": "競品監控"
         },
         {
           "ref": "E08",
-          "name": "促銷活動規劃",
-          "why": "節日提醒後直接呼叫規劃活動"
+          "name": "促銷活動規劃"
         },
         {
           "ref": "E19",
-          "name": "廣告文案生成",
-          "why": "預熱期生成廣告素材"
+          "name": "廣告文案生成"
         },
         {
           "ref": "E27",
-          "name": "LINE 推播",
-          "why": "節日前推送給訂閱會員"
+          "name": "LINE 推播"
         }
       ],
       "mentions": [
@@ -1000,7 +910,6 @@
       "id": "E21",
       "slug": "e21-edm-generator",
       "name": "e21-edm-generator",
-      "description": "生成促銷、新品上市、節日、回購提醒等各類電子報內容，符合 EDM 最佳實踐格式，可直接複製到 Mailchimp、Sender 等發送工具。支援截圖、純文字輸入。",
       "emoji": "📧",
       "user_invocable": true,
       "always_on": false,
@@ -1011,23 +920,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存 EDM 草稿記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E34",
-          "name": "顧客分眾",
-          "why": "依分眾發送不同內容"
+          "name": "顧客分眾"
         },
         {
           "ref": "E32",
-          "name": "棄單挽回",
-          "why": "棄單 EDM 搭配使用"
+          "name": "棄單挽回"
         },
         {
           "ref": "E26",
-          "name": "UTM 追蹤碼管理",
-          "why": "EDM 連結加入 UTM 追蹤點擊來源"
+          "name": "UTM 追蹤碼管理"
         }
       ],
       "mentions": [
@@ -1042,7 +947,6 @@
       "id": "E22",
       "slug": "e22-social-monitor",
       "name": "e22-social-monitor",
-      "description": "監控品牌、商品名稱在 Facebook、Instagram、PTT、Dcard 等平台的提及與討論，正面聲量主動記錄，負面討論即時通知並附上回應建議。支援網址、截圖輸入。",
       "emoji": "👂",
       "user_invocable": true,
       "always_on": false,
@@ -1053,28 +957,23 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "動態頁面擷取"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C06",
-          "name": "基礎爬蟲",
-          "why": "PTT、Dcard 等靜態頁面"
+          "name": "基礎爬蟲"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存監控記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "定時自動執行"
+          "name": "定時排程"
         },
         {
           "ref": "E37",
-          "name": "UGC 管理",
-          "why": "正面討論可轉為 UGC 素材"
+          "name": "UGC 管理"
         }
       ],
       "mentions": [
@@ -1090,7 +989,6 @@
       "id": "E23",
       "slug": "e23-kol-manager",
       "name": "e23-kol-manager",
-      "description": "管理 KOL/網紅合作資料，包含名單建立、合作條件記錄、成效追蹤、費用計算。幫學員找到適合的 KOL，追蹤合作後的實際效益。支援網址、截圖、純文字輸入。",
       "emoji": "🌟",
       "user_invocable": true,
       "always_on": false,
@@ -1101,23 +999,19 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "擷取 KOL 公開頁面資料"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存 KOL 名單與合作記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E26",
-          "name": "UTM 追蹤碼管理",
-          "why": "追蹤 KOL 帶來的流量"
+          "name": "UTM 追蹤碼管理"
         },
         {
           "ref": "E37",
-          "name": "UGC 管理",
-          "why": "KOL 內容可轉為 UGC 素材"
+          "name": "UGC 管理"
         }
       ],
       "mentions": [
@@ -1132,7 +1026,6 @@
       "id": "E24",
       "slug": "e24-ab-test-analyzer",
       "name": "e24-ab-test-analyzer",
-      "description": "分析兩個廣告文案、商品頁、主圖或定價方案的成效差異，判斷哪個版本統計上顯著較好，給出明確結論和下一步建議。支援截圖、手動輸入數據。",
       "emoji": "🔬",
       "user_invocable": true,
       "always_on": false,
@@ -1143,23 +1036,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存測試記錄與洞察"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E19",
-          "name": "廣告文案生成",
-          "why": "生成 A/B 測試用的兩個文案版本"
+          "name": "廣告文案生成"
         },
         {
           "ref": "E21",
-          "name": "EDM 電子報生成",
-          "why": "主旨行 A/B 測試"
+          "name": "EDM 電子報生成"
         },
         {
           "ref": "E05",
-          "name": "標題優化",
-          "why": "標題 A/B 測試"
+          "name": "標題優化"
         }
       ],
       "mentions": [
@@ -1175,7 +1064,6 @@
       "id": "E25",
       "slug": "e25-retargeting-planner",
       "name": "e25-retargeting-planner",
-      "description": "根據買家行為建議再行銷受眾分群和對應的廣告策略，包含瀏覽未購買、加購未結帳、過去購買者、交叉銷售等場景。支援截圖、純文字輸入。",
       "emoji": "🎯",
       "user_invocable": true,
       "always_on": false,
@@ -1186,28 +1074,23 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存受眾規劃記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E19",
-          "name": "廣告文案生成",
-          "why": "生成各受眾的廣告文案"
+          "name": "廣告文案生成"
         },
         {
           "ref": "E21",
-          "name": "EDM 電子報",
-          "why": "舊客喚回搭配 EDM 同步"
+          "name": "EDM 電子報"
         },
         {
           "ref": "E32",
-          "name": "棄單挽回",
-          "why": "棄單受眾的專屬處理"
+          "name": "棄單挽回"
         },
         {
           "ref": "E34",
-          "name": "顧客分眾",
-          "why": "RFM 分群結果匯入受眾設定"
+          "name": "顧客分眾"
         }
       ],
       "mentions": [
@@ -1223,7 +1106,6 @@
       "id": "E26",
       "slug": "e26-utm-tracker",
       "name": "e26-utm-tracker",
-      "description": "生成並管理各渠道的 UTM 追蹤碼，讓學員清楚知道每筆流量和訂單從哪裡來，幫助評估各行銷渠道的實際效益。",
       "emoji": "🔗",
       "user_invocable": true,
       "always_on": false,
@@ -1234,28 +1116,23 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存所有 UTM 連結記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E21",
-          "name": "EDM 電子報",
-          "why": "EDM 連結自動加 UTM"
+          "name": "EDM 電子報"
         },
         {
           "ref": "E23",
-          "name": "KOL 名單管理",
-          "why": "KOL 合作連結加 UTM"
+          "name": "KOL 名單管理"
         },
         {
           "ref": "E27",
-          "name": "LINE 官方帳號",
-          "why": "推播連結加 UTM"
+          "name": "LINE 官方帳號"
         },
         {
           "ref": "E29",
-          "name": "聯盟行銷管理",
-          "why": "聯盟連結 UTM 管理"
+          "name": "聯盟行銷管理"
         }
       ],
       "mentions": [
@@ -1271,7 +1148,6 @@
       "id": "E27",
       "slug": "e27-line-official",
       "name": "e27-line-official",
-      "description": "管理 LINE 官方帳號的推播內容、分眾標籤、訊息排程。幫學員生成推播文案、規劃推播時機、設定分眾條件，讓 LINE 推播不只是廣播，而是精準的個人化溝通。支援截圖、純文字輸入。",
       "emoji": "💚",
       "user_invocable": true,
       "always_on": false,
@@ -1282,33 +1158,27 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存推播記錄與行事曆"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "推播前提醒準備內容"
+          "name": "定時排程"
         },
         {
           "ref": "E20",
-          "name": "行銷行事曆",
-          "why": "節日推播時機整合"
+          "name": "行銷行事曆"
         },
         {
           "ref": "E21",
-          "name": "EDM 電子報",
-          "why": "LINE 和 EDM 同步發送效果更好"
+          "name": "EDM 電子報"
         },
         {
           "ref": "E26",
-          "name": "UTM 追蹤碼",
-          "why": "推播連結加入 UTM 追蹤"
+          "name": "UTM 追蹤碼"
         },
         {
           "ref": "E32",
-          "name": "棄單挽回",
-          "why": "棄單推播整合"
+          "name": "棄單挽回"
         }
       ],
       "mentions": [
@@ -1325,7 +1195,6 @@
       "id": "E28",
       "slug": "e28-ad-creative-advisor",
       "name": "e28-ad-creative-advisor",
-      "description": "根據商品特性、目標受眾、投放平台，建議廣告圖片和影片的拍攝方向、構圖、文字疊加、素材組合策略。不生成圖片，而是給出具體的素材製作指引。支援網址、截圖、純文字輸入。",
       "emoji": "🎨",
       "user_invocable": true,
       "always_on": false,
@@ -1336,23 +1205,19 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "擷取現有素材或競品廣告"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "E19",
-          "name": "廣告文案生成",
-          "why": "素材上的廣告文字搭配使用"
+          "name": "廣告文案生成"
         },
         {
           "ref": "E24",
-          "name": "A/B 測試分析",
-          "why": "測試不同素材的成效"
+          "name": "A/B 測試分析"
         },
         {
           "ref": "E23",
-          "name": "KOL 名單管理",
-          "why": "開箱影片可交給 KOL 製作"
+          "name": "KOL 名單管理"
         }
       ],
       "mentions": [
@@ -1367,7 +1232,6 @@
       "id": "E29",
       "slug": "e29-affiliate-manager",
       "name": "e29-affiliate-manager",
-      "description": "管理聯盟行銷計畫，包含夥伴招募、專屬連結生成、點擊追蹤、分潤計算、付款記錄。讓學員建立被動行銷渠道，讓別人幫你賣商品。支援截圖、純文字輸入。",
       "emoji": "🤝",
       "user_invocable": true,
       "always_on": false,
@@ -1378,23 +1242,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存夥伴名單與分潤記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "月底自動結算"
+          "name": "定時排程"
         },
         {
           "ref": "E26",
-          "name": "UTM 追蹤碼管理",
-          "why": "聯盟連結加入 UTM 追蹤"
+          "name": "UTM 追蹤碼管理"
         },
         {
           "ref": "E23",
-          "name": "KOL 名單管理",
-          "why": "KOL 轉聯盟夥伴"
+          "name": "KOL 名單管理"
         }
       ],
       "mentions": [
@@ -1409,7 +1269,6 @@
       "id": "E30",
       "slug": "e30-holiday-marketing",
       "name": "e30-holiday-marketing",
-      "description": "節日前 3-5 天自動推送行銷快報，包含節日背景、適合推廣的商品方向、文案建議、競品動態。讓學員不錯過任何一個行銷機會。由 E20 行銷行事曆觸發，也可手動查詢。",
       "emoji": "🎉",
       "user_invocable": true,
       "always_on": false,
@@ -1420,38 +1279,31 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "抓取競品近期活動動態"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "節日前 5 天自動觸發"
+          "name": "定時排程"
         },
         {
           "ref": "E20",
-          "name": "行銷行事曆",
-          "why": "上游觸發來源"
+          "name": "行銷行事曆"
         },
         {
           "ref": "E03",
-          "name": "庫存預警",
-          "why": "節日前確認庫存"
+          "name": "庫存預警"
         },
         {
           "ref": "E08",
-          "name": "促銷規劃",
-          "why": "節日促銷方案設定"
+          "name": "促銷規劃"
         },
         {
           "ref": "E19",
-          "name": "廣告文案生成",
-          "why": "生成節日文案"
+          "name": "廣告文案生成"
         },
         {
           "ref": "E27",
-          "name": "LINE 官方帳號",
-          "why": "推播節日活動通知"
+          "name": "LINE 官方帳號"
         }
       ],
       "mentions": [
@@ -1469,7 +1321,6 @@
       "id": "E31",
       "slug": "e31-referral-tracker",
       "name": "e31-referral-tracker",
-      "description": "管理老客帶新客的推薦計畫，包含推薦碼生成、追蹤點擊與成交、獎勵計算與發放提醒。讓學員用口碑行銷降低獲客成本。支援純文字輸入。",
       "emoji": "👥",
       "user_invocable": true,
       "always_on": false,
@@ -1480,23 +1331,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存推薦碼和記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "月底自動結算"
+          "name": "定時排程"
         },
         {
           "ref": "E26",
-          "name": "UTM 追蹤碼管理",
-          "why": "推薦連結加 UTM"
+          "name": "UTM 追蹤碼管理"
         },
         {
           "ref": "E34",
-          "name": "顧客分眾",
-          "why": "高滿意度顧客優先邀請加入推薦計畫"
+          "name": "顧客分眾"
         }
       ],
       "mentions": [
@@ -1511,7 +1358,6 @@
       "id": "E32",
       "slug": "e32-cart-abandonment",
       "name": "e32-cart-abandonment",
-      "description": "偵測加購物車未結帳的買家，在適當時機自動推送挽回訊息（LINE、EDM、廣告），附上限時小優惠提高轉換率。是再行銷 ROI 最高的場景之一。支援平台 API 或截圖輸入。",
       "emoji": "🛒",
       "user_invocable": true,
       "always_on": false,
@@ -1522,28 +1368,23 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存棄單記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "定時掃描棄單"
+          "name": "定時排程"
         },
         {
           "ref": "E21",
-          "name": "EDM 電子報生成",
-          "why": "第二波 EDM 內容"
+          "name": "EDM 電子報生成"
         },
         {
           "ref": "E25",
-          "name": "再行銷受眾規劃",
-          "why": "第三波廣告受眾設定"
+          "name": "再行銷受眾規劃"
         },
         {
           "ref": "E27",
-          "name": "LINE 官方帳號管理",
-          "why": "第一波 LINE 推播"
+          "name": "LINE 官方帳號管理"
         }
       ],
       "mentions": [
@@ -1559,7 +1400,6 @@
       "id": "E33",
       "slug": "e33-short-video-script",
       "name": "e33-short-video-script",
-      "description": "根據商品和平台，生成 15-60 秒短影音的完整腳本，包含每個鏡頭的畫面、台詞、字幕、時間長度。適用於蝦皮直播片段、TikTok、IG Reels、YouTube Shorts。支援截圖、純文字輸入。",
       "emoji": "🎬",
       "user_invocable": true,
       "always_on": false,
@@ -1570,18 +1410,15 @@
       "declared_dependencies": [
         {
           "ref": "E19",
-          "name": "廣告文案生成",
-          "why": "腳本的字幕和台詞可搭配"
+          "name": "廣告文案生成"
         },
         {
           "ref": "E23",
-          "name": "KOL 名單管理",
-          "why": "腳本可以交給 KOL 照著拍"
+          "name": "KOL 名單管理"
         },
         {
           "ref": "E35",
-          "name": "直播腳本",
-          "why": "直播用的長版腳本"
+          "name": "直播腳本"
         }
       ],
       "mentions": [
@@ -1595,7 +1432,6 @@
       "id": "E34",
       "slug": "e34-customer-segmentation",
       "name": "e34-customer-segmentation",
-      "description": "根據 RFM 模型（最近購買時間、購買頻率、消費金額）將顧客分群，針對不同群體建議差異化行銷策略，包含忠實客維護、流失客挽回、高價值客升級、新客培育。支援截圖、純文字、CSV 輸入。",
       "emoji": "👤",
       "user_invocable": true,
       "always_on": false,
@@ -1606,23 +1442,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "顧客資料來源與分群結果儲存"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E21",
-          "name": "EDM 電子報",
-          "why": "各群體的差異化 EDM"
+          "name": "EDM 電子報"
         },
         {
           "ref": "E25",
-          "name": "再行銷受眾",
-          "why": "分群結果匯入廣告受眾"
+          "name": "再行銷受眾"
         },
         {
           "ref": "E27",
-          "name": "LINE 官方帳號",
-          "why": "分群結果設定標籤"
+          "name": "LINE 官方帳號"
         }
       ],
       "mentions": [
@@ -1638,7 +1470,6 @@
       "id": "E35",
       "slug": "e35-live-stream-manager",
       "name": "e35-live-stream-manager",
-      "description": "規劃直播腳本、商品出場順序、話術重點，以及直播前準備清單和直播後數據整理。適用於蝦皮直播、TikTok Live、Instagram Live。支援截圖、純文字輸入。",
       "emoji": "📡",
       "user_invocable": true,
       "always_on": false,
@@ -1649,18 +1480,15 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存直播腳本和成效記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E03",
-          "name": "庫存預警",
-          "why": "直播前確認庫存充足"
+          "name": "庫存預警"
         },
         {
           "ref": "E33",
-          "name": "短影音腳本",
-          "why": "直播精華片段剪輯方向"
+          "name": "短影音腳本"
         }
       ],
       "mentions": [
@@ -1674,7 +1502,6 @@
       "id": "E36",
       "slug": "e36-review-invite",
       "name": "e36-review-invite",
-      "description": "出貨後自動在適當時機發送邀請評價的訊息，提高好評率和評價數量。時機設定在買家收到商品並使用幾天後，語氣親切不強迫。支援截圖、純文字輸入。",
       "emoji": "⭐",
       "user_invocable": true,
       "always_on": false,
@@ -1685,23 +1512,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存評價邀請記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "出貨後自動計算發送時間"
+          "name": "定時排程"
         },
         {
           "ref": "E06",
-          "name": "負評回覆生成",
-          "why": "收到負評時觸發"
+          "name": "負評回覆生成"
         },
         {
           "ref": "E31",
-          "name": "推薦人追蹤",
-          "why": "好評後附上推薦碼"
+          "name": "推薦人追蹤"
         }
       ],
       "mentions": [
@@ -1716,7 +1539,6 @@
       "id": "E37",
       "slug": "e37-ugc-manager",
       "name": "e37-ugc-manager",
-      "description": "收集和管理買家自發的開箱文、曬單貼文、評價截圖，整理成可用的行銷素材庫，並生成轉發或引用的訊息草稿。支援網址、截圖輸入。",
       "emoji": "📸",
       "user_invocable": true,
       "always_on": false,
@@ -1727,23 +1549,19 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "擷取貼文內容和數據"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "UGC 素材庫"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E22",
-          "name": "社群監控",
-          "why": "自動偵測潛在 UGC"
+          "name": "社群監控"
         },
         {
           "ref": "E23",
-          "name": "KOL 名單管理",
-          "why": "KOL 內容也可加入 UGC 庫"
+          "name": "KOL 名單管理"
         }
       ],
       "mentions": [
@@ -1758,7 +1576,6 @@
       "id": "E38",
       "slug": "e38-social-post-scheduler",
       "name": "e38-social-post-scheduler",
-      "description": "生成社群貼文內容並規劃發布排程，支援 Facebook、Instagram、TikTok、Threads。幫學員維持穩定的社群發文頻率，不再因為沒靈感就斷更。支援截圖、純文字輸入。",
       "emoji": "📱",
       "user_invocable": true,
       "always_on": false,
@@ -1769,23 +1586,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存排程記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "發布前提醒"
+          "name": "定時排程"
         },
         {
           "ref": "E20",
-          "name": "行銷行事曆",
-          "why": "節日貼文自動帶入"
+          "name": "行銷行事曆"
         },
         {
           "ref": "E33",
-          "name": "短影音腳本",
-          "why": "TikTok 貼文搭配影片腳本"
+          "name": "短影音腳本"
         }
       ],
       "mentions": [
@@ -1800,7 +1613,6 @@
       "id": "E39",
       "slug": "e39-keyword-research",
       "name": "e39-keyword-research",
-      "description": "關鍵字研究工具，找出目標市場的高機會關鍵字，分析搜尋量、競爭度、商業意圖，幫學員建立關鍵字策略地圖。SEO 模組的地基，其他所有 SEO skill 都依賴這裡的關鍵字資料。支援網址、截圖、純文字輸入。",
       "emoji": "🔍",
       "user_invocable": true,
       "always_on": false,
@@ -1811,23 +1623,19 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "擷取競品頁面關鍵字"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存關鍵字地圖"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E40",
-          "name": "關鍵字排名追蹤",
-          "why": "研究完後持續追蹤排名"
+          "name": "關鍵字排名追蹤"
         },
         {
           "ref": "E52",
-          "name": "AI SEO 文章生成",
-          "why": "關鍵字確定後生成文章"
+          "name": "AI SEO 文章生成"
         }
       ],
       "mentions": [
@@ -1843,7 +1651,6 @@
       "id": "E40",
       "slug": "e40-keyword-rank-tracker",
       "name": "e40-keyword-rank-tracker",
-      "description": "追蹤目標關鍵字在 Google 的排名變化，定時監控排名上升或下滑，並在異常時主動通知。搭配 E39 關鍵字研究使用，讓學員隨時掌握 SEO 成效。支援截圖、純文字輸入。",
       "emoji": "📈",
       "user_invocable": true,
       "always_on": false,
@@ -1854,28 +1661,23 @@
       "declared_dependencies": [
         {
           "ref": "C06",
-          "name": "基礎爬蟲",
-          "why": "搜尋關鍵字排名"
+          "name": "基礎爬蟲"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存排名歷史記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每週自動追蹤"
+          "name": "定時排程"
         },
         {
           "ref": "E39",
-          "name": "關鍵字研究",
-          "why": "追蹤對象來源"
+          "name": "關鍵字研究"
         },
         {
           "ref": "E58",
-          "name": "SEO 週報",
-          "why": "排名數據匯入週報"
+          "name": "SEO 週報"
         }
       ],
       "mentions": [
@@ -1893,7 +1695,6 @@
       "id": "E41",
       "slug": "e41-search-intent-analyzer",
       "name": "e41-search-intent-analyzer",
-      "description": "分析目標關鍵字背後的搜尋意圖，判斷用戶真正想要什麼（資訊、比較、購買），建議最適合的頁面類型和內容結構，避免用錯誤的頁面類型去攻關鍵字。支援截圖、純文字輸入。",
       "emoji": "🧠",
       "user_invocable": true,
       "always_on": false,
@@ -1904,23 +1705,19 @@
       "declared_dependencies": [
         {
           "ref": "C06",
-          "name": "基礎爬蟲",
-          "why": "抓取 SERP 頁面類型分佈"
+          "name": "基礎爬蟲"
         },
         {
           "ref": "E39",
-          "name": "關鍵字研究",
-          "why": "提供待分析的關鍵字清單"
+          "name": "關鍵字研究"
         },
         {
           "ref": "E42",
-          "name": "SERP 分析",
-          "why": "搭配分析競品頁面結構"
+          "name": "SERP 分析"
         },
         {
           "ref": "E52",
-          "name": "AI SEO 文章生成",
-          "why": "確定意圖後生成對應內容"
+          "name": "AI SEO 文章生成"
         }
       ],
       "mentions": [
@@ -1935,7 +1732,6 @@
       "id": "E42",
       "slug": "e42-serp-analyzer",
       "name": "e42-serp-analyzer",
-      "description": "分析特定關鍵字的搜尋結果頁（SERP），拆解前 10 名競品的標題、描述、頁面結構、字數、內容特色，找出排名成功的規律，作為自己內容優化的依據。支援網址、截圖輸入。",
       "emoji": "🔎",
       "user_invocable": true,
       "always_on": false,
@@ -1946,28 +1742,23 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "擷取競品頁面詳細內容"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C06",
-          "name": "基礎爬蟲",
-          "why": "抓取搜尋結果頁"
+          "name": "基礎爬蟲"
         },
         {
           "ref": "E41",
-          "name": "搜尋意圖分析",
-          "why": "搭配理解排名邏輯"
+          "name": "搜尋意圖分析"
         },
         {
           "ref": "E43",
-          "name": "內容缺口分析",
-          "why": "找出未覆蓋的主題"
+          "name": "內容缺口分析"
         },
         {
           "ref": "E52",
-          "name": "AI SEO 文章生成",
-          "why": "找到缺口後直接生成內容"
+          "name": "AI SEO 文章生成"
         }
       ],
       "mentions": [
@@ -1983,7 +1774,6 @@
       "id": "E43",
       "slug": "e43-content-gap-analyzer",
       "name": "e43-content-gap-analyzer",
-      "description": "比較你的網站和競品，找出競品有排名但你完全沒有佈局的關鍵字和內容主題，幫學員發現 SEO 內容缺口，決定下一步要寫什麼內容。支援網址、截圖輸入。",
       "emoji": "🕳️",
       "user_invocable": true,
       "always_on": false,
@@ -1994,28 +1784,23 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "爬取競品網站頁面清單"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C06",
-          "name": "基礎爬蟲",
-          "why": "抓取競品關鍵字資料"
+          "name": "基礎爬蟲"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存缺口分析結果"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E39",
-          "name": "關鍵字研究",
-          "why": "搭配評估缺口的搜尋量"
+          "name": "關鍵字研究"
         },
         {
           "ref": "E52",
-          "name": "AI SEO 文章生成",
-          "why": "找到缺口後直接生成內容"
+          "name": "AI SEO 文章生成"
         }
       ],
       "mentions": [
@@ -2031,7 +1816,6 @@
       "id": "E44",
       "slug": "e44-seo-health-check",
       "name": "e44-seo-health-check",
-      "description": "全面檢查網站的 SEO 基礎健康狀況，包含 Meta 標籤、標題結構、圖片 Alt 文字、規範標籤、網站地圖、robots.txt，給出評分和修復優先順序。支援網址輸入。",
       "emoji": "🏥",
       "user_invocable": true,
       "always_on": false,
@@ -2042,28 +1826,23 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "擷取頁面 HTML 分析"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C06",
-          "name": "基礎爬蟲",
-          "why": "爬取網站結構"
+          "name": "基礎爬蟲"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每月自動健康檢查"
+          "name": "定時排程"
         },
         {
           "ref": "E46",
-          "name": "內部連結優化",
-          "why": "修復孤立頁面和斷鏈"
+          "name": "內部連結優化"
         },
         {
           "ref": "E54",
-          "name": "Meta 標籤批量優化",
-          "why": "批量修復 Title 和 Description"
+          "name": "Meta 標籤批量優化"
         }
       ],
       "mentions": [
@@ -2080,7 +1859,6 @@
       "id": "E45",
       "slug": "e45-technical-seo-crawler",
       "name": "e45-technical-seo-crawler",
-      "description": "主動爬取網站找出技術 SEO 問題，包含斷鏈（404）、重定向鏈、重複內容、爬取錯誤、索引問題。比 E44 健康檢查更深入，專注於需要開發或後台操作才能修復的技術問題。支援網址輸入。",
       "emoji": "🕷️",
       "user_invocable": true,
       "always_on": false,
@@ -2091,23 +1869,19 @@
       "declared_dependencies": [
         {
           "ref": "C06",
-          "name": "基礎爬蟲",
-          "why": "系統性爬取網站"
+          "name": "基礎爬蟲"
         },
         {
           "ref": "E44",
-          "name": "SEO 健康檢查",
-          "why": "輕量版，E45 是深度版"
+          "name": "SEO 健康檢查"
         },
         {
           "ref": "E46",
-          "name": "內部連結優化",
-          "why": "修復爬取深度問題"
+          "name": "內部連結優化"
         },
         {
           "ref": "E56",
-          "name": "Search Console 整合",
-          "why": "確認實際索引狀況"
+          "name": "Search Console 整合"
         }
       ],
       "mentions": [
@@ -2122,7 +1896,6 @@
       "id": "E46",
       "slug": "e46-internal-link-optimizer",
       "name": "e46-internal-link-optimizer",
-      "description": "分析網站內部連結結構，找出孤立頁面、過度連結、PageRank 分配不均等問題，建議在哪些頁面加入哪些內部連結，並生成可直接使用的連結錨點文字。支援網址輸入。",
       "emoji": "🕸️",
       "user_invocable": true,
       "always_on": false,
@@ -2133,23 +1906,19 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "擷取頁面連結結構"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C06",
-          "name": "基礎爬蟲",
-          "why": "系統爬取所有內部連結"
+          "name": "基礎爬蟲"
         },
         {
           "ref": "E44",
-          "name": "SEO 健康檢查",
-          "why": "孤立頁面清單來源"
+          "name": "SEO 健康檢查"
         },
         {
           "ref": "E45",
-          "name": "技術 SEO 爬蟲",
-          "why": "爬取深度問題解決"
+          "name": "技術 SEO 爬蟲"
         }
       ],
       "mentions": [
@@ -2164,7 +1933,6 @@
       "id": "E47",
       "slug": "e47-core-web-vitals",
       "name": "e47-core-web-vitals",
-      "description": "監控 Google Core Web Vitals 三個核心指標（LCP、CLS、INP），這是 Google 正式用於排名的頁面體驗信號。找出具體影響分數的元素並給出修復建議。支援網址輸入。",
       "emoji": "⚡",
       "user_invocable": true,
       "always_on": false,
@@ -2175,23 +1943,19 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "頁面效能測試"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每月自動監控"
+          "name": "定時排程"
         },
         {
           "ref": "E44",
-          "name": "SEO 健康檢查",
-          "why": "健康檢查後可深入用 E47 分析"
+          "name": "SEO 健康檢查"
         },
         {
           "ref": "E55",
-          "name": "頁面速度監控",
-          "why": "E55 監控速度趨勢，E47 專注 Google 排名指標"
+          "name": "頁面速度監控"
         }
       ],
       "mentions": [
@@ -2206,7 +1970,6 @@
       "id": "E48",
       "slug": "e48-backlink-monitor",
       "name": "e48-backlink-monitor",
-      "description": "監控網站的反向連結（外部網站連結到你的頁面），追蹤新增和失去的連結，評估連結品質，並在獲得高品質反向連結或失去重要連結時通知。支援網址輸入。",
       "emoji": "🔗",
       "user_invocable": true,
       "always_on": false,
@@ -2217,28 +1980,23 @@
       "declared_dependencies": [
         {
           "ref": "C06",
-          "name": "基礎爬蟲",
-          "why": "抓取反向連結資料"
+          "name": "基礎爬蟲"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每週自動監控"
+          "name": "定時排程"
         },
         {
           "ref": "E22",
-          "name": "社群監控",
-          "why": "找品牌提及轉連結機會"
+          "name": "社群監控"
         },
         {
           "ref": "E23",
-          "name": "KOL 管理",
-          "why": "換取評測連結"
+          "name": "KOL 管理"
         },
         {
           "ref": "E58",
-          "name": "SEO 週報",
-          "why": "連結變化納入週報"
+          "name": "SEO 週報"
         }
       ],
       "mentions": [
@@ -2254,7 +2012,6 @@
       "id": "E49",
       "slug": "e49-schema-generator",
       "name": "e49-schema-generator",
-      "description": "生成符合 Google 規範的 Schema 結構化資料（JSON-LD 格式），包含商品、評價、FAQ、麵包屑、組織等類型，幫助 Google 更好理解頁面內容，爭取豐富摘要（Rich Results）。",
       "emoji": "🏷️",
       "user_invocable": true,
       "always_on": false,
@@ -2265,13 +2022,11 @@
       "declared_dependencies": [
         {
           "ref": "E44",
-          "name": "SEO 健康檢查",
-          "why": "健康檢查中會提醒缺少 Schema"
+          "name": "SEO 健康檢查"
         },
         {
           "ref": "E56",
-          "name": "Search Console",
-          "why": "監控豐富摘要的實際呈現狀況"
+          "name": "Search Console"
         }
       ],
       "mentions": [
@@ -2284,7 +2039,6 @@
       "id": "E50",
       "slug": "e50-ecommerce-seo",
       "name": "e50-ecommerce-seo",
-      "description": "專門針對電商網站的 SEO 策略，處理商品頁、分類頁、規格變體造成的重複內容、長尾關鍵字佈局、商品下架後的處理等電商特有的 SEO 問題。支援網址、截圖輸入。",
       "emoji": "🛍️",
       "user_invocable": true,
       "always_on": false,
@@ -2295,23 +2049,19 @@
       "declared_dependencies": [
         {
           "ref": "E39",
-          "name": "關鍵字研究",
-          "why": "電商關鍵字策略基礎"
+          "name": "關鍵字研究"
         },
         {
           "ref": "E45",
-          "name": "技術 SEO 爬蟲",
-          "why": "找出重複內容問題"
+          "name": "技術 SEO 爬蟲"
         },
         {
           "ref": "E49",
-          "name": "Schema 生成",
-          "why": "商品 Schema 是電商 SEO 重要一環"
+          "name": "Schema 生成"
         },
         {
           "ref": "E54",
-          "name": "Meta 標籤批量優化",
-          "why": "批量優化商品頁 Meta"
+          "name": "Meta 標籤批量優化"
         }
       ],
       "mentions": [
@@ -2327,7 +2077,6 @@
       "id": "E51",
       "slug": "e51-google-business",
       "name": "e51-google-business",
-      "description": "管理 Google 商家檔案（Google Business Profile），優化商家資訊、發布貼文、回覆評論、追蹤在地搜尋排名。適合有實體門市或提供本地服務的學員。支援截圖、純文字輸入。",
       "emoji": "📍",
       "user_invocable": true,
       "always_on": false,
@@ -2338,18 +2087,15 @@
       "declared_dependencies": [
         {
           "ref": "E06",
-          "name": "負評回覆生成",
-          "why": "Google 評論差評處理"
+          "name": "負評回覆生成"
         },
         {
           "ref": "E26",
-          "name": "UTM 追蹤碼",
-          "why": "商家貼文連結加追蹤"
+          "name": "UTM 追蹤碼"
         },
         {
           "ref": "E58",
-          "name": "SEO 週報",
-          "why": "在地排名納入週報"
+          "name": "SEO 週報"
         }
       ],
       "mentions": [
@@ -2363,7 +2109,6 @@
       "id": "E52",
       "slug": "e52-ai-seo-article",
       "name": "e52-ai-seo-article",
-      "description": "根據目標關鍵字、搜尋意圖、競品內容分析，生成符合 SEO 最佳實踐的長篇文章，包含標題結構、關鍵字密度、內部連結建議、FAQ 區塊。結合 E39-E43 的研究成果直接產出可發布的內容。支援純文字輸入。",
       "emoji": "✍️",
       "user_invocable": true,
       "always_on": false,
@@ -2374,28 +2119,23 @@
       "declared_dependencies": [
         {
           "ref": "E39",
-          "name": "關鍵字研究",
-          "why": "提供目標關鍵字"
+          "name": "關鍵字研究"
         },
         {
           "ref": "E41",
-          "name": "搜尋意圖分析",
-          "why": "確定文章類型"
+          "name": "搜尋意圖分析"
         },
         {
           "ref": "E42",
-          "name": "SERP 分析",
-          "why": "競品字數和必要元素"
+          "name": "SERP 分析"
         },
         {
           "ref": "E43",
-          "name": "內容缺口分析",
-          "why": "確定要寫哪個主題"
+          "name": "內容缺口分析"
         },
         {
           "ref": "E49",
-          "name": "Schema 生成",
-          "why": "FAQ 區塊轉為 FAQ Schema"
+          "name": "Schema 生成"
         }
       ],
       "mentions": [
@@ -2412,7 +2152,6 @@
       "id": "E53",
       "slug": "e53-competitor-traffic",
       "name": "e53-competitor-traffic",
-      "description": "分析競品網站的自然流量來源、流量最高的頁面、關鍵字佈局策略，幫學員了解競品靠什麼帶流量，找到可以模仿或超越的機會。支援網址輸入。",
       "emoji": "🕵️",
       "user_invocable": true,
       "always_on": false,
@@ -2423,28 +2162,23 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "爬取競品頁面"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C06",
-          "name": "基礎爬蟲",
-          "why": "系統性分析競品網站"
+          "name": "基礎爬蟲"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每月自動監控"
+          "name": "定時排程"
         },
         {
           "ref": "E43",
-          "name": "內容缺口分析",
-          "why": "搭配找出具體缺口"
+          "name": "內容缺口分析"
         },
         {
           "ref": "E58",
-          "name": "SEO 週報",
-          "why": "競品流量變化納入週報"
+          "name": "SEO 週報"
         }
       ],
       "mentions": [
@@ -2461,7 +2195,6 @@
       "id": "E54",
       "slug": "e54-meta-tag-optimizer",
       "name": "e54-meta-tag-optimizer",
-      "description": "批量分析並優化網站所有頁面的 Title 標籤和 Meta Description，找出缺失、過長、過短、重複的問題，並生成優化後的版本。電商網站商品頁多，最需要批量處理。支援網址輸入。",
       "emoji": "🏷️",
       "user_invocable": true,
       "always_on": false,
@@ -2472,23 +2205,19 @@
       "declared_dependencies": [
         {
           "ref": "C06",
-          "name": "基礎爬蟲",
-          "why": "掃描所有頁面 Meta 標籤"
+          "name": "基礎爬蟲"
         },
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存優化清單"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E44",
-          "name": "SEO 健康檢查",
-          "why": "健康檢查會觸發 E54 批量修復"
+          "name": "SEO 健康檢查"
         },
         {
           "ref": "E50",
-          "name": "電商 SEO 專項",
-          "why": "電商商品頁 Meta 優化策略"
+          "name": "電商 SEO 專項"
         }
       ],
       "mentions": [
@@ -2503,7 +2232,6 @@
       "id": "E55",
       "slug": "e55-pagespeed-monitor",
       "name": "e55-pagespeed-monitor",
-      "description": "監控網站頁面載入速度，定期測試並在速度明顯下滑時通知，找出拖慢速度的主要問題（圖片過大、未壓縮 JS/CSS、第三方腳本等）並給出改善建議。支援網址輸入。",
       "emoji": "🚀",
       "user_invocable": true,
       "always_on": false,
@@ -2514,23 +2242,19 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "測試頁面載入速度"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每週自動監控"
+          "name": "定時排程"
         },
         {
           "ref": "E47",
-          "name": "Core Web Vitals",
-          "why": "E47 專注 Google 排名指標，E55 監控整體速度趨勢"
+          "name": "Core Web Vitals"
         },
         {
           "ref": "E58",
-          "name": "SEO 週報",
-          "why": "速度數據納入週報"
+          "name": "SEO 週報"
         }
       ],
       "mentions": [
@@ -2545,7 +2269,6 @@
       "id": "E56",
       "slug": "e56-search-console",
       "name": "e56-search-console",
-      "description": "整合 Google Search Console 數據，分析哪些關鍵字帶來流量、哪些頁面點擊率偏低、哪些頁面有索引問題，並給出具體的優化行動。是 SEO 模組中唯一能取得真實 Google 數據的 skill。支援截圖、CSV 輸入。",
       "emoji": "🖥️",
       "user_invocable": true,
       "always_on": false,
@@ -2556,23 +2279,19 @@
       "declared_dependencies": [
         {
           "ref": "E40",
-          "name": "關鍵字排名追蹤",
-          "why": "Search Console 是最準確的排名來源"
+          "name": "關鍵字排名追蹤"
         },
         {
           "ref": "E49",
-          "name": "Schema 生成",
-          "why": "精選摘要機會搭配 FAQ Schema"
+          "name": "Schema 生成"
         },
         {
           "ref": "E54",
-          "name": "Meta 標籤優化",
-          "why": "低 CTR 頁面的 Meta 優化"
+          "name": "Meta 標籤優化"
         },
         {
           "ref": "E58",
-          "name": "SEO 週報",
-          "why": "Search Console 數據是週報核心"
+          "name": "SEO 週報"
         }
       ],
       "mentions": [
@@ -2589,7 +2308,6 @@
       "id": "E57",
       "slug": "e57-ga4-seo",
       "name": "e57-ga4-seo",
-      "description": "整合 GA4 數據分析 SEO 成效，重點關注自然流量的用戶行為——哪些 SEO 頁面跳出率高、停留時間短、轉換率低，幫學員找出內容品質問題和優化機會。同時分析付費 vs 自然流量比較。支援截圖、CSV 輸入。",
       "emoji": "📊",
       "user_invocable": true,
       "always_on": false,
@@ -2600,23 +2318,19 @@
       "declared_dependencies": [
         {
           "ref": "E56",
-          "name": "Search Console",
-          "why": "搜尋端數據來源"
+          "name": "Search Console"
         },
         {
           "ref": "E41",
-          "name": "搜尋意圖分析",
-          "why": "高跳出率頁面的意圖重新分析"
+          "name": "搜尋意圖分析"
         },
         {
           "ref": "E52",
-          "name": "AI SEO 文章生成",
-          "why": "重寫表現差的文章"
+          "name": "AI SEO 文章生成"
         },
         {
           "ref": "E58",
-          "name": "SEO 週報",
-          "why": "GA4 數據納入週報"
+          "name": "SEO 週報"
         }
       ],
       "mentions": [
@@ -2631,7 +2345,6 @@
       "id": "E58",
       "slug": "e58-seo-weekly-report",
       "name": "e58-seo-weekly-report",
-      "description": "每週自動彙整 SEO 模組各 skill 的關鍵數據，生成一份完整的 SEO 週報，包含排名變化、流量趨勢、技術問題、本週成果、下週行動建議。讓學員一份報告掌握 SEO 全局。",
       "emoji": "📋",
       "user_invocable": true,
       "always_on": false,
@@ -2642,43 +2355,35 @@
       "declared_dependencies": [
         {
           "ref": "E40",
-          "name": "關鍵字排名追蹤",
-          "why": "排名數據"
+          "name": "關鍵字排名追蹤"
         },
         {
           "ref": "E44",
-          "name": "SEO 健康檢查",
-          "why": "技術問題狀態"
+          "name": "SEO 健康檢查"
         },
         {
           "ref": "E45",
-          "name": "技術 SEO 爬蟲",
-          "why": "深度技術問題"
+          "name": "技術 SEO 爬蟲"
         },
         {
           "ref": "E48",
-          "name": "反向連結監控",
-          "why": "連結變化"
+          "name": "反向連結監控"
         },
         {
           "ref": "E55",
-          "name": "頁面速度監控",
-          "why": "速度數據"
+          "name": "頁面速度監控"
         },
         {
           "ref": "E56",
-          "name": "Search Console",
-          "why": "流量和點擊數據"
+          "name": "Search Console"
         },
         {
           "ref": "E57",
-          "name": "GA4 × SEO",
-          "why": "行為和轉換數據"
+          "name": "GA4 × SEO"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每週一自動生成"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -2698,7 +2403,6 @@
       "id": "E59",
       "slug": "e59-ga4-summary",
       "name": "e59-ga4-summary",
-      "description": "每日或每週自動摘要 GA4 全站數據，包含流量來源、用戶行為、轉換率、各渠道貢獻，以白話文呈現讓學員快速掌握網站健康狀況。支援截圖、CSV 輸入。",
       "emoji": "📊",
       "user_invocable": true,
       "always_on": false,
@@ -2709,23 +2413,19 @@
       "declared_dependencies": [
         {
           "ref": "E57",
-          "name": "GA4 × SEO",
-          "why": "SEO 流量專項分析"
+          "name": "GA4 × SEO"
         },
         {
           "ref": "E58",
-          "name": "SEO 週報",
-          "why": "摘要數據匯入 SEO 週報"
+          "name": "SEO 週報"
         },
         {
           "ref": "E60",
-          "name": "廣告成效分析",
-          "why": "廣告渠道深入比較"
+          "name": "廣告成效分析"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每週自動生成"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -2742,7 +2442,6 @@
       "id": "E60",
       "slug": "e60-ad-performance",
       "name": "e60-ad-performance",
-      "description": "分析 Meta、Google、蝦皮廣告的成效數據，包含 CTR、CPM、CPC、ROAS，找出表現最好和最差的廣告組合，給出調整建議。支援截圖、CSV 輸入。",
       "emoji": "📣",
       "user_invocable": true,
       "always_on": false,
@@ -2753,33 +2452,27 @@
       "declared_dependencies": [
         {
           "ref": "E19",
-          "name": "廣告文案生成",
-          "why": "低 CTR 廣告的文案優化"
+          "name": "廣告文案生成"
         },
         {
           "ref": "E24",
-          "name": "A/B 測試分析",
-          "why": "廣告素材 A/B 測試"
+          "name": "A/B 測試分析"
         },
         {
           "ref": "E28",
-          "name": "廣告素材建議",
-          "why": "低 CTR 廣告的素材方向"
+          "name": "廣告素材建議"
         },
         {
           "ref": "E47",
-          "name": "Core Web Vitals",
-          "why": "落地頁優化（提升廣告轉換率）"
+          "name": "Core Web Vitals"
         },
         {
           "ref": "E59",
-          "name": "GA4 摘要",
-          "why": "廣告渠道流量行為對比"
+          "name": "GA4 摘要"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每週自動分析"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -2796,7 +2489,6 @@
       "id": "E61",
       "slug": "e61-ltv-calculator",
       "name": "e61-ltv-calculator",
-      "description": "計算顧客終身價值（LTV），分析不同顧客群體的 LTV 差異，幫學員了解哪種顧客最值得投資、廣告最多可以花多少錢獲取一個顧客。支援截圖、CSV、純文字輸入。",
       "emoji": "💎",
       "user_invocable": true,
       "always_on": false,
@@ -2807,23 +2499,19 @@
       "declared_dependencies": [
         {
           "ref": "E34",
-          "name": "顧客分眾 RFM",
-          "why": "各群體 LTV 計算基礎"
+          "name": "顧客分眾 RFM"
         },
         {
           "ref": "E62",
-          "name": "CAC 獲客成本",
-          "why": "LTV:CAC 對比"
+          "name": "CAC 獲客成本"
         },
         {
           "ref": "E67",
-          "name": "AOV 客單價追蹤",
-          "why": "提升 LTV 的手段之一"
+          "name": "AOV 客單價追蹤"
         },
         {
           "ref": "E70",
-          "name": "會員忠誠度管理",
-          "why": "提升留存和購買頻率"
+          "name": "會員忠誠度管理"
         }
       ],
       "mentions": [
@@ -2838,7 +2526,6 @@
       "id": "E62",
       "slug": "e62-cac-tracker",
       "name": "e62-cac-tracker",
-      "description": "追蹤和計算各渠道的顧客獲取成本（CAC），分析哪個渠道獲客最便宜、哪個渠道最貴，搭配 LTV 判斷獲客投資是否值得。支援截圖、CSV 輸入。",
       "emoji": "🎯",
       "user_invocable": true,
       "always_on": false,
@@ -2849,28 +2536,23 @@
       "declared_dependencies": [
         {
           "ref": "E61",
-          "name": "LTV 計算",
-          "why": "CAC 必須和 LTV 對比才有意義"
+          "name": "LTV 計算"
         },
         {
           "ref": "E60",
-          "name": "廣告成效分析",
-          "why": "廣告花費數據來源"
+          "name": "廣告成效分析"
         },
         {
           "ref": "E29",
-          "name": "聯盟行銷管理",
-          "why": "CAC 過高時改用績效分潤"
+          "name": "聯盟行銷管理"
         },
         {
           "ref": "E31",
-          "name": "推薦人追蹤",
-          "why": "零 CAC 渠道擴大"
+          "name": "推薦人追蹤"
         },
         {
           "ref": "E78",
-          "name": "數據分析週報",
-          "why": "CAC 數據匯入週報"
+          "name": "數據分析週報"
         }
       ],
       "mentions": [
@@ -2886,7 +2568,6 @@
       "id": "E63",
       "slug": "e63-funnel-analyzer",
       "name": "e63-funnel-analyzer",
-      "description": "分析從訪客到購買的完整轉換漏斗，找出每個環節的流失率和流失原因，給出具體改善建議。支援截圖、GA4 CSV 輸入。",
       "emoji": "🔽",
       "user_invocable": true,
       "always_on": false,
@@ -2897,28 +2578,23 @@
       "declared_dependencies": [
         {
           "ref": "E24",
-          "name": "A/B 測試分析",
-          "why": "測試漏斗改善方案"
+          "name": "A/B 測試分析"
         },
         {
           "ref": "E32",
-          "name": "棄單挽回",
-          "why": "購物車流失處理"
+          "name": "棄單挽回"
         },
         {
           "ref": "E36",
-          "name": "評價邀請",
-          "why": "增加商品頁社會證明"
+          "name": "評價邀請"
         },
         {
           "ref": "E59",
-          "name": "GA4 全站摘要",
-          "why": "漏斗數據來源"
+          "name": "GA4 全站摘要"
         },
         {
           "ref": "E78",
-          "name": "數據分析週報",
-          "why": "漏斗數據匯入週報"
+          "name": "數據分析週報"
         }
       ],
       "mentions": [
@@ -2934,7 +2610,6 @@
       "id": "E64",
       "slug": "e64-monthly-report",
       "name": "e64-monthly-report",
-      "description": "每月自動生成完整的行銷數據月報，彙整營收、流量、廣告、SEO、轉換率等各面向的月度表現，與上月和去年同期比較，並給出下月策略建議。支援截圖、CSV 輸入。",
       "emoji": "📅",
       "user_invocable": true,
       "always_on": false,
@@ -2945,38 +2620,31 @@
       "declared_dependencies": [
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每月 1 日自動生成"
+          "name": "定時排程"
         },
         {
           "ref": "E58",
-          "name": "SEO 週報",
-          "why": "SEO 月度數據"
+          "name": "SEO 週報"
         },
         {
           "ref": "E59",
-          "name": "GA4 全站摘要",
-          "why": "流量數據"
+          "name": "GA4 全站摘要"
         },
         {
           "ref": "E60",
-          "name": "廣告成效分析",
-          "why": "廣告數據"
+          "name": "廣告成效分析"
         },
         {
           "ref": "E61",
-          "name": "LTV 計算",
-          "why": "顧客價值數據"
+          "name": "LTV 計算"
         },
         {
           "ref": "E62",
-          "name": "CAC 追蹤",
-          "why": "獲客成本數據"
+          "name": "CAC 追蹤"
         },
         {
           "ref": "E78",
-          "name": "數據分析週報",
-          "why": "月報和週報互補"
+          "name": "數據分析週報"
         }
       ],
       "mentions": [
@@ -2994,7 +2662,6 @@
       "id": "E65",
       "slug": "e65-multi-platform-dashboard",
       "name": "e65-multi-platform-dashboard",
-      "description": "整合蝦皮、Momo、官網、LINE 等多個平台的銷售數據，提供統一的跨平台績效視圖，讓學員不需要逐一登入各平台後台。支援截圖、CSV 輸入。",
       "emoji": "🗂️",
       "user_invocable": true,
       "always_on": false,
@@ -3005,23 +2672,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "整合數據儲存"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每週自動推送跨平台摘要"
+          "name": "定時排程"
         },
         {
           "ref": "E72",
-          "name": "商品績效分析",
-          "why": "跨平台商品表現深入分析"
+          "name": "商品績效分析"
         },
         {
           "ref": "E78",
-          "name": "數據分析週報",
-          "why": "多平台數據匯入週報"
+          "name": "數據分析週報"
         }
       ],
       "mentions": [
@@ -3036,7 +2699,6 @@
       "id": "E66",
       "slug": "e66-paid-vs-organic",
       "name": "e66-paid-vs-organic",
-      "description": "比較付費流量（廣告）和自然流量（SEO、口碑）的數量、品質、轉換率、成本，幫學員決定資源配置比例，避免過度依賴廣告。支援截圖、CSV 輸入。",
       "emoji": "⚖️",
       "user_invocable": true,
       "always_on": false,
@@ -3047,23 +2709,19 @@
       "declared_dependencies": [
         {
           "ref": "E57",
-          "name": "GA4 × SEO",
-          "why": "SEO 自然流量深入分析"
+          "name": "GA4 × SEO"
         },
         {
           "ref": "E59",
-          "name": "GA4 全站摘要",
-          "why": "流量數據來源"
+          "name": "GA4 全站摘要"
         },
         {
           "ref": "E60",
-          "name": "廣告成效分析",
-          "why": "付費流量深入分析"
+          "name": "廣告成效分析"
         },
         {
           "ref": "E78",
-          "name": "數據分析週報",
-          "why": "比較數據匯入週報"
+          "name": "數據分析週報"
         }
       ],
       "mentions": [
@@ -3078,7 +2736,6 @@
       "id": "E67",
       "slug": "e67-aov-tracker",
       "name": "e67-aov-tracker",
-      "description": "追蹤平均客單價（AOV）趨勢，分析影響 AOV 的因素，找出提升客單價的機會（組合銷售、滿額門檻、升級推薦）。支援截圖、CSV 輸入。",
       "emoji": "🛒",
       "user_invocable": true,
       "always_on": false,
@@ -3089,23 +2746,19 @@
       "declared_dependencies": [
         {
           "ref": "E61",
-          "name": "LTV 計算",
-          "why": "AOV 是 LTV 的組成要素"
+          "name": "LTV 計算"
         },
         {
           "ref": "E63",
-          "name": "轉換漏斗分析",
-          "why": "結帳流程中加入 AOV 優化"
+          "name": "轉換漏斗分析"
         },
         {
           "ref": "E65",
-          "name": "多平台數據整合",
-          "why": "各平台 AOV 數據來源"
+          "name": "多平台數據整合"
         },
         {
           "ref": "E78",
-          "name": "數據分析週報",
-          "why": "AOV 數據匯入週報"
+          "name": "數據分析週報"
         }
       ],
       "mentions": [
@@ -3120,7 +2773,6 @@
       "id": "E68",
       "slug": "e68-return-rate",
       "name": "e68-return-rate",
-      "description": "分析顧客回購率和回購週期，追蹤新客轉回購客的比例，找出提升回購的機會。回購率是衡量品牌健康度最重要的指標之一。支援截圖、CSV 輸入。",
       "emoji": "🔄",
       "user_invocable": true,
       "always_on": false,
@@ -3131,33 +2783,27 @@
       "declared_dependencies": [
         {
           "ref": "E27",
-          "name": "LINE 官方帳號",
-          "why": "分眾推播回購提醒"
+          "name": "LINE 官方帳號"
         },
         {
           "ref": "E31",
-          "name": "推薦人追蹤",
-          "why": "首購後推薦碼發放"
+          "name": "推薦人追蹤"
         },
         {
           "ref": "E34",
-          "name": "顧客分眾 RFM",
-          "why": "依回購行為分群"
+          "name": "顧客分眾 RFM"
         },
         {
           "ref": "E36",
-          "name": "評價邀請",
-          "why": "首購後 14 天邀請評價"
+          "name": "評價邀請"
         },
         {
           "ref": "E61",
-          "name": "LTV 計算",
-          "why": "回購率影響 LTV"
+          "name": "LTV 計算"
         },
         {
           "ref": "E70",
-          "name": "會員忠誠度管理",
-          "why": "提升回購的主要工具"
+          "name": "會員忠誠度管理"
         }
       ],
       "mentions": [
@@ -3174,7 +2820,6 @@
       "id": "E69",
       "slug": "e69-daily-revenue",
       "name": "e69-daily-revenue",
-      "description": "每日自動生成營收快報，包含當日訂單數、營收、客單價與前日和目標的比較，異常時立即通知。讓學員每天早上 5 分鐘掌握昨日生意狀況。支援截圖、CSV 輸入。",
       "emoji": "📆",
       "user_invocable": true,
       "always_on": false,
@@ -3185,28 +2830,23 @@
       "declared_dependencies": [
         {
           "ref": "C09",
-          "name": "每日早報",
-          "why": "每日營收納入早報"
+          "name": "每日早報"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每日 08:00 自動生成"
+          "name": "定時排程"
         },
         {
           "ref": "E65",
-          "name": "多平台數據整合",
-          "why": "各平台數據來源"
+          "name": "多平台數據整合"
         },
         {
           "ref": "E77",
-          "name": "數據異常偵測",
-          "why": "異常數據進一步分析"
+          "name": "數據異常偵測"
         },
         {
           "ref": "E78",
-          "name": "數據分析週報",
-          "why": "每日數據匯總成週報"
+          "name": "數據分析週報"
         }
       ],
       "mentions": [
@@ -3222,7 +2862,6 @@
       "id": "E70",
       "slug": "e70-loyalty-manager",
       "name": "e70-loyalty-manager",
-      "description": "設計和管理會員忠誠度計畫，追蹤會員等級、點數累積、兌換狀況，分析哪些獎勵機制最有效提升回購，並自動推送升等提醒和點數到期通知。支援純文字輸入。",
       "emoji": "👑",
       "user_invocable": true,
       "always_on": false,
@@ -3233,28 +2872,23 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "會員點數記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "點數到期每週自動掃描提醒"
+          "name": "定時排程"
         },
         {
           "ref": "E27",
-          "name": "LINE 官方帳號",
-          "why": "推送升等和點數通知給會員"
+          "name": "LINE 官方帳號"
         },
         {
           "ref": "E34",
-          "name": "顧客分眾 RFM",
-          "why": "忠實客優先升等邀請"
+          "name": "顧客分眾 RFM"
         },
         {
           "ref": "E68",
-          "name": "回購率分析",
-          "why": "忠誠度計畫效果追蹤"
+          "name": "回購率分析"
         }
       ],
       "mentions": [
@@ -3270,7 +2904,6 @@
       "id": "E71",
       "slug": "e71-competitor-ads",
       "name": "e71-competitor-ads",
-      "description": "監控競品在 Meta、Google、蝦皮的廣告投放狀況，分析競品的廣告素材、文案策略、出價模式，找出競品的廣告規律和你可以學習或差異化的方向。支援截圖、網址輸入。",
       "emoji": "🔍",
       "user_invocable": true,
       "always_on": false,
@@ -3281,23 +2914,19 @@
       "declared_dependencies": [
         {
           "ref": "C05",
-          "name": "沙盒瀏覽器",
-          "why": "查看 Meta 廣告資料庫和競品社群"
+          "name": "沙盒瀏覽器"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每週自動監控"
+          "name": "定時排程"
         },
         {
           "ref": "E19",
-          "name": "廣告文案生成",
-          "why": "找到差異化方向後生成新文案"
+          "name": "廣告文案生成"
         },
         {
           "ref": "E28",
-          "name": "廣告素材建議",
-          "why": "競品素材分析後優化自己的素材"
+          "name": "廣告素材建議"
         }
       ],
       "mentions": [
@@ -3312,7 +2941,6 @@
       "id": "E72",
       "slug": "e72-product-performance",
       "name": "e72-product-performance",
-      "description": "分析各商品的銷售量、營收貢獻、毛利率、退貨率，找出明星商品、潛力商品和拖累整體表現的商品，給出商品線調整建議。支援截圖、CSV 輸入。",
       "emoji": "🏆",
       "user_invocable": true,
       "always_on": false,
@@ -3323,28 +2951,23 @@
       "declared_dependencies": [
         {
           "ref": "E17",
-          "name": "利潤計算機",
-          "why": "各商品毛利率計算"
+          "name": "利潤計算機"
         },
         {
           "ref": "E65",
-          "name": "多平台數據整合",
-          "why": "跨平台商品銷售數據"
+          "name": "多平台數據整合"
         },
         {
           "ref": "E73",
-          "name": "庫存周轉率",
-          "why": "問題商品的庫存壓資金分析"
+          "name": "庫存周轉率"
         },
         {
           "ref": "E74",
-          "name": "退貨率分析",
-          "why": "高退貨商品的原因深入分析"
+          "name": "退貨率分析"
         },
         {
           "ref": "E78",
-          "name": "數據分析週報",
-          "why": "商品績效匯入週報"
+          "name": "數據分析週報"
         }
       ],
       "mentions": [
@@ -3360,7 +2983,6 @@
       "id": "E73",
       "slug": "e73-inventory-turnover",
       "name": "e73-inventory-turnover",
-      "description": "分析各商品的庫存周轉率，找出賣太慢的滯銷品（資金被壓死）和賣太快的熱銷品（容易缺貨），給出補貨優先順序和滯銷品的清倉建議。支援截圖、CSV 輸入。",
       "emoji": "📦",
       "user_invocable": true,
       "always_on": false,
@@ -3371,28 +2993,23 @@
       "declared_dependencies": [
         {
           "ref": "E03",
-          "name": "庫存預警",
-          "why": "熱銷品缺貨預警（E73 提供周轉分析，E03 做日常監控）"
+          "name": "庫存預警"
         },
         {
           "ref": "E08",
-          "name": "促銷規劃",
-          "why": "滯銷品清倉促銷設計"
+          "name": "促銷規劃"
         },
         {
           "ref": "E18",
-          "name": "採購管理",
-          "why": "熱銷品補貨採購"
+          "name": "採購管理"
         },
         {
           "ref": "E72",
-          "name": "商品績效分析",
-          "why": "商品績效配合庫存決策"
+          "name": "商品績效分析"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每週自動掃描庫存狀況"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -3408,7 +3025,6 @@
       "id": "E74",
       "slug": "e74-return-analysis",
       "name": "e74-return-analysis",
-      "description": "分析退貨和退款數據，找出高退貨率商品、常見退貨原因、退貨集中的買家特徵，幫學員改善商品品質、描述準確度或目標受眾，降低退貨率。支援截圖、CSV 輸入。",
       "emoji": "↩️",
       "user_invocable": true,
       "always_on": false,
@@ -3419,28 +3035,23 @@
       "declared_dependencies": [
         {
           "ref": "E04",
-          "name": "訂單異常偵測",
-          "why": "異常退貨率觸發 E74 深入分析"
+          "name": "訂單異常偵測"
         },
         {
           "ref": "E06",
-          "name": "負評回覆",
-          "why": "因退貨產生的負評處理"
+          "name": "負評回覆"
         },
         {
           "ref": "E07",
-          "name": "商品描述生成",
-          "why": "根據退貨原因改善商品描述"
+          "name": "商品描述生成"
         },
         {
           "ref": "E18",
-          "name": "採購管理",
-          "why": "包材改善採購"
+          "name": "採購管理"
         },
         {
           "ref": "E72",
-          "name": "商品績效分析",
-          "why": "高退貨商品的整體績效評估"
+          "name": "商品績效分析"
         }
       ],
       "mentions": [
@@ -3456,7 +3067,6 @@
       "id": "E75",
       "slug": "e75-peak-hour-analyzer",
       "name": "e75-peak-hour-analyzer",
-      "description": "分析訂單和流量的時段分布，找出每天、每週的高峰時段，幫學員決定廣告投放時間、LINE 推播時機、直播排程、社群貼文發布時間。支援截圖、CSV 輸入。",
       "emoji": "⏰",
       "user_invocable": true,
       "always_on": false,
@@ -3467,23 +3077,19 @@
       "declared_dependencies": [
         {
           "ref": "E27",
-          "name": "LINE 官方帳號",
-          "why": "根據時段設定推播時間"
+          "name": "LINE 官方帳號"
         },
         {
           "ref": "E35",
-          "name": "直播腳本",
-          "why": "根據時段安排直播"
+          "name": "直播腳本"
         },
         {
           "ref": "E38",
-          "name": "社群貼文排程",
-          "why": "最佳發文時間設定"
+          "name": "社群貼文排程"
         },
         {
           "ref": "E60",
-          "name": "廣告成效分析",
-          "why": "廣告時段出價策略"
+          "name": "廣告成效分析"
         }
       ],
       "mentions": [
@@ -3498,7 +3104,6 @@
       "id": "E76",
       "slug": "e76-campaign-review",
       "name": "e76-campaign-review",
-      "description": "促銷活動結束後自動生成效果回顧報告，比較活動期間 vs 平時的營收、訂單數、新客比例、廣告成本，評估這次活動值不值得、下次如何改進。支援截圖、CSV 輸入。",
       "emoji": "🎯",
       "user_invocable": true,
       "always_on": false,
@@ -3509,23 +3114,19 @@
       "declared_dependencies": [
         {
           "ref": "E08",
-          "name": "促銷規劃",
-          "why": "活動規劃時連結到事後回顧"
+          "name": "促銷規劃"
         },
         {
           "ref": "E60",
-          "name": "廣告成效分析",
-          "why": "活動期廣告數據"
+          "name": "廣告成效分析"
         },
         {
           "ref": "E64",
-          "name": "月度行銷報告",
-          "why": "活動成果納入月報"
+          "name": "月度行銷報告"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "活動結束後自動提醒執行回顧"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -3540,7 +3141,6 @@
       "id": "E77",
       "slug": "e77-anomaly-detector",
       "name": "e77-anomaly-detector",
-      "description": "自動偵測營收、流量、廣告、退貨等關鍵指標的異常波動，在數據突然暴跌或暴漲時主動分析可能原因，讓學員第一時間知道發生了什麼事。由 C10 每日自動執行。",
       "emoji": "🚨",
       "user_invocable": true,
       "always_on": false,
@@ -3551,28 +3151,23 @@
       "declared_dependencies": [
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每日自動執行異常偵測"
+          "name": "定時排程"
         },
         {
           "ref": "E03",
-          "name": "庫存預警",
-          "why": "暴增時確認庫存"
+          "name": "庫存預警"
         },
         {
           "ref": "E44",
-          "name": "SEO 健康檢查",
-          "why": "流量下滑時確認技術問題"
+          "name": "SEO 健康檢查"
         },
         {
           "ref": "E56",
-          "name": "Search Console",
-          "why": "自然流量異常時深入確認"
+          "name": "Search Console"
         },
         {
           "ref": "E69",
-          "name": "每日營收報告",
-          "why": "配合每日快報同步通知"
+          "name": "每日營收報告"
         }
       ],
       "mentions": [
@@ -3588,7 +3183,6 @@
       "id": "E78",
       "slug": "e78-analytics-weekly-report",
       "name": "e78-analytics-weekly-report",
-      "description": "每週一自動彙整數據分析模組（E59–E77）的關鍵指標，生成一份完整的數據週報，包含營收、流量、廣告、顧客、商品五大面向，附本週成果和下週行動建議。",
       "emoji": "📋",
       "user_invocable": true,
       "always_on": false,
@@ -3599,13 +3193,11 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets",
-          "why": "完整數據存檔"
+          "name": "Sheets"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每週一 08:30 自動生成"
+          "name": "定時排程"
         }
       ],
       "mentions": [
@@ -3629,7 +3221,6 @@
       "id": "E79",
       "slug": "e79-multi-platform-publish",
       "name": "e79-multi-platform-publish",
-      "description": "將商品資訊一次同步發布到多個銷售平台，自動根據各平台規格調整標題字數、圖片比例、描述格式，避免手動逐一上架的重複作業。適用於任何有多平台銷售需求的學員。支援純文字、截圖輸入。",
       "emoji": "🚀",
       "user_invocable": true,
       "always_on": false,
@@ -3640,23 +3231,19 @@
       "declared_dependencies": [
         {
           "ref": "E07",
-          "name": "商品描述生成",
-          "why": "提供原始商品描述素材"
+          "name": "商品描述生成"
         },
         {
           "ref": "E54",
-          "name": "Meta 標籤優化",
-          "why": "官網版本 SEO meta 標籤確認"
+          "name": "Meta 標籤優化"
         },
         {
           "ref": "E87",
-          "name": "緊急更新與下架",
-          "why": "上架後需要修改時使用"
+          "name": "緊急更新與下架"
         },
         {
           "ref": "E88",
-          "name": "發布狀態追蹤",
-          "why": "追蹤各平台發布結果"
+          "name": "發布狀態追蹤"
         }
       ],
       "mentions": [
@@ -3671,7 +3258,6 @@
       "id": "E80",
       "slug": "e80-social-cross-post",
       "name": "e80-social-cross-post",
-      "description": "將同一則內容自動改寫成適合 FB、IG、Threads、TikTok、LINE 官方帳號各平台風格的貼文，一次輸入、多平台輸出，並排入 E84 內容日曆統一管理發布時間。適用於任何產業。支援純文字、截圖輸入。",
       "emoji": "📱",
       "user_invocable": true,
       "always_on": false,
@@ -3682,23 +3268,19 @@
       "declared_dependencies": [
         {
           "ref": "E75",
-          "name": "熱銷時段分析",
-          "why": "最佳發布時間建議"
+          "name": "熱銷時段分析"
         },
         {
           "ref": "E84",
-          "name": "跨渠道內容日曆",
-          "why": "統一管理發布排程"
+          "name": "跨渠道內容日曆"
         },
         {
           "ref": "E86",
-          "name": "內容格式轉換",
-          "why": "需要改變內容形式時"
+          "name": "內容格式轉換"
         },
         {
           "ref": "E88",
-          "name": "發布狀態追蹤",
-          "why": "記錄各平台發布結果"
+          "name": "發布狀態追蹤"
         }
       ],
       "mentions": [
@@ -3713,7 +3295,6 @@
       "id": "E81",
       "slug": "e81-promo-sync",
       "name": "e81-promo-sync",
-      "description": "促銷活動開始前，自動將折扣資訊、活動規則、限時訊息同步更新到所有平台——銷售平台、社群媒體、電子報、LINE——確保各渠道資訊一致，不會發生某平台還是舊價格的狀況。支援純文字輸入。",
       "emoji": "🎪",
       "user_invocable": true,
       "always_on": false,
@@ -3724,33 +3305,27 @@
       "declared_dependencies": [
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "活動開始/結束前自動提醒"
+          "name": "定時排程"
         },
         {
           "ref": "E08",
-          "name": "促銷規劃",
-          "why": "活動規劃後觸發 E81 同步"
+          "name": "促銷規劃"
         },
         {
           "ref": "E21",
-          "name": "EDM 生成",
-          "why": "活動電子報"
+          "name": "EDM 生成"
         },
         {
           "ref": "E27",
-          "name": "LINE 官方帳號",
-          "why": "LINE 推播"
+          "name": "LINE 官方帳號"
         },
         {
           "ref": "E80",
-          "name": "社群跨平台發布",
-          "why": "社群貼文格式"
+          "name": "社群跨平台發布"
         },
         {
           "ref": "E87",
-          "name": "緊急更新與下架",
-          "why": "活動結束後同步下架"
+          "name": "緊急更新與下架"
         }
       ],
       "mentions": [
@@ -3767,7 +3342,6 @@
       "id": "E82",
       "slug": "e82-edm-line-sync",
       "name": "e82-edm-line-sync",
-      "description": "將同一則行銷訊息同步發送到電子報和 LINE 官方帳號，自動根據兩個渠道的格式差異調整內容長度和排版，確保兩邊訊息一致但格式各自最佳化。適用於任何產業。支援純文字輸入。",
       "emoji": "📨",
       "user_invocable": true,
       "always_on": false,
@@ -3778,33 +3352,27 @@
       "declared_dependencies": [
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "排定 EDM 和 LINE 發送時間"
+          "name": "定時排程"
         },
         {
           "ref": "E21",
-          "name": "EDM 生成",
-          "why": "完整電子報深度撰寫"
+          "name": "EDM 生成"
         },
         {
           "ref": "E24",
-          "name": "A/B 測試",
-          "why": "主旨 A/B 測試"
+          "name": "A/B 測試"
         },
         {
           "ref": "E26",
-          "name": "UTM 追蹤碼",
-          "why": "各渠道效果追蹤"
+          "name": "UTM 追蹤碼"
         },
         {
           "ref": "E27",
-          "name": "LINE 官方帳號",
-          "why": "LINE 推播設定"
+          "name": "LINE 官方帳號"
         },
         {
           "ref": "E84",
-          "name": "跨渠道內容日曆",
-          "why": "發送時間統一管理"
+          "name": "跨渠道內容日曆"
         }
       ],
       "mentions": [
@@ -3821,7 +3389,6 @@
       "id": "E83",
       "slug": "e83-asset-distributor",
       "name": "e83-asset-distributor",
-      "description": "管理已設計好的圖文素材，根據各平台的尺寸規格和使用規則，指定哪張素材用在哪個渠道，產出各平台素材使用清單，並追蹤素材使用狀態。適用於任何產業。支援截圖、純文字輸入。",
       "emoji": "🗃️",
       "user_invocable": true,
       "always_on": false,
@@ -3832,28 +3399,23 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "素材庫清單儲存管理"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E79",
-          "name": "多平台商品同步發布",
-          "why": "上架素材分配"
+          "name": "多平台商品同步發布"
         },
         {
           "ref": "E80",
-          "name": "社群跨平台發布",
-          "why": "社群素材分配"
+          "name": "社群跨平台發布"
         },
         {
           "ref": "E84",
-          "name": "跨渠道內容日曆",
-          "why": "素材使用排程"
+          "name": "跨渠道內容日曆"
         },
         {
           "ref": "E88",
-          "name": "發布狀態追蹤",
-          "why": "素材發布狀態追蹤"
+          "name": "發布狀態追蹤"
         }
       ],
       "mentions": [
@@ -3869,7 +3431,6 @@
       "id": "E84",
       "slug": "e84-content-calendar",
       "name": "e84-content-calendar",
-      "description": "建立和管理跨所有渠道的統一內容日曆，顯示每天哪個平台要發什麼內容，避免撞期或斷更，並自動提醒即將到來的發布任務。適用於任何產業。支援純文字輸入。",
       "emoji": "📆",
       "user_invocable": true,
       "always_on": false,
@@ -3880,28 +3441,23 @@
       "declared_dependencies": [
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每日 07:30 自動推送任務提醒"
+          "name": "定時排程"
         },
         {
           "ref": "E80",
-          "name": "社群跨平台發布",
-          "why": "社群內容排入日曆"
+          "name": "社群跨平台發布"
         },
         {
           "ref": "E81",
-          "name": "促銷活動同步",
-          "why": "活動期間排入日曆"
+          "name": "促銷活動同步"
         },
         {
           "ref": "E82",
-          "name": "EDM+LINE 同步",
-          "why": "電子報和推播排入日曆"
+          "name": "EDM+LINE 同步"
         },
         {
           "ref": "E88",
-          "name": "發布狀態追蹤",
-          "why": "日曆任務完成後更新狀態"
+          "name": "發布狀態追蹤"
         }
       ],
       "mentions": [
@@ -3917,7 +3473,6 @@
       "id": "E85",
       "slug": "e85-listing-template",
       "name": "e85-listing-template",
-      "description": "建立和管理各平台商品上架的格式模板庫，學員只需填入商品資訊，自動套用該平台的標準格式輸出，減少每次上架重新調整格式的時間。適用於任何有上架需求的產業。支援純文字輸入。",
       "emoji": "📋",
       "user_invocable": true,
       "always_on": false,
@@ -3928,23 +3483,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "模板庫儲存管理"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "E07",
-          "name": "商品描述生成",
-          "why": "提供原始商品文案素材"
+          "name": "商品描述生成"
         },
         {
           "ref": "E54",
-          "name": "Meta 標籤優化",
-          "why": "官網模板加入 SEO meta 標籤"
+          "name": "Meta 標籤優化"
         },
         {
           "ref": "E79",
-          "name": "多平台商品同步發布",
-          "why": "模板供 E79 使用"
+          "name": "多平台商品同步發布"
         }
       ],
       "mentions": [
@@ -3959,7 +3510,6 @@
       "id": "E86",
       "slug": "e86-content-reformatter",
       "name": "e86-content-reformatter",
-      "description": "將現有的內容轉換成不同平台適用的格式，例如部落格文章轉成 IG 九宮格圖卡文字、直播精華轉成短影音腳本、長文轉成 Threads 串文。內容再利用，讓一個內容發揮多倍效益。適用於任何產業。支援純文字、截圖輸入。",
       "emoji": "🔄",
       "user_invocable": true,
       "always_on": false,
@@ -3970,23 +3520,19 @@
       "declared_dependencies": [
         {
           "ref": "E33",
-          "name": "短影音腳本",
-          "why": "影片腳本深度創作"
+          "name": "短影音腳本"
         },
         {
           "ref": "E52",
-          "name": "AI SEO 文章生成",
-          "why": "部落格文章來源"
+          "name": "AI SEO 文章生成"
         },
         {
           "ref": "E80",
-          "name": "社群跨平台發布",
-          "why": "轉換後的內容排入各平台"
+          "name": "社群跨平台發布"
         },
         {
           "ref": "E84",
-          "name": "跨渠道內容日曆",
-          "why": "轉換後的內容加入排程"
+          "name": "跨渠道內容日曆"
         }
       ],
       "mentions": [
@@ -4001,7 +3547,6 @@
       "id": "E87",
       "slug": "e87-emergency-update",
       "name": "e87-emergency-update",
-      "description": "當商品出現問題（缺貨、價格錯誤、品質異常、活動結束）時，快速在所有平台同步更新或下架，並自動草擬給顧客的說明通知。緊急狀況下避免逐一平台手動處理。適用於任何產業。支援純文字輸入。",
       "emoji": "⚡",
       "user_invocable": true,
       "always_on": false,
@@ -4012,33 +3557,27 @@
       "declared_dependencies": [
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "搭配 E81 活動結束後觸發"
+          "name": "定時排程"
         },
         {
           "ref": "E03",
-          "name": "庫存預警",
-          "why": "缺貨觸發 E87 緊急處理"
+          "name": "庫存預警"
         },
         {
           "ref": "E06",
-          "name": "負評回覆",
-          "why": "緊急狀況引發的負評處理"
+          "name": "負評回覆"
         },
         {
           "ref": "E27",
-          "name": "LINE 官方帳號",
-          "why": "緊急通知顧客"
+          "name": "LINE 官方帳號"
         },
         {
           "ref": "E77",
-          "name": "數據異常偵測",
-          "why": "異常狀況觸發 E87"
+          "name": "數據異常偵測"
         },
         {
           "ref": "E81",
-          "name": "促銷活動同步",
-          "why": "活動提早結束後觸發 E87"
+          "name": "促銷活動同步"
         }
       ],
       "mentions": [
@@ -4055,7 +3594,6 @@
       "id": "E88",
       "slug": "e88-publish-tracker",
       "name": "e88-publish-tracker",
-      "description": "統一追蹤所有渠道的發布狀態，包含已發布、排程中、待處理、發布失敗，讓學員一個畫面看清楚內容和商品的發布進度，避免遺漏。適用於任何產業。支援純文字輸入。",
       "emoji": "✅",
       "user_invocable": true,
       "always_on": false,
@@ -4078,7 +3616,6 @@
       "id": "E89",
       "slug": "e89-pchome-inventory",
       "name": "e89-pchome-inventory",
-      "description": "同步 PChome 24h 商店街的商品庫存到龍蝦系統，低於門檻時主動通知並建議補貨，與 E03 庫存預警整合。支援 API 自動同步與截圖手動輸入兩種模式。",
       "emoji": "🛒",
       "user_invocable": true,
       "always_on": false,
@@ -4089,18 +3626,15 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存庫存記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每天自動同步"
+          "name": "定時排程"
         },
         {
           "ref": "E03",
-          "name": "庫存預警",
-          "why": "接收同步結果並判斷預警"
+          "name": "庫存預警"
         }
       ],
       "mentions": [
@@ -4114,7 +3648,6 @@
       "id": "E90",
       "slug": "e90-yahoo-inventory",
       "name": "e90-yahoo-inventory",
-      "description": "同步 Yahoo 購物中心的商品庫存到龍蝦系統，低於門檻時主動通知並建議補貨，與 E03 庫存預警整合。支援 API 自動同步與截圖手動輸入兩種模式。",
       "emoji": "🟣",
       "user_invocable": true,
       "always_on": false,
@@ -4125,18 +3658,15 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存庫存記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每天自動同步"
+          "name": "定時排程"
         },
         {
           "ref": "E03",
-          "name": "庫存預警",
-          "why": "接收同步結果並判斷預警"
+          "name": "庫存預警"
         }
       ],
       "mentions": [
@@ -4150,7 +3680,6 @@
       "id": "E91",
       "slug": "e91-momo-plus-inventory",
       "name": "e91-momo-plus-inventory",
-      "description": "同步 Momo mo+店（購物商城第三方賣家）的商品庫存到龍蝦系統，低於門檻時主動通知並建議補貨，與 E03 庫存預警整合。支援 API 自動同步與截圖手動輸入兩種模式。",
       "emoji": "🔴",
       "user_invocable": true,
       "always_on": false,
@@ -4161,23 +3690,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存庫存記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每天自動同步"
+          "name": "定時排程"
         },
         {
           "ref": "E03",
-          "name": "庫存預警",
-          "why": "接收同步結果並判斷預警"
+          "name": "庫存預警"
         },
         {
           "ref": "E10",
-          "name": "廣告成效監控",
-          "why": "mo+店廣告費用追蹤"
+          "name": "廣告成效監控"
         }
       ],
       "mentions": [
@@ -4192,7 +3717,6 @@
       "id": "E92",
       "slug": "e92-amazon-inventory",
       "name": "e92-amazon-inventory",
-      "description": "同步 Amazon 賣家中心（Seller Central）的商品庫存到龍蝦系統，涵蓋 FBA 倉庫庫存與自發貨庫存，低於門檻時主動通知並建議補貨，與 E03 庫存預警整合。支援 SP-API 自動同步與截圖手動輸入兩種模式。",
       "emoji": "🌍",
       "user_invocable": true,
       "always_on": false,
@@ -4203,23 +3727,19 @@
       "declared_dependencies": [
         {
           "ref": "C07",
-          "name": "Sheets 資料庫",
-          "why": "儲存庫存記錄"
+          "name": "Sheets 資料庫"
         },
         {
           "ref": "C10",
-          "name": "定時排程",
-          "why": "每天自動同步"
+          "name": "定時排程"
         },
         {
           "ref": "E03",
-          "name": "庫存預警",
-          "why": "接收同步結果並判斷預警"
+          "name": "庫存預警"
         },
         {
           "ref": "E16",
-          "name": "跨境稅務試算",
-          "why": "Amazon 跨境成本計算"
+          "name": "跨境稅務試算"
         }
       ],
       "mentions": [
@@ -4234,7 +3754,6 @@
       "id": "SA01",
       "slug": "sa01-copywriter",
       "name": "sa01-copywriter",
-      "description": "文案龍蝦。專門負責撰寫、改寫、翻譯各類文案的子代理人。由主 Skill 派遣，根據任務傳入的角色人格和指令產出文字內容。不直接面對用戶，只接收主 Skill 的任務派遣。",
       "emoji": "✍️",
       "user_invocable": false,
       "always_on": false,
@@ -4250,7 +3769,6 @@
       "id": "SA02",
       "slug": "sa02-analyst",
       "name": "sa02-analyst",
-      "description": "數據龍蝦。專門負責數字計算、數據分析、報表生成的子代理人。由主 Skill 派遣，根據傳入的數據和分析角色產出結構化報告。不直接面對用戶，只接收主 Skill 的任務派遣。",
       "emoji": "📊",
       "user_invocable": false,
       "always_on": false,
@@ -4271,7 +3789,6 @@
       "id": "SA03",
       "slug": "sa03-crawler",
       "name": "sa03-crawler",
-      "description": "爬蟲龍蝦。專門負責網頁資訊擷取、競品監控、數據蒐集的子代理人。由主 Skill 派遣，根據指定目標和角色過濾並回傳關鍵資訊。不直接面對用戶，只接收主 Skill 的任務派遣。",
       "emoji": "🕷️",
       "user_invocable": false,
       "always_on": false,
@@ -4287,7 +3804,6 @@
       "id": "SA04",
       "slug": "sa04-judge",
       "name": "sa04-judge",
-      "description": "判斷龍蝦。專門負責策略評估、風險判斷、決策建議的子代理人。由主 Skill 派遣，根據輸入的情境和角色框架產出有依據的判斷與建議。不直接面對用戶，只接收主 Skill 的任務派遣。",
       "emoji": "⚖️",
       "user_invocable": false,
       "always_on": false,
@@ -4299,5 +3815,6 @@
       "mentions": [],
       "bytes": 3022
     }
-  ]
+  ],
+  "_note": "Descriptions are deliberately absent: they are the trigger phrasing from the source skill packs, which are not published. Nothing here reads them; the registry needs the id, the shape and the dependencies."
 }

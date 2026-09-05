@@ -9,10 +9,14 @@ discipline. So this walks recursively and de-duplicates on the declared name
 rather than on where the file happened to sit, because the same skill appears in
 several versioned copies of the same pack.
 
-Only derived metadata leaves this script. The packs are paid course material and
-their contents never enter the repository; what does is the id, the one-line
-description, the declared dependencies and which connectors a skill asks for.
-That is what a registry needs and all it needs.
+Only derived metadata leaves this script. The packs are course material and
+their contents never enter the repository; what does is the id, the group, the
+declared dependencies and which connectors a skill asks for.
+
+Descriptions used to come out too, and should not have. A skill's description
+is its trigger phrasing - the sentences a user says to invoke it - which is the
+material itself in miniature, and nothing in this project ever read them. What a
+registry needs is the shape of the graph, not what each node says.
 """
 import io, json, re, sys, collections
 from pathlib import Path
@@ -86,7 +90,6 @@ for industry, root in SOURCES.items():
             'id': sid,
             'industry': industry,
             'group': group,
-            'description': fields.get('description', '')[:400],
             'emoji': meta.get('emoji', ''),
             'always_on': bool(meta.get('always')),
             'is_subagent': bool(meta.get('subagent')),
