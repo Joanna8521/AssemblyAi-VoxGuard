@@ -32,6 +32,7 @@ import { load } from '../governance/registry.js';
 import { validateRules } from '../governance/validate.js';
 import { MemoryStore, KVStore, sessionIdFrom } from '../governance/store.js';
 import { MemoryLedger, KVLedger, entryFrom, report } from '../governance/ledger.js';
+import { PLANS, planOf, allows, record as meter, statement, usageFor } from '../governance/plans.js';
 import { perform, adapterStatus } from '../adapters/index.js';
 import { runAgent, implementedAgents } from '../runtime/run.js';
 import { open as openMission, blueprint, digest } from '../governance/mission.js';
@@ -245,6 +246,12 @@ async function decide(session, request, context = {}) {
 
   const audit = record(session, request, result, outcome);
 
+  // Counted after the decision, never before it. A workspace out of allowance
+  // still gets judged and still gets recorded: a refusal that failed to happen
+  // because of billing is the one failure this must not have.
+  usageFor(session).decisions += 1;
+  if (audit.real) meter(session, 'sends');
+
   // Kept for good, and awaited rather than fired off. A serverless invocation
   // ends when the response does, so an un-awaited append is an append that
   // sometimes does not happen. A ledger with sometimes in it is not a ledger.
@@ -282,7 +289,17 @@ const routes = {
     version: buildVersion(),
   }),
 
-  'GET /api/token': async () => mintToken(),
+  'GET /api/token': async (_body, { session, save }) => {
+    const room = allows(session, 'voiceMinutes');
+    if (!room.ok) {
+      const e = new Error(room.reason);
+      e.status = 402;
+      e.code = 'over_allowance';
+      throw e;
+    }
+    await save();
+    return mintToken();
+  },
 
   /**
    * The session config the browser sends verbatim as `session.update`.
@@ -523,6 +540,14 @@ const routes = {
     session.pools ??= {};
     session.pools.sheets ??= [];
     if (!session.pools.sheets.some((s2) => s2.url === url)) {
+      const held = (session.pools.sheets ?? []).length + (session.pools.listings ?? []).length;
+      const room = allows(session, 'sources', { sources: held });
+      if (!room.ok) {
+        const e = new Error(room.reason);
+        e.status = 402;
+        e.code = 'over_allowance';
+        throw e;
+      }
       session.pools.sheets.push({
         url, id: parsed.id, name: body.name ?? 'spreadsheet',
         addedAt: new Date().toISOString(),
@@ -586,9 +611,15 @@ const routes = {
     if (session.pools.listings.some((w) => w.url === url.toString())) {
       return { watching: session.pools.listings, added: false };
     }
-    if (session.pools.listings.length >= 12) {
-      const e = new Error('twelve is enough to prove the point');
-      e.status = 400;
+    // The cap used to be a flat twelve with a joke attached. It is now whatever
+    // the workspace is paying for, counted across both kinds of source, since a
+    // spreadsheet and a rival's page cost the same to keep reading.
+    const held = (session.pools.sheets ?? []).length + session.pools.listings.length;
+    const room = allows(session, 'sources', { sources: held });
+    if (!room.ok) {
+      const e = new Error(room.reason);
+      e.status = 402;
+      e.code = 'over_allowance';
       throw e;
     }
 
@@ -632,6 +663,44 @@ const routes = {
    */
   'GET /api/sources': async (_body, { session }) => ({ sources: describeSources(session) }),
 
+  /**
+   * The billing screen, counted from the same meters that refuse.
+   *
+   * No payment is taken anywhere here and the plan is chosen rather than bought,
+   * which is said on the page rather than left to be discovered.
+   */
+  'GET /api/billing': async (_body, { session }) => {
+    const pools = session.pools ?? {};
+    const sources = (pools.sheets ?? []).length + (pools.listings ?? []).length;
+    return { ...statement(session, { sources }), plans: Object.values(PLANS) };
+  },
+
+  'POST /api/plan': async (body, { session, save }) => {
+    if (!PLANS[body.plan]) {
+      const e = new Error(`no such plan: ${body.plan}`);
+      e.status = 400;
+      throw e;
+    }
+    session.plan = body.plan;
+    await save();
+    return { plan: planOf(session.plan), note: 'Chosen, not purchased. Nothing was charged.' };
+  },
+
+  /**
+   * How long the microphone was actually open.
+   *
+   * Reported by the browser when it stops, because the server never learns when
+   * a session ended: the socket it would have to watch is between the browser
+   * and AssemblyAI. Worth stating plainly rather than implying the server timed
+   * it. Somebody understating their own usage is understating their own bill.
+   */
+  'POST /api/usage/voice': async (body, { session, save }) => {
+    const seconds = Math.max(0, Math.min(3600, Number(body.seconds) || 0));
+    usageFor(session).voiceSeconds += seconds;
+    await save();
+    return { voiceSeconds: usageFor(session).voiceSeconds };
+  },
+
   'GET /api/pools': async (_body, { session }) => ({
     pools: session.pools ?? {},
     implemented: implementedAgents(),
@@ -661,6 +730,14 @@ const routes = {
    * rest of this decorative.
    */
   'POST /api/agents/run': async (body, { session, save }) => {
+    const room = allows(session, 'agentRuns');
+    if (!room.ok) {
+      const e = new Error(room.reason);
+      e.status = 402;
+      e.code = 'over_allowance';
+      throw e;
+    }
+    meter(session, 'agentRuns');
     const run = await runAgent(body.agent, { session, workforce });
 
     const decisions = [];
@@ -778,6 +855,12 @@ const routes = {
       (a, b) => order.indexOf(a.id) - order.indexOf(b.id));
 
     for (const member of team) {
+      const room = allows(session, 'agentRuns');
+      if (!room.ok) {
+        observed.push(`Stopped part way: ${room.reason}`);
+        break;
+      }
+      meter(session, 'agentRuns');
       const run = await runAgent(member.id, { session, workforce });
       observed.push(...run.observed.map((o) => `${member.name}: ${o}`));
       for (const intent of run.intents) {

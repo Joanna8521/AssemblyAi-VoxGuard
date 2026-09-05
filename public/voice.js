@@ -46,6 +46,9 @@ export async function connect(h = {}) {
   // connection are the same event.
   let stopping = false;
   let partial = '', replyId = null;
+  // When the microphone actually opened, so the workspace is billed for the
+  // time it was open rather than for the number of times it was pressed.
+  let openedAt = null;
 
   const teardown = () => {
     if (closed) return;
@@ -53,6 +56,14 @@ export async function connect(h = {}) {
     if (node) { node.port.onmessage = null; node.disconnect(); }
     audioCtx?.close().catch(() => {});
     stream?.getTracks().forEach((t) => t.stop());
+
+    // Reported once, on the way out. The server cannot time this itself: the
+    // socket it would have to watch runs between this browser and AssemblyAI.
+    if (openedAt) {
+      const seconds = Math.round((Date.now() - openedAt) / 1000);
+      openedAt = null;
+      if (seconds > 0) api('/api/usage/voice', { seconds }).catch(() => {});
+    }
     say('onStatus', 'offline');
   };
 
@@ -82,6 +93,7 @@ export async function connect(h = {}) {
     const msg = JSON.parse(ev.data);
     switch (msg.type) {
       case 'session.ready':
+        openedAt = Date.now();
         say('onStatus', 'live');
         await startCapture();
         break;

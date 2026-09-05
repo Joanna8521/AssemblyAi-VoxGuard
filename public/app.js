@@ -498,6 +498,127 @@ function showTab(which) {
  */
 let COMPANY = null;
 
+/**
+ * The account page: what this workspace is on, what it has used, and what the
+ * workforce actually did with the month.
+ *
+ * One page rather than two because they are the same question asked twice. A
+ * bill nobody can tie to work done is a number to argue with; a report with no
+ * cost beside it is a slideshow. It prints, because the person who has to
+ * approve the spend is usually not the person reading the screen.
+ */
+async function showAccount() {
+  $('account').hidden = false;
+  const body = $('ac-body');
+  body.innerHTML = '<p class="empty">Counting…</p>';
+  try {
+    const [bill, rep] = await Promise.all([api('/api/billing'), api('/api/report')]);
+    drawAccount(bill, rep);
+  } catch (e) {
+    body.innerHTML = `<p class="empty">${esc(e.message)}</p>`;
+  }
+}
+
+function drawAccount(bill, d) {
+  const r = d.report;
+  const pct = (n) => `${Math.round(n * 100)}%`;
+
+  $('ac-sub').textContent =
+    `${bill.plan.name}, ${bill.period}. Nothing is charged here: the plan is ` +
+    `chosen rather than bought, and the numbers are counted from the same ` +
+    `meters that refuse when an allowance runs out.`;
+
+  const plans = bill.plans.map((p) => `
+    <button class="plan${p.id === bill.plan.id ? ' here' : ''}" data-plan="${p.id}">
+      <div class="nm">${esc(p.name)}</div>
+      <div class="pr">$${p.price}<small>/month</small></div>
+      <div class="bl">${esc(p.blurb)}</div>
+    </button>`).join('');
+
+  const meters = bill.lines.map((l) => `
+    <div class="meter${l.over ? ' over' : ''}">
+      <div class="k">${esc(l.label)}</div>
+      <div class="v">${l.used}<small> of ${l.limit ?? '\u221e'}</small></div>
+      <div class="bar"><i style="width:${Math.round((l.share ?? 0) * 100)}%"></i></div>
+    </div>`).join('');
+
+  const fig = (k, v, tone = '') =>
+    `<div class="fig ${tone}"><div class="k">${esc(k)}</div><div class="v">${v}</div></div>`;
+
+  // The bars are drawn from counts, so a quiet day is a short bar rather than
+  // a gap, and a month with nothing in it looks like a month with nothing in it.
+  const top = Math.max(1, ...r.byDay.map((x) => x.ALLOW + x.ASK + x.DENY));
+  const days = r.byDay.length ? `
+    <div class="days">${r.byDay.map((x) => {
+      const h = (n) => `${Math.round((n / top) * 46)}px`;
+      return `<div class="d" title="${x.day}: ${x.ALLOW} cleared, ${x.ASK} held, ${x.DENY} refused">` +
+        `<i class="n" style="height:${h(x.DENY)}"></i>` +
+        `<i class="s" style="height:${h(x.ASK)}"></i>` +
+        `<i class="a" style="height:${h(x.ALLOW)}"></i></div>`;
+    }).join('')}</div>
+    <div class="days-x"><span>${r.byDay[0].day}</span><span>${r.byDay.at(-1).day}</span></div>` : '';
+
+  const list = (rows, empty) => rows.length
+    ? rows.slice(0, 5).map((x) => `<div class="rep"><span class="k">${esc(x.name)}</span>` +
+        `<span class="v">${x.count}</span></div>`).join('')
+    : `<p class="empty">${empty}</p>`;
+
+  $('ac-body').innerHTML =
+    `<div class="rep-hd">Plan</div><div class="plans">${plans}</div>` +
+    `<div class="rep-hd">This month, against the allowance</div><div class="meters">${meters}</div>` +
+
+    `<div class="rep-hd">The last 30 days</div>` +
+    `<div class="figs">` +
+      fig('Decisions', r.window.decisions) +
+      fig('Missions', r.missions) +
+      fig('Cleared', r.verdicts.ALLOW, 'good') +
+      fig('Held for you', r.verdicts.ASK, 'warn') +
+      fig('Refused', r.verdicts.DENY, 'bad') +
+      fig('You were needed', pct(r.interventionRate)) +
+    `</div>` +
+    days +
+
+    `<div class="rep-hd">How far it reached</div>` +
+    `<div class="figs">` +
+      fig('Carried out for real', r.reached.real, 'good') +
+      fig('Authorised, sandboxed', r.reached.sandboxed) +
+    `</div>` +
+
+    `<div class="rep-hd">Most often stopped</div>` +
+    list(r.stoppedByAction, 'Nothing was stopped in this window.') +
+    `<div class="rep-hd">Busiest</div>` +
+    list(r.byAgent, 'No agent has been called yet.') +
+
+    `<p class="co-foot">Every figure is a count over rows kept for ninety days, ` +
+    `not an estimate. <b>${d.entries}</b> are held for this workspace ` +
+    `(${esc(d.kept)}). The record is what a governance claim rests on: without ` +
+    `it, "your agents were stopped 14 times" is something to be believed rather ` +
+    `than checked.</p>`;
+
+  for (const b of $('ac-body').querySelectorAll('.plan')) {
+    b.onclick = async () => {
+      await api('/api/plan', { plan: b.dataset.plan });
+      await showAccount();
+      await refreshPlanChip();
+    };
+  }
+}
+
+/** The chip says the plan, and turns when an allowance is spent. */
+async function refreshPlanChip() {
+  try {
+    const bill = await api('/api/billing');
+    const chip = $('c-plan');
+    chip.textContent = bill.headroom.length
+      ? `${bill.plan.name} \u00b7 full`
+      : bill.plan.name;
+    chip.classList.toggle('stale', bill.headroom.length > 0);
+    chip.title = bill.headroom.length
+      ? `Out of ${bill.headroom.join(' and ')} this month`
+      : 'Plan, usage and the month\u2019s record';
+  } catch { /* the chip is not worth an error line */ }
+}
+
 async function showCompany() {
   $('company').hidden = false;
   const body = $('co-body');
@@ -843,9 +964,13 @@ const EXAMPLES = {
   }
 
   $('c-corpus').onclick = showCompany;
+  $('c-plan').onclick = showAccount;
+  $('ac-close').onclick = () => { $('account').hidden = true; };
+  $('ac-print').onclick = () => window.print();
   $('co-close').onclick = () => { $('company').hidden = true; };
   document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Escape' && !$('company').hidden) $('company').hidden = true;
+    if (ev.key !== 'Escape') return;
+    for (const id of ['company', 'account']) if (!$(id).hidden) $(id).hidden = true;
   });
 
   $('tab-log').onclick = () => showTab('log');
@@ -960,5 +1085,6 @@ const EXAMPLES = {
     chip.classList.toggle('stale', stale);
   } catch { $('c-build').textContent = 'offline'; }
 
+  await refreshPlanChip();
   await refresh();
 })();
