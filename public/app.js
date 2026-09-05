@@ -486,6 +486,87 @@ function showTab(which) {
   if (isReport) renderReport();
 }
 
+/**
+ * The company, drawn once and honestly.
+ *
+ * The board answers "what is happening now" and has to fit one screen. This
+ * answers "who is there at all", which is a different question and a bigger
+ * picture: thirty-six agents across ten departments, of which seventeen are
+ * built and the rest are still descriptions. Showing them as equal cards would
+ * claim a workforce twice the size of the one that exists, so they are not
+ * equal cards.
+ */
+let COMPANY = null;
+
+async function showCompany() {
+  $('company').hidden = false;
+  const body = $('co-body');
+  if (!COMPANY) {
+    body.innerHTML = '<p class="empty">Reading the register…</p>';
+    try { COMPANY = await api('/api/workforce'); }
+    catch (e) { body.innerHTML = `<p class="empty">${esc(e.message)}</p>`; return; }
+  }
+  drawCompany();
+}
+
+function drawCompany() {
+  const { agents, departments, corpus, built } = COMPANY;
+  const onTeam = new Set((MISSION?.team ?? []).map((m) => m.id));
+
+  $('co-sub').textContent =
+    `${built} of ${agents.length} are built and will really go and look. ` +
+    `The rest are described, and say so rather than pretending.` +
+    (onTeam.size ? ` ${onTeam.size} are on ${MISSION.id} right now.` : '');
+
+  const byDept = new Map(departments.map((d) => [d.id, []]));
+  for (const a of agents) {
+    if (!byDept.has(a.department)) byDept.set(a.department, []);
+    byDept.get(a.department).push(a);
+  }
+
+  const card = (a) => {
+    const tags = [];
+    if (onTeam.has(a.id)) tags.push('<span class="tag2 team">on this mission</span>');
+    tags.push(a.runs
+      ? '<span class="tag2 duty">built</span>'
+      : '<span class="tag2">described</span>');
+    if (a.ceiling) tags.push(`<span class="tag2 r-${a.ceiling}">up to ${a.ceiling}</span>`);
+    if (a.reaches) tags.push('<span class="tag2 reach">reaches out</span>');
+    tags.push(`<span class="tag2">${a.actions.length} action${a.actions.length === 1 ? '' : 's'}</span>`);
+
+    return `<div class="card${a.runs ? '' : ' off'}${onTeam.has(a.id) ? ' on-team' : ''}" ` +
+      `title="${esc(a.actions.join(', '))}">` +
+      `<div class="who"><span class="e">${esc(a.emoji ?? '')}</span>` +
+      `<span class="nm">${esc(a.name)}</span></div>` +
+      `<p class="why">${esc(a.purpose ?? '')}</p>` +
+      `<div class="tags">${tags.join('')}</div></div>`;
+  };
+
+  const sections = departments.map((d) => {
+    const list = byDept.get(d.id) ?? [];
+    if (!list.length) return '';
+    const live = list.filter((a) => a.runs).length;
+    return `<section class="dept"><div class="dept-hd">` +
+      `<h3>${esc(d.emoji ?? '')} ${esc(d.name)}</h3>` +
+      `<span class="p">${esc(d.purpose ?? '')}</span>` +
+      `<span class="n">${live}/${list.length} built</span></div>` +
+      `<div class="crew">${list.map(card).join('')}</div></section>`;
+  }).join('');
+
+  // The corpus is evidence, not staffing, and saying which is which is the
+  // difference between a number and a claim.
+  const per = Object.entries(corpus?.per_industry ?? {})
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${v} in ${k}`).join(', ');
+
+  $('co-body').innerHTML = sections +
+    `<p class="co-foot">Behind these sit <b>${corpus?.capabilities ?? '?'}</b> catalogued ` +
+    `capabilities across <b>${corpus?.industries ?? '?'}</b> industries &mdash; ${esc(per)}. ` +
+    `That is the surface this governance covers, not the staff on duty: only commerce ` +
+    `has agents standing in front of it here, and only the ${built} marked built will ` +
+    `actually go and do something when a mission calls them.</p>`;
+}
+
 async function refresh() {
   const [state, pools] = await Promise.all([api('/api/state'), api('/api/pools')]);
   renderAudit(state.audit);
@@ -730,6 +811,7 @@ const EXAMPLES = {
   const [health, catalog] = await Promise.all([api('/api/health'), api('/api/actions')]);
 
   $('c-corpus').innerHTML = `<b>${health.corpus?.skills ?? '?'}</b> governed`;
+  $('c-corpus').title = 'Every agent, on duty and off';
   if (!health.keyConfigured) {
     setConn('no API key', false);
     $('mic').disabled = true;
@@ -759,6 +841,12 @@ const EXAMPLES = {
       b.disabled = false;
     };
   }
+
+  $('c-corpus').onclick = showCompany;
+  $('co-close').onclick = () => { $('company').hidden = true; };
+  document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape' && !$('company').hidden) $('company').hidden = true;
+  });
 
   $('tab-log').onclick = () => showTab('log');
   $('tab-report').onclick = () => showTab('report');

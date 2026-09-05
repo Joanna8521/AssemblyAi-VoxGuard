@@ -310,12 +310,45 @@ const routes = {
     return { entries: entries.length, rows: entries.slice(-200) };
   },
 
-  'GET /api/workforce': async () => ({
-    platforms: workforce.platforms,
-    departments: workforce.departments,
-    pools: workforce.pools,
-    agents: workforce.agents,
-  }),
+  /**
+   * The company, as it actually stands.
+   *
+   * Enough to draw it honestly in one view: which agents are built and which are
+   * still a description, how far each one could go if authorised, and whether
+   * anything it does reaches the outside world at all. A page that showed
+   * thirty-six equal cards would be claiming a workforce three times the size
+   * of the one that exists.
+   */
+  'GET /api/workforce': async () => {
+    const live = new Set(implementedAgents());
+    const order = ['L0', 'L1', 'L2', 'L3', 'L4', 'L4-meta'];
+    const corpus = JSON.parse(
+      readFileSync(join(HERE, '..', 'registry', 'corpus.json'), 'utf8'));
+
+    return {
+      platforms: workforce.platforms,
+      departments: workforce.departments,
+      pools: workforce.pools,
+      agents: workforce.agents.map((a) => {
+        const risks = a.actions.map((x) => registry.riskOf(x)).filter(Boolean);
+        return {
+          ...a,
+          runs: live.has(a.id),
+          // The worst it could do if everything it asks for were allowed.
+          ceiling: risks.sort((x, y) => order.indexOf(y) - order.indexOf(x))[0] ?? null,
+          // Both halves, or it is not true. An adapter existing says the action
+          // could reach the world; only a built agent will ever ask it to. A
+          // description marked "reaches out" claims something twice over.
+          reaches: live.has(a.id) && a.actions.some((x) => registry.isReal(x)),
+        };
+      }),
+      built: live.size,
+      // The wider surface this governs, which is evidence rather than staffing:
+      // capabilities catalogued across four industries, only one of which has
+      // agents standing in front of it here.
+      corpus: corpus.summary,
+    };
+  },
 
   'GET /api/state': async (_body, { session }) => ({
     policy: session.policy,

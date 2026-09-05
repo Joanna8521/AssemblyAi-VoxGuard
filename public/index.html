@@ -376,6 +376,56 @@ h1{font-size:16px;letter-spacing:-.02em}
 .w.sheet{border-left:3px solid var(--accent)}
 .w.sheet .t small{color:var(--accent)}
 .chip.stale{border-color:var(--deny);color:var(--deny);background:var(--deny-soft)}
+button.chip{cursor:pointer;font:inherit}
+button.chip:hover{border-color:var(--line-strong);color:var(--ink)}
+
+/* The company, at its own size.
+   It does not belong in the six-panel board: that has to stay inside one
+   screen, and thirty-six agents do not. So it opens over the top, and closes
+   back to exactly where the person was. */
+.sheetview{position:fixed;inset:0;z-index:60;background:var(--bg);
+  display:flex;flex-direction:column;overflow:hidden}
+.sheetview[hidden]{display:none!important}
+.sheetview-hd{display:flex;align-items:flex-start;gap:16px;
+  padding:18px 22px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.sheetview-hd h2{font-size:19px;font-weight:650;letter-spacing:-.01em;margin-top:2px}
+.sheetview-hd .sub{font-size:12.5px;color:var(--muted);margin-top:5px;max-width:70ch;line-height:1.55}
+.sheetview-hd button{margin-left:auto;padding:7px 14px;font-size:12.5px}
+.sheetview-bd{flex:1;min-height:0;overflow:auto;padding:18px 22px 40px}
+
+.dept{margin-bottom:22px}
+.dept-hd{display:flex;align-items:baseline;gap:9px;margin-bottom:9px;
+  padding-bottom:6px;border-bottom:1px solid var(--line)}
+.dept-hd h3{font-size:13.5px;font-weight:650}
+.dept-hd .n{font:10.5px var(--mono);color:var(--faint);margin-left:auto}
+.dept-hd .p{font-size:11.5px;color:var(--muted)}
+
+.crew{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(232px,1fr))}
+.card{border:1px solid var(--line);border-radius:5px;background:var(--surface);
+  padding:10px 11px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.card.off{opacity:.5;border-style:dashed;background:none}
+.card.on-team{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.card .who{display:flex;align-items:center;gap:7px;min-width:0}
+.card .who .e{font-size:15px;flex:none}
+.card .who .nm{font-size:12.5px;font-weight:600;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.card .why{font-size:11px;line-height:1.5;color:var(--muted)}
+.card .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:auto;padding-top:2px}
+.tag2{font:9.5px var(--mono);letter-spacing:.03em;padding:2px 5px;border-radius:3px;
+  border:1px solid var(--line-strong);color:var(--faint);white-space:nowrap}
+.tag2.duty{border-color:var(--clear);color:var(--clear)}
+.tag2.team{border-color:var(--accent);color:var(--accent)}
+.tag2.reach{border-color:var(--caution);color:var(--caution)}
+.tag2.r-L3,.tag2.r-L4,.tag2.r-L4-meta{border-color:var(--deny);color:var(--deny)}
+
+.co-foot{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);
+  font-size:12px;line-height:1.65;color:var(--muted);max-width:78ch}
+.co-foot b{color:var(--ink);font-variant-numeric:tabular-nums}
+@media (max-width:640px){
+  .sheetview-hd{padding:14px 14px 12px}
+  .sheetview-bd{padding:14px 14px 34px}
+  .crew{grid-template-columns:1fr}
+}
 .tabs{display:flex;gap:2px;background:var(--surface-3);border-radius:4px;padding:2px}
 .tab{border:0;background:none;border-radius:3px;cursor:pointer;padding:3px 8px;
   font:600 10px var(--mono);letter-spacing:.04em;color:var(--muted)}
@@ -525,7 +575,7 @@ h1{font-size:16px;letter-spacing:-.02em}
       <span class="chip pol" id="c-mission">no mission</span>
       <span class="chip" id="c-fp">&mdash;</span>
       <span class="chip" id="c-build" title="the build this page is running">&mdash;</span>
-      <span class="chip" id="c-corpus">&hellip;</span>
+      <button class="chip" id="c-corpus" title="Every agent, on duty and off">&hellip;</button>
       <button id="reset" style="padding:6px 11px;font-size:12.5px">Reset</button>
     </div>
   </header>
@@ -625,7 +675,18 @@ h1{font-size:16px;letter-spacing:-.02em}
     </section>
 
   </div>
+<div class="sheetview" id="company" hidden>
+  <div class="sheetview-hd">
+    <div>
+      <span class="eyebrow">Workforce</span>
+      <h2 id="co-title">Everyone this can call on</h2>
+      <p class="sub" id="co-sub"></p>
+    </div>
+    <button id="co-close">Close</button>
+  </div>
+  <div class="sheetview-bd" id="co-body"></div>
 </div>
+
 <script type="module" src="./app.js"></script>
 </body>
 </html>

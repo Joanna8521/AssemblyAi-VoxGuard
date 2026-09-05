@@ -117,3 +117,26 @@ describe('what this workforce is actually dangerous for', () => {
     }
   });
 });
+
+test('every agent belongs to a department that exists', () => {
+  // The company view draws department by department. An agent whose department
+  // is not declared would simply not be drawn, and a workforce view quietly
+  // missing somebody is worse than no view.
+  const declared = new Set(workforce.departments.map((d) => d.id));
+  const orphans = workforce.agents.filter((a) => !declared.has(a.department));
+  assert.deepEqual(orphans.map((a) => `${a.id} ${a.name}`), []);
+});
+
+test('nothing claims to reach the world unless it is built and has an adapter', async () => {
+  const { implementedAgents } = await import('../runtime/run.js');
+  // Both halves are needed. An adapter says the action could reach the world;
+  // only a built agent will ever ask it to.
+  const live = new Set(implementedAgents());
+  for (const a of workforce.agents) {
+    const couldReach = a.actions.some((x) => registry.isReal(x));
+    const claims = live.has(a.id) && couldReach;
+    if (!live.has(a.id)) {
+      assert.equal(claims, false, `${a.name} is described, so it reaches nothing`);
+    }
+  }
+});
