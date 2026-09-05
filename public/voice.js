@@ -164,6 +164,9 @@ export async function connect(h = {}) {
         team: r.mission.team.map((m) => `${m.name}: ${m.reason}`),
         why_this_team: r.mission.composition,
         orders_in_force: r.mission.policy.rules.map((x) => `${x.action}: ${x.effect}`),
+        // So it stops telling people it cannot see a spreadsheet that is open
+        // on the same screen.
+        connected_sources: r.sources ?? [],
         nobody_can_do: r.unknownNeeds ?? [],
         not_recorded: (r.rejected ?? []).map((x) => `${x.rule.action ?? '?'}: ${x.reason}`),
         note: 'Assembled and bounded. Nothing has run yet.',
@@ -186,9 +189,13 @@ export async function connect(h = {}) {
     const EFFECTS = { forbid: 'DENY', ask_first: 'ASK', permit: 'ALLOW' };
     if (EFFECTS[name]) {
       const rules = (args.actions ?? []).map((action) => ({ action, effect: EFFECTS[name] }));
-      const r = await api('/api/policy/compile', { rules, scope: 'mission' });
+      const [r, s2] = await Promise.all([
+        api('/api/policy/compile', { rules, scope: 'mission' }),
+        api('/api/sources'),
+      ]);
       return {
         effect: EFFECTS[name],
+        connected_sources: s2.sources ?? [],
         rules_in_force: r.policy.rules.map((x) => `${x.action}: ${x.effect}`),
         total_rules: r.policy.rules.length,
         not_recorded: (r.rejected ?? []).map((x) => `${x.rule.action ?? '?'}: ${x.reason}`),
@@ -197,9 +204,10 @@ export async function connect(h = {}) {
     }
 
     if (name === 'report_status') {
-      const s = await api('/api/state');
+      const [s, src] = await Promise.all([api('/api/state'), api('/api/sources')]);
       const held = s.audit.filter((e) => e.verdict !== 'ALLOW');
       return {
+        connected_sources: src.sources ?? [],
         policy_version: s.policy?.version ?? null,
         rules_in_force: s.policy?.rules.map((x) => `${x.action}: ${x.effect}`) ?? [],
         decisions: s.audit.length,

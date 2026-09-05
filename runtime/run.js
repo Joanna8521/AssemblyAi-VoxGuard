@@ -126,6 +126,7 @@ const RUNNERS = {
         orders: col(['orders', 'order count', '訂單數', '訂單']),
         units: col(['units sold', 'units', 'quantity', 'qty', '件數']),
         returns: col(['returns', 'refunds', 'returned', '退貨']),
+        product: col(['top product', 'product', 'item', 'sku', '商品', '品名']),
       };
 
       const daily = data.rows.map((r) => ({
@@ -135,6 +136,7 @@ const RUNNERS = {
         orders: cols.orders ? toNumber(r[cols.orders]) : null,
         units: cols.units ? toNumber(r[cols.units]) : null,
         returns: cols.returns ? toNumber(r[cols.returns]) : null,
+        product: cols.product ? (r[cols.product] || null) : null,
         source: sheet.name ?? 'sheet',
       })).filter((d) => d.revenue !== null);
 
@@ -321,6 +323,127 @@ const RUNNERS = {
     }
 
     return { observed, intents };
+  },
+
+  /**
+   * Cross Check: what else was happening on the day the numbers moved.
+   *
+   * The one agent here that reads from every source at once, and the one that
+   * has to be most careful about what it says. Three things being true on the
+   * same day is not one of them causing the others, and an assistant that
+   * quietly upgrades coincidence to cause is worse than one that says nothing:
+   * somebody acts on it.
+   *
+   * So it states what lines up, names what it cannot separate, and says plainly
+   * where it has no history to look at. The conclusion is left to the person,
+   * which is the only place it can honestly sit.
+   */
+  async A37({ pools }) {
+    const rows = (pools.metrics ?? []).filter((r) => r.revenue !== null);
+    if (rows.length < 8) return missing('metrics', 'at least eight days of takings');
+
+    // The day that fell furthest below the days before it.
+    let worst = null;
+    for (let i = 4; i < rows.length; i++) {
+      const before = rows.slice(Math.max(0, i - 7), i);
+      const avg = before.reduce((a, r) => a + r.revenue, 0) / before.length;
+      const change = (rows[i].revenue - avg) / avg;
+      if (worst === null || change < worst.change) {
+        worst = { row: rows[i], avg, change, index: i };
+      }
+    }
+
+    const pct = Math.round(Math.abs(worst.change) * 100);
+    const day = worst.row.day ?? `row ${worst.index + 1}`;
+    const observed = [
+      `The sharpest fall is ${day}: ${Math.round(worst.row.revenue)} against ` +
+      `${Math.round(worst.avg)} over the week before, down ${pct}%.`,
+    ];
+
+    const alongside = [];
+
+    // What else moved that day, each measured the same way, so they are
+    // comparable rather than merely mentioned together.
+    for (const [field, name] of [
+      ['spend', 'ad spend'], ['orders', 'orders'],
+      ['units', 'units'], ['returns', 'returns'],
+    ]) {
+      const here = worst.row[field];
+      if (here === null || here === undefined) continue;
+      const before = rows.slice(Math.max(0, worst.index - 7), worst.index)
+        .map((r) => r[field]).filter((v) => v !== null && v !== undefined);
+      if (before.length < 3) continue;
+
+      const avg = before.reduce((a, b) => a + b, 0) / before.length;
+      if (!avg) continue;
+      const move = Math.round(((here - avg) / avg) * 100);
+      if (Math.abs(move) >= 20) {
+        alongside.push(`${name} ${move > 0 ? 'up' : 'down'} ${Math.abs(move)}%`);
+      }
+    }
+
+    if (alongside.length) {
+      observed.push(`On the same day: ${alongside.join(', ')}.`);
+    } else {
+      observed.push('Nothing else in the sheet moved by more than a fifth that day.');
+    }
+
+    // The join between the takings and the shelves: the product the sheet
+    // credits, against the pages being watched.
+    const norm = (v) => String(v ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    const carried = [...new Set(rows.slice(Math.max(0, worst.index - 7), worst.index + 1)
+      .map((r) => r.product).filter(Boolean))];
+    const soldOut = (pools.listings ?? []).filter((w) => w.inStock === false);
+
+    const matched = [];
+    for (const name of carried) {
+      const hit = soldOut.find((w) => {
+        const a = norm(name), b = norm(w.title);
+        return a && b && (a.includes(b) || b.includes(a));
+      });
+      if (hit) matched.push({ name, url: hit.url });
+    }
+
+    if (matched.length) {
+      observed.push(
+        `${matched.map((m) => m.name).join(' and ')} carried days in that week and ` +
+        `${matched.length === 1 ? 'is' : 'are'} sold out on the page being watched now. ` +
+        `Whether it was already gone on ${day} is not something these readings can say.`);
+      pools.signals = [...(pools.signals ?? []), {
+        kind: 'sold_out_top_seller', products: matched.map((m) => m.name),
+        day, at: new Date().toISOString(),
+      }];
+    } else if (soldOut.length) {
+      observed.push(`${soldOut.length} watched ${soldOut.length === 1 ? 'product is' : 'products are'} ` +
+        'sold out, but none of them is what the sheet credits for that week.');
+    }
+
+    // Rival prices, only where there is a reading to compare against another.
+    const moved = [];
+    let anyHistory = false;
+    for (const w of pools.listings ?? []) {
+      const h = (w.history ?? []).filter((x) => typeof x.price === 'number');
+      if (h.length < 2) continue;
+      anyHistory = true;
+      const first = h[0], last = h.at(-1);
+      if (first.price === last.price) continue;
+      const move = Math.round(((last.price - first.price) / first.price) * 100);
+      moved.push(`${label(w)} ${move > 0 ? 'up' : 'down'} ${Math.abs(move)}% ` +
+        `(${first.price} to ${last.price}, ${first.at.slice(0, 10)} to ${last.at.slice(0, 10)})`);
+    }
+
+    if (moved.length) observed.push(`Watched prices have moved: ${moved.join('; ')}.`);
+    else if (!anyHistory) {
+      observed.push('No watched page has been read twice yet, so there is no price ' +
+        'history to line up against any of this.');
+    } else {
+      observed.push('No watched price has changed between readings.');
+    }
+
+    observed.push('These things were true at the same time. That is not the same as ' +
+      'one of them causing another, and nothing here can tell the difference.');
+
+    return { observed, intents: [] };
   },
 
   /**

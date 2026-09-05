@@ -214,6 +214,28 @@ function record(session, request, result, outcome) {
  * being exactly one of these: two copies of evaluate-then-perform would drift,
  * and the one that drifted would be the one nobody was reading.
  */
+/** Plain sentences, because they are read aloud. */
+function describeSources(session) {
+  const pools = session.pools ?? {};
+  const out = [];
+
+  for (const sheet of pools.sheets ?? []) {
+    out.push(sheet.rows != null
+      ? `${sheet.name ?? 'a spreadsheet'} is connected: ${sheet.rows} rows, columns ` +
+        `${(sheet.headers ?? []).slice(0, 6).join(', ')}`
+      : `${sheet.name ?? 'a spreadsheet'} is connected but has not been read yet`);
+  }
+
+  const listings = pools.listings ?? [];
+  if (listings.length) {
+    out.push(`${listings.length} product ${listings.length === 1 ? 'page is' : 'pages are'} ` +
+      `being watched: ${listings.map((w) => w.title || w.url).slice(0, 4).join(', ')}`);
+  }
+
+  if (!out.length) out.push('Nothing is connected yet: no spreadsheet, no watched pages.');
+  return out;
+}
+
 async function decide(session, request, context = {}) {
   const result = evaluate(request, session.policy, registry);
 
@@ -600,6 +622,16 @@ const routes = {
     return { settings: session.settings };
   },
 
+  /**
+   * What the workforce can currently see, in a sentence.
+   *
+   * The agent told somebody it could not see their spreadsheet while the page
+   * beside it was showing thirty rows from that spreadsheet. It was not lying:
+   * nothing it could call told it what was connected, so it assumed nothing
+   * was. Every tool result now carries this.
+   */
+  'GET /api/sources': async (_body, { session }) => ({ sources: describeSources(session) }),
+
   'GET /api/pools': async (_body, { session }) => ({
     pools: session.pools ?? {},
     implemented: implementedAgents(),
@@ -698,6 +730,7 @@ const routes = {
       blueprint: blueprint(mission, workforce.agents),
       rejected,
       unknownNeeds,
+      sources: describeSources(session),
     };
   },
 

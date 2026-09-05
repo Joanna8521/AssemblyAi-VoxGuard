@@ -764,6 +764,27 @@
         "create_schedule"
       ],
       "note": "The escape hatch. Scheduling is not an effect, it is the capacity to have an effect after the person who set the policy has gone home. A governance layer that only weighs direct actions is walked around by this agent."
+    },
+    {
+      "id": "A37",
+      "name": "Cross Check",
+      "emoji": "🧩",
+      "department": "analytics",
+      "purpose": "Lines a change in the takings up against what else changed on the same days, and says what it cannot tell apart.",
+      "schedule": "daily 09:30",
+      "reads": [
+        "metrics",
+        "orders",
+        "listings",
+        "signals"
+      ],
+      "writes": [
+        "signals"
+      ],
+      "actions": [
+        "analyze_data",
+        "generate_report"
+      ]
     }
   ],
   "departments": [
