@@ -1,13 +1,66 @@
 # Standing Order
 
-**Voice-compiled policy for an AI commerce workforce.**
-
-> One sentence, spoken once, governs a workforce that keeps running after you stop talking.
+**Your shop, watched while you are not looking, inside limits you said out loud.**
 
 Built for the [AssemblyAI Voice Agent Hackathon](https://lablab.ai/ai-hackathons/assemblyai-voice-agent-hackathon)
 (Sep 1-30, 2026).
 
 **Live:** https://standing-order-joanna8521s-projects.vercel.app
+
+---
+
+## What it is for
+
+You run a small shop. You already have software that could watch your takings,
+your stock and your competitors. What you do not have is a way to let it act
+while you are asleep without either trusting it completely or approving every
+step yourself.
+
+So you connect two things, once: the Google Sheet your daily takings live in,
+and a few product pages you care about. Then you say one sentence out loud:
+
+> "Watch my daily takings and tell me the moment they fall off a cliff. Never
+> touch prices, never spend money on ads, and ask me before you tell any
+> customer anything."
+
+That sentence is not a command. It becomes the standing orders: three things
+permitted, two forbidden, one held for you. It stays in force after you stop
+talking, and it is what every agent is judged against from then on.
+
+### A morning it has already happened
+
+Overnight, seven agents read your sheet and the pages you gave them. You wake
+up to one message on Telegram, and this on the screen:
+
+```
+Daily Revenue    30 rows read. 2 423 yesterday against 3 919 the week
+                 before, down 38%.
+Cross Check      On the same day: ad spend down 54%, orders down 33%.
+                 Chilton Parka carried days in that week and is sold out on
+                 the page being watched. Whether it was already gone that day
+                 is not something these readings can say.
+Ad Performance   Return on ad spend 6.47x, against 6.48x before. Unchanged.
+Unit Economics   Each order leaves 221 after advertising. Yesterday: 214.
+
+✓ ALLOW   send_telegram_message    you asked to be told
+✓ ALLOW   pause_ad                 ads pointing at something nobody can buy
+✓ ALLOW   delist_product           the listing should come down
+✕ DENY    issue_refund             you said never
+? ASK     notify_customer          you said ask first, so it is waiting
+```
+
+Note what did *not* happen: return on ad spend is 6.47x against 6.48x, and it
+says so rather than finding a story in it. Most mornings look like that, which
+is the point of having something read every day.
+
+Nothing here was decided by a model. The readings are arithmetic over your own
+numbers. The four verdicts are a deterministic evaluator comparing
+each request to what you said. The refusal is not an opinion; it is the
+sentence you spoke, still holding at four in the morning.
+
+**The thing being sold is the last two lines.** Anyone can build agents that
+act. The hard part is being able to say, a month later, exactly what they did,
+what they wanted to do, and what stopped them.
 
 ---
 

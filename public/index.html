@@ -356,6 +356,8 @@ h1{font-size:16px;letter-spacing:-.02em}
    an action that stops there stops in the centre of the shot. */
 /* Sources belong on the first screen. They were only reachable once a mission
    was open, which put connecting the numbers after the work that needs them. */
+.hero .reach{font-size:11.5px;line-height:1.6;color:var(--faint);max-width:52ch;
+  margin:9px auto 0}
 .hero-src{width:100%;max-width:460px;margin:15px auto 0;padding-top:13px;
   border-top:1px solid var(--line)}
 .hero-src .hd{display:block;font:9.5px var(--mono);letter-spacing:.13em;
@@ -629,9 +631,14 @@ button.chip:hover{border-color:var(--line-strong);color:var(--ink)}
   <!-- Nothing open yet, and only one thing to do about that. -->
   <section class="panel" id="hero-panel">
     <div class="hero">
-      <h2>What needs handling?</h2>
-      <p>Describe the situation and its limits in one breath. It works out who should be
-         involved, and exactly how far they may go.</p>
+      <h2>Your shop, watched while you are not looking</h2>
+      <p>Connect the spreadsheet your takings live in and the product pages you care
+         about. Say once what may happen on its own and what has to wait for you.
+         Agents then read those sources and act inside that sentence, and nowhere
+         outside it, whether or not you are at the screen.</p>
+      <p class="reach">Today it really reads a shared Google Sheet and public
+         storefront pages, and really sends Telegram. Every other action is
+         registered, judged and simulated, and says so on its face.</p>
       <button class="mic" id="hero-mic"><span class="dot"></span><span id="hero-lbl">Start talking</span></button>
       <div class="examples">
         <span>or try one</span>
